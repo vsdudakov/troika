@@ -7,5 +7,6 @@ expect_finding:
   severity: Major
   keywords_any: [scope, not in the plan, unrequested, delete_owner_portfolios, drop_all_for_owner]
   file: any
+plan_requires: [## Out of scope]
 why: >
   delete_owner_portfolios and drop_all_for_owner appear in the diff and nowhere in the plan.

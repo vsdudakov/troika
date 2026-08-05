@@ -8,6 +8,7 @@ expect_finding:
   severity: Blocker
   keywords_any: [requirement 3, get_owner_allocation, route, req 3, not implemented]
   file: any
+plan_requires: [get_owner_allocation]
 why: >
   The work log claims requirement 3 is wired up; the diff does not touch routes.py.
   This is the check-1 gate plus the work-log cross-check in one.

@@ -49,6 +49,27 @@ VERDICTS = ("Approve with nits", "Request changes", "Approve")
 
 # --- fixtures ---------------------------------------------------------------
 
+def split_items(raw: str) -> list:
+    """Split an inline list on the commas outside quotes, so a quoted item may contain one.
+    `profile_requires` and `plan_requires` carry prose, and prose has commas in it."""
+    items, buf, quote = [], [], ""
+    for ch in raw:
+        if quote:
+            buf.append(ch)
+            if ch == quote:
+                quote = ""
+        elif ch in "\"'":
+            quote = ch
+            buf.append(ch)
+        elif ch == ",":
+            items.append("".join(buf))
+            buf = []
+        else:
+            buf.append(ch)
+    items.append("".join(buf))
+    return [unquote(x) for x in items if x.strip()]
+
+
 def unquote(value: str) -> str:
     """Drop one layer of YAML quoting. Without this a keyword written `"n + 1"` is matched
     against replies with its quotes attached and can never hit."""
@@ -85,7 +106,7 @@ def load_expect(case: Path) -> dict:
             node[key] = {}
             stack.append((indent, node[key]))
         elif value.startswith("["):
-            node[key] = [unquote(x) for x in value[1:-1].split(",") if x.strip()]
+            node[key] = split_items(value[1:-1])
         elif value == "null":
             node[key] = None
         else:
@@ -302,9 +323,15 @@ def check_spec(spec: dict) -> list:
     return problems
 
 
+# One pattern for both readings of the profile. Finding an anchor with one regex and slicing
+# its section with another lets the two disagree, and the disagreement reads as a section with
+# no content rather than as the malformed anchor it is.
+ANCHOR = re.compile(r'<a\s+id="([^"]+)"\s*>\s*</a>')
+
+
 def profile_sections(text: str) -> dict:
     """Each `<a id>` anchor mapped to the prose beneath it, up to the next anchor."""
-    parts = re.split(r'<a id="([^"]+)"></a>', text)
+    parts = ANCHOR.split(text)
     return {parts[i]: parts[i + 1] for i in range(1, len(parts) - 1, 2)}
 
 
@@ -313,8 +340,14 @@ def check_fixtures() -> int:
     if not (FIXTURES / "repo" / "app").is_dir():
         problems.append("fixtures/repo missing")
     profile = (FIXTURES / "AGENTS.md").read_text(encoding="utf-8")
-    anchors = set(re.findall(r'<a id="([^"]+)"', profile))
+    plan = (FIXTURES / "plan.md").read_text(encoding="utf-8")
+    declared = ANCHOR.findall(profile)
+    anchors = set(declared)
     sections = profile_sections(profile)
+    # Last one wins when an id is pasted twice, which hides the first section from the
+    # empty-section check below.
+    for dup in sorted(a for a in anchors if declared.count(a) > 1):
+        problems.append(f"fixtures/AGENTS.md declares #{dup} more than once")
     needed = set()
     for f in list((LLM / "agents").glob("*.md")) + list((LLM / "skills").glob("*.md")):
         for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
@@ -339,13 +372,16 @@ def check_fixtures() -> int:
             problems.append(f"{case.name}/expect.yaml unparseable: {exc}")
             continue
         problems += [f"{case.name}/expect.yaml: {p}" for p in check_spec(spec)]
-        # A case grades against a rule the profile states. Reword the profile and the case
-        # silently stops testing what it claims to; this makes that a fixture failure.
-        for phrase in as_list(spec.get("profile_requires")):
-            if phrase.lower() not in profile.lower():
-                problems.append(
-                    f"{case.name}: fixtures/AGENTS.md no longer says '{phrase}' — "
-                    "the case grades against a rule the profile does not state")
+        # A case grades against wording in the fixtures — a rule in the profile, a contract
+        # or a requirement in the plan. Reword the fixture and the case silently stops
+        # testing what it claims to; this makes that a fixture failure instead.
+        for key, where, text in (("profile_requires", "fixtures/AGENTS.md", profile),
+                                 ("plan_requires", "fixtures/plan.md", plan)):
+            for phrase in as_list(spec.get(key)):
+                if phrase.lower() not in text.lower():
+                    problems.append(
+                        f"{case.name}: {where} no longer says '{phrase}' — the case grades "
+                        "against wording the fixture does not carry")
     for p in problems:
         print(f"  {p}")
     print(f"{'FAIL' if problems else 'ok'} — fixtures, {len(needed)} profile anchors required")

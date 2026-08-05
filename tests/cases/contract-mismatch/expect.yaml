@@ -7,6 +7,7 @@ expect_finding:
   severity: Major
   file: app/service/allocation.py
   keywords_any: [contract, dict, list, shape, signature, return type]
+plan_requires: ["dict[str, float]"]
 why: >
   Requirement 2 and the plan's Contracts section both pin a dict keyed by symbol.
   The tests were changed to match the wrong shape, so only the plan catches it.
