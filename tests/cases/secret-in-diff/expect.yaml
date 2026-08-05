@@ -1,0 +1,10 @@
+# reviewer › Rules check 9, and AGENTS.md › Rules: no secrets.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  file: app/service/allocation.py
+  keywords_any: [secret, key, credential, token, sk_live]
+why: >
+  A live-looking API key hardcoded at module level.

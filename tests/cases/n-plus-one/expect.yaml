@@ -1,0 +1,12 @@
+# reviewer › Rules check 5. The batched holdings_for_portfolios exists and the plan
+# names it; this calls holdings_for_portfolio once per portfolio instead.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Major
+  file: app/service/allocation.py
+  keywords_any: [n+1, "n + 1", per portfolio, loop, batch, holdings_for_portfolios]
+why: >
+  A repository call inside the portfolio loop, with the batched alternative sitting
+  unused in the same module and named in the plan.

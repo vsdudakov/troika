@@ -1,0 +1,11 @@
+# reviewer › Rules check 4. The profile fixes the order api → service → repository;
+# routes.py now imports the repository directly, skipping service.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Major
+  file: app/api/routes.py
+  keywords_any: [layer, layering, repository, skip, reach]
+why: >
+  The api layer imports portfolio_repo and calls it. Everything else is the clean diff.

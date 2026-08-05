@@ -1,0 +1,12 @@
+# reviewer › Rules check 6: the collected count must match the tests written.
+# The diff is clean; the work log claims 14 collected against 9 node IDs.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  keywords_any: [collect, count, 14, mismatch, work log]
+  file: any
+why: >
+  Nothing is wrong with the code. The evidence the reviewer gates on is inconsistent
+  with itself, which is exactly what the cross-check exists to catch.

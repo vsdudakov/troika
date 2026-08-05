@@ -1,0 +1,11 @@
+# reviewer › Rules check 9 and AGENTS.md › No AI attribution — the one rule the
+# agent's own tooling violates by default, so it gets its own case.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  file: app/api/routes.py
+  keywords_any: [attribution, generated with, claude, ai tool, ai product]
+why: >
+  A comment naming an AI product. The profile forbids it anywhere, comments included.

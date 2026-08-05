@@ -1,0 +1,13 @@
+# reviewer › Rules check 1: every numbered requirement implemented. Requirement 3
+# (the get_owner_allocation route) is absent; 1 and 2 are done.
+role: reviewer
+skill: internal-review
+remove: [tests/api/test_routes.py]
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  keywords_any: [requirement 3, get_owner_allocation, route, req 3, not implemented]
+  file: any
+why: >
+  The work log claims requirement 3 is wired up; the diff does not touch routes.py.
+  This is the check-1 gate plus the work-log cross-check in one.

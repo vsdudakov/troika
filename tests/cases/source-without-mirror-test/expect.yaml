@@ -1,0 +1,14 @@
+# reviewer › Rules check 6 plus internal-review › Checks: "Missing/hollow is Blocker."
+# The base overlay ships app/service/allocation.py with its mirror test; this case
+# deletes the test and nothing else.
+role: reviewer
+skill: internal-review
+remove: [tests/service/test_allocation.py]
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  file: app/service/allocation.py
+  keywords_any: [mirror, test_allocation, no test, missing test, untested, coverage]
+why: >
+  A new source file ships with no tests/service/test_allocation.py. The profile fixes
+  the mirror path, so this is mechanically checkable from the diff alone.

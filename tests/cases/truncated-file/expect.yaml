@@ -1,0 +1,12 @@
+# reviewer › Rules check 9: no truncated or empty new files. The function ends
+# mid-body with no return — a whole-file read catches it, a hunk-only read does not.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Blocker
+  file: app/service/allocation.py
+  keywords_any: [truncat, incomplete, cut off, no return, missing return, unfinished]
+why: >
+  percent_by_symbol builds `units` and then simply stops. Its tests reference a
+  return value that never arrives.

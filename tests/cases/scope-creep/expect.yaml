@@ -1,0 +1,11 @@
+# reviewer › Rules check 1: "nothing implemented that the plan didn't ask for."
+# A destructive route nobody requested, in a plan whose Out of scope section is explicit.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Major
+  keywords_any: [scope, not in the plan, unrequested, delete_owner_portfolios, drop_all_for_owner]
+  file: any
+why: >
+  delete_owner_portfolios and drop_all_for_owner appear in the diff and nowhere in the plan.

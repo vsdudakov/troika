@@ -1,0 +1,12 @@
+# reviewer › Rules check 8: implemented shape equals the plan's pinned contract.
+# The plan pins dict[str, float]; this returns list[tuple[str, float]].
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Major
+  file: app/service/allocation.py
+  keywords_any: [contract, dict, list, shape, signature, return type]
+why: >
+  Requirement 2 and the plan's Contracts section both pin a dict keyed by symbol.
+  The tests were changed to match the wrong shape, so only the plan catches it.

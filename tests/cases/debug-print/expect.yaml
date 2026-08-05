@@ -1,0 +1,10 @@
+# reviewer › Rules check 9: no debug prints.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: Major
+  file: app/service/allocation.py
+  keywords_any: [print, debug, logging]
+why: >
+  A DEBUG print left in the hot path.

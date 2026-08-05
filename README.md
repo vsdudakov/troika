@@ -18,11 +18,12 @@ That cuts both ways: where the profile declares a *limit* — no ticket transiti
 - [`memory/`](memory/README.md) — dated, provisional observations about the workspace it is cloned into. **Gitignored** — memory is per-workspace, not shared.
 - [`worktrees/`](worktrees/README.md) — the per-branch checkouts. **Gitignored**, and not configuration: never recurse into it when loading this tree.
 - [`scratchpad/`](scratchpad/README.md) — role handoff files. **Gitignored**, not configuration either.
+- [`tests/`](tests/README.md) — the two gates on this tree. [`check.py`](tests/check.py) is structural: every link and anchor resolves, the profile anchors exist in the template, file shapes match what the two READMEs declare, and the reviewer's check list matches the copies of it in `skills/`. [`run.py`](tests/run.py) is behavioural: it plants a known defect in a toy repo and asserts the gate that claims to catch it does. Run `python3 tests/check.py` before committing; CI runs it on every PR.
 
 ## Set up in a new workspace
 
 1. Clone this repo into the workspace root as `llm/`.
-2. Copy [AGENTS.template.md](AGENTS.template.md) to `<workspace>/AGENTS.md` and fill every section. The **anchors are a contract** — roles and skills link to them by name, and a missing one is a role reading a dead link.
+2. Copy [AGENTS.template.md](AGENTS.template.md) to `<workspace>/AGENTS.md` and fill every section. The **anchors are a contract** — roles and skills link to them by name, and a missing one is a role reading a dead link. `python3 tests/check.py` verifies every anchor this tree needs exists in the template.
 3. Run the pipeline: `run llm/skills/develop-flow.md for <TICKET>`. Run one role: `read llm/agents/qa.md and verify <TICKET> on the local stack`.
 
 Everything under `memory/`, `scratchpad/`, and `worktrees/` is per-workspace and ignored; each keeps a tracked `README.md` so the folder itself survives a clone. Because they are *ignored* rather than absent, `git clean -xfd` in this repo deletes all three — in-flight branches included. Clean with explicit paths or not at all.

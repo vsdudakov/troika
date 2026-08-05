@@ -1,0 +1,10 @@
+# The second control. reviewer › Gates 1: "Blockers and Majors gate the flow; Nits do not."
+# Comments restating the code are a nit "every time" per check 2 — so this must still pass.
+role: reviewer
+skill: internal-review
+verdict: [Approve with nits, Approve]
+expect_finding: null
+forbid_severity: [Blocker, Major]
+why: >
+  Two comments that restate the line below them, and nothing else. A reviewer that
+  gates on this blocks the flow on style, which the harness explicitly forbids.
