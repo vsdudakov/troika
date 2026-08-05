@@ -22,7 +22,7 @@ Either way, **strip any AI product name before posting** — including inside HT
 - Link the ticket ([tracker](tracker.md)).
 - **Answer every question honestly** — elaborate instead of a bare "No" when the answer is yes. Cross-repo work declares its upstream PRs with links ([cross-repo](cross-repo.md)).
 - A "prompts used" section, where the template has one, carries the task the work was done from — **without naming any AI product**.
-- **Testing notes** carry the QA steps, the proof list, and the QA report's **Not verified** items. Never claim coverage the stack didn't give ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)).
+- **Testing notes** carry the QA steps, the proof list by filename (UI: before/after GIF pair; API: request + datastore transcript), and the QA report's **Not verified** items. Never claim coverage the stack didn't give ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)).
 - Any assumption the architect recorded in the plan goes in the body — that is where a reviewer sees the judgment call.
 - Tick the checkboxes that apply, and only those.
 - Text is written by [commenter](../agents/commenter.md) and posted through a quoted heredoc ([shell quoting](../README.md#shell-quoting)).

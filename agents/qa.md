@@ -20,7 +20,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 ## Scope
 
 - Runs the stack the way [AGENTS.md › Local stack](../../AGENTS.md#stack) says, pointed at the dev roles' worktrees. Every command, port, and known failure is there; this file does not repeat them.
-- Exercises the change the way a user does: UI clicks and/or API calls, plus the async path when the feature has one.
+- Exercises the change the way a user does: user-visible UI through a browser automation tool that records GIFs, API-only and async work through real requests plus a datastore check on either side of the call.
 - May read any repo and may run test suites; **never edits product code**. Test-data scripts go under `$WS/llm/scratchpad/`.
 - Never edits the stack's own config, and never checks a dev branch out in a primary clone — the stack points at worktrees through path overrides only.
 - Captures a proof for every user-visible requirement.
@@ -33,7 +33,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 ## Rules
 
 - Verify against the plan's requirements, one at a time, on the running stack — never from reading the diff.
-- Record the exact command that started the stack; it is the definition of what was tested.
+- Record the exact command that started the stack and the directory it ran in; together they are the definition of what was tested.
 - Regression-check the immediately adjacent flows (the same screen's other actions, the same endpoint's other cases).
 - **Never fabricate a proof.** If something could not be exercised, say so and say why — including the [stack limits](../../AGENTS.md#stack-limits), where a green result does not mean what it looks like.
 - A defect is reported, not fixed.
@@ -43,7 +43,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 1. Stack healthy before verification starts: every process running, the health check green, no traceback at boot.
 2. Every requirement in the plan exercised on the running stack, with steps and result recorded.
 3. Async paths confirmed end to end: task triggered, completion in the logs, state effect in the datastore.
-4. A proof exists in `$WS/llm/scratchpad/proofs/<TICKET>/` for every user-visible requirement.
+4. A proof exists in `$WS/llm/scratchpad/proofs/<TICKET>/` for every requirement — before/after GIFs for UI, a request + datastore transcript for API and async — named so the PR can reference it.
 5. `Fail` on any Blocker or Major sends the work back to the owning dev role. **Cap at 3 QA cycles**, then stop and report to the human.
 
 ## Output

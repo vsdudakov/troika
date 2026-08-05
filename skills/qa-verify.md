@@ -1,86 +1,109 @@
 ---
 name: qa-verify
-description: Verifies a change on the real local stack pointed at the dev worktrees, captures a proof per user-visible requirement, and reports a Pass/Fail verdict.
+description: Verifies a change on the real local stack — browser E2E with before/after GIFs for frontend work, API calls plus datastore checks for backend work — and returns proofs and a Pass/Fail verdict.
 ---
 
 # QA verify (local stack)
 
 Verifies the change on the real stack and produces the proofs the PR and the ticket carry.
 
-**Kind** procedure · **Used by** [qa](../agents/qa.md) · **When** internal review passes, before release (develop-flow step 5) · **Ends with** a QA report file, proofs on disk, and a `Pass`/`Fail` verdict
+**Kind** procedure · **Used by** [qa](../agents/qa.md) · **When** internal review passes, before release (develop-flow step 5) · **Ends with** a QA report file, a proof per user-visible requirement on disk, and a `Pass`/`Fail` verdict
 
-Never edits product code. Test-data scripts go in `$WS/llm/scratchpad/`. Every stack command, port, and reset in this skill comes from [AGENTS.md › Local stack](../../AGENTS.md#stack).
+Never edits product code. Test-data scripts go in `$WS/llm/scratchpad/`. Every stack command, port, and reset comes from [AGENTS.md › Local stack](../../AGENTS.md#stack).
 
-## 1. Point the stack at the worktrees
+## 1. Point the stack at the branch under test
 
-The stack takes a path override per repo, so it runs the dev roles' worktrees directly. This is the **only** supported mechanism: never check a dev branch out in a primary clone (it breaks one-branch-per-worktree — [worktree](worktree.md) — and collides with whatever else uses that clone), and never edit the stack's own config to point it somewhere.
+Read the override mechanism from [AGENTS.md › Local stack](../../AGENTS.md#stack) — either per-repo path flags, or running the stack from inside the worktree directory. Use that one only: never check a dev branch out in a primary clone ([worktree](worktree.md)), never edit the stack's own config.
 
-Take the override names and syntax from [AGENTS.md › Local stack](../../AGENTS.md#stack); take the worktree paths from each dev role's work log. Omit the repos the ticket doesn't touch — they default to the primary clones. A path that doesn't exist does **not** fall back to the default; the process dies at boot ([worktree › naming](worktree.md#naming)).
+Worktree paths come from each dev role's work log; a missing path does not fall back, the process dies at boot. Deps and env files are linked by the dev role — check, don't install.
 
-A worktree needs its dependencies linked before the stack can run it; the dev role has already done this, so check the link exists rather than installing.
-
-Record the exact command line in the report — it is the definition of what was tested.
+Record the exact command line **and the directory it ran in** — together they define what was tested.
 
 ## 2. Bring the stack up
 
-Run the profile's boot sequence, then gate on all four before verifying anything:
+Run the profile's boot sequence, then gate on all four: dependency check passes · every process running · no traceback in the boot logs · health check returns its expected status.
 
-1. dependency/service check passes,
-2. every process is running,
-3. no traceback in the logs at boot,
-4. the health check returns its expected status.
+A narrower route (single services, container fallback) usually ignores the worktree and tests the primary clone — if you used one, say so in the report.
 
-If the profile documents narrower ways to run the code (single services, a container fallback), say in the report which route you used — a narrower route usually ignores the worktree overrides and therefore tests the primary clone.
+## 3. Split the change
 
-## 3. Verify each requirement
+From the dev work logs, classify each requirement in `$WS/llm/scratchpad/plans/<TICKET>.md`:
 
-Walk `$WS/llm/scratchpad/plans/<TICKET>.md` requirement by requirement, on the running stack:
+| Change | Verify with | Proof |
+| --- | --- | --- |
+| user-visible UI | step 4 — browser E2E | before/after GIF |
+| API, task, or data only | step 5 — API call + datastore | before/after transcript |
+| both | steps 4 **and** 5 | both |
 
-- **UI** — the click path from the plan's test plan, in the running app.
-- **API** — call the endpoint with the documented auth; check status, body shape, and error cases against the pinned contract.
-- **Async** — trigger the task, watch the logs for it, then confirm the state effect in the datastore.
-- **Regression** — the same screen's other actions and the same endpoint's other cases.
+A change that touches frontend code but no user-visible behaviour is verified as backend and said so in the report.
 
-Record for each: steps, request/response or screenshot, pass/fail.
+## 4. Frontend — browser E2E, before/after GIF
 
-## 4. Integration suite
+Drive the real running app with a browser automation tool that records GIFs (Claude in Chrome, or equivalent); fall back to before/after screenshots only if none exists.
 
-Run it when the workspace has one covering the touched services ([AGENTS.md › Local stack](../../AGENTS.md#stack)).
+Per user-visible requirement, walk the plan's click path and record two artifacts:
 
-**Read what its result means before reporting it.** An integration suite that builds from its own checkouts of the default branch says the default branch is healthy — nothing about your branch. Report it as a regression check, never as evidence for the change, and list every requirement it did not cover under **Not verified**.
+- **before** — the same path on the base state (stack on the base checkout), showing the old behaviour. Net-new screens have no before: write `n/a — new` in the report rather than faking one.
+- **after** — the same path on the branch worktree, showing the requirement met.
 
-## 5. Stack limits — what cannot be verified here
+Capture a few frames before and after each action so playback is readable, and end the recording on the state that proves the requirement (the loaded list, the saved toast), not on the click. Read the browser console and network log during the run — an error there is a defect even when the screen looks right.
 
-[AGENTS.md › Stack limits](../../AGENTS.md#stack-limits) lists what a green run does not prove in this workspace. State each applicable one explicitly in the report rather than letting a `Pass` imply coverage, and name what covers it instead (usually unit tests, or a consumer PR after a release tag exists).
+Recording the before first, then restarting the stack onto the worktree, is one restart for the whole ticket — batch every before, then every after.
 
-## 6. Proofs
+## 5. Backend — API E2E + datastore
 
-One artifact per user-visible requirement in `$WS/llm/scratchpad/proofs/<TICKET>/`, named after the requirement (`req-2-portfolio-filter.gif`):
+Per requirement, exercise the endpoint or task against the running stack and capture the whole round trip as a fenced transcript:
 
-- UI work: a GIF of the flow — use the tool's browser GIF recorder if it has one (capture a few frames before and after each action so playback is smooth), otherwise before/after screenshots.
-- API-only work: the request and its response as a fenced transcript in the report.
-- Async work: the triggering call plus the decisive log line and the resulting record.
+1. **Datastore before** — the query and the rows the change should affect.
+2. **The call** — `curl` with the documented auth, showing status, headers that matter, and body. Real requests only; never a client library wrapper hiding the wire.
+3. **Datastore after** — the same query, showing the state effect.
+4. **Error cases** — bad auth, missing field, not-found — status and body shape checked against the pinned contract.
 
-Never fabricate a proof. If something couldn't be exercised, put it under **Not verified**.
+Async requirements add the decisive log line between 2 and 3: the task picked up and completed. A response that says success without the row changing is a defect, not a pass.
 
-## 7. Clean up
+## 6. Regression and integration suite
 
-Take the stack down with the profile's command, then **verify nothing from a worktree survived it**. Teardown patterns are usually anchored to the primary clones, so a background worker launched from a worktree override can outlive them and run the previous branch's code in the next cycle:
+Exercise the adjacent paths — the same screen's other actions, the same endpoint's other cases. Then run the workspace's integration suite when one covers the touched services ([AGENTS.md › Local stack](../../AGENTS.md#stack)).
+
+**Read what its result means before reporting it.** A suite that builds from its own checkouts of the default branch says the default branch is healthy — nothing about your branch. Report it as a regression check, never as evidence for the change.
+
+## 7. Stack limits
+
+[AGENTS.md › Stack limits](../../AGENTS.md#stack-limits) lists what a green run does not prove here. State each applicable one in the report rather than letting a `Pass` imply coverage, and name what covers it instead (unit tests, a manual out-of-band check, a consumer PR after a release tag).
+
+## 8. Proofs for the PR
+
+One directory per ticket, `$WS/llm/scratchpad/proofs/<TICKET>/`, one file per requirement per side, named after the requirement:
+
+```
+req-2-portfolio-filter-before.gif
+req-2-portfolio-filter-after.gif
+req-3-export-endpoint.md          # backend: the step-5 transcript
+```
+
+List them in the report by filename against their requirement number — [release-pr](release-pr.md#4-proofs) attaches them to the ticket and references those names from the PR body, so a name that doesn't match a requirement row loses the link.
+
+**Never fabricate a proof.** Anything not exercised goes under **Not verified**, with why.
+
+## 9. Clean up
+
+Take the stack down with the profile's command, then verify nothing from a worktree survived — teardown is usually anchored to the primary clones, so a worker launched from a worktree can outlive it and run the old branch's code next cycle:
 
 ```bash
 pgrep -fl "$WS/llm/worktrees" || echo "no worktree processes left"
 ```
 
-Kill what is left explicitly ([AGENTS.md › Local stack](../../AGENTS.md#stack)). Nothing else to undo — the path overrides live in the command line, not in any file. Leave the stack running only if the human asked; state which in the report.
+Kill what is left explicitly ([AGENTS.md › Local stack](../../AGENTS.md#stack)). Close any browser tabs the run opened. Leave the stack running only if the human asked; say which in the report.
 
 ## Output
 
 Write the report to `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` (`<n>` = QA cycle, from 1) **and** return it to the orchestrator — [releaser](../agents/releaser.md) runs in a separate context and gates on that file ([handoff contract](../agents/README.md#handoff)).
 
-Use the [QA report format](../agents/qa.md#output) and include: the exact command that started the stack, the branches under test, every requirement's result, the **Not verified** list from step 5, and each defect with its repro.
+Use the [QA report format](../agents/qa.md#output) and include: the exact command and directory that started the stack, the branches under test, every requirement's result with its proof filenames, the **Not verified** list, and each defect with its repro.
 
 ## Stop conditions
 
 - Stack won't come up after the profile's documented reset and one restart → stop and report; don't debug the environment for hours.
+- Browser tool unresponsive or a page failing after 2–3 attempts → stop and report; don't retry the same action or wander the app.
 - `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, internal review runs again, then this skill, writing `-qa-<n+1>.md`. **Cap at 3 QA cycles**, then stop and report to the human.
 - A worktree named in a work log is missing → stop and report ([worktree › Gotchas](worktree.md#gotchas)).

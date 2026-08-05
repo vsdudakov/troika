@@ -18,7 +18,7 @@ Stop and report instead of releasing if any of these fails:
 ```bash
 ls "$WS/llm/scratchpad/plans/<TICKET>-review-"*.md   # read the highest <n>: Approve / Approve with nits
 ls "$WS/llm/scratchpad/plans/<TICKET>-qa-"*.md       # read the highest <n>: Pass
-ls "$WS/llm/scratchpad/proofs/<TICKET>/"             # one artifact per user-visible requirement
+ls "$WS/llm/scratchpad/proofs/<TICKET>/"             # one artifact per requirement ([qa-verify](qa-verify.md#8-proofs-for-the-pr))
 ```
 
 - Both verdicts read from their own files — never taken second-hand ([handoff contract](../agents/README.md#handoff)).
@@ -64,7 +64,7 @@ The body text comes from [commenter](../agents/commenter.md) — pass it the fac
 
 ## 4. Proofs
 
-Attach the proofs to the ticket and reference them by name from the PR body — the PR host has no CLI upload for body images ([AGENTS.md › Tracker](../../AGENTS.md#tracker) has the attachment call). Use absolute paths: the cwd is the worktree, and a discarded response body hides the error.
+Attach every file in the ticket's proof directory — both sides of each before/after pair — and reference them by name from the PR body against their requirement — the PR host has no CLI upload for body images ([AGENTS.md › Tracker](../../AGENTS.md#tracker) has the attachment call). Use absolute paths: the cwd is the worktree, and a discarded response body hides the error.
 
 Check the response — an attachment record, not an error. If the human wants a GIF inline in the PR, ask them to drag it into the body; that upload can't be automated.
 

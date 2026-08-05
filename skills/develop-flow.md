@@ -85,7 +85,7 @@ Each pass writes `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md`; release read
 
 Run [qa-verify.md](qa-verify.md) with [agents/qa.md](../agents/qa.md) against the dev worktrees, on the workspace's [local stack](../../AGENTS.md#stack).
 
-1. QA exercises every requirement on the running stack, plus the adjacent regression paths, and captures a proof (GIF preferred) per user-visible requirement into `$WS/llm/scratchpad/proofs/<TICKET>/`.
+1. QA exercises every requirement on the running stack, plus the adjacent regression paths, and captures a proof per requirement into `$WS/llm/scratchpad/proofs/<TICKET>/` — before/after GIFs of the browser flow for UI work, a request + datastore transcript for API and async work.
 2. `Fail` on any Blocker or Major → back to the owning dev role; after the fix, re-run internal review on the new diff (step 4), then QA again.
 3. **Cap: 3 QA cycles**, then stop and report to the human.
 
