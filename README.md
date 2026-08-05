@@ -1,4 +1,4 @@
-# llm/
+# harness/
 
 A tool-neutral agent harness: roles, procedures, templates. Plain markdown, so Claude Code, Cursor, and Codex all load it by path; the YAML frontmatter (`name`, `description`) is the one convention all three read.
 
@@ -8,9 +8,9 @@ That cuts both ways: where the profile declares a *limit* — no ticket transiti
 
 ```
 <workspace>/
-  AGENTS.md        the project profile — org-specific, lives with the org's workspace
-  llm/             this repo — generic, shared across orgs
-  <repos…>         the product repos, each an independent clone
+  AGENTS.md    the project profile — org-specific, lives with the org's workspace
+  harness/     this repo — generic, shared across orgs
+  <repos…>     the product repos, each an independent clone
 ```
 
 - [`agents/`](agents/README.md) — the roles: architect, backend-dev, frontend-dev, reviewer, tester, qa, releaser, commenter. Who acts, what gates them, which model and effort each runs on.
@@ -22,9 +22,9 @@ That cuts both ways: where the profile declares a *limit* — no ticket transiti
 
 ## Set up in a new workspace
 
-1. Clone this repo into the workspace root as `llm/`.
+1. Clone this repo into the workspace root as `harness/`.
 2. Copy [AGENTS.template.md](AGENTS.template.md) to `<workspace>/AGENTS.md` and fill every section. The **anchors are a contract** — roles and skills link to them by name, and a missing one is a role reading a dead link. `python3 tests/check.py` verifies every anchor this tree needs exists in the template.
-3. Run the pipeline: `run llm/skills/develop-flow.md for <TICKET>`. Run one role: `read llm/agents/qa.md and verify <TICKET> on the local stack`.
+3. Run the pipeline: `run harness/skills/develop-flow.md for <TICKET>`. Run one role: `read harness/agents/qa.md and verify <TICKET> on the local stack`.
 
 Everything under `memory/`, `scratchpad/`, and `worktrees/` is per-workspace and ignored; each keeps a tracked `README.md` so the folder itself survives a clone. Because they are *ignored* rather than absent, `git clean -xfd` in this repo deletes all three — in-flight branches included. Clean with explicit paths or not at all.
 
@@ -32,7 +32,7 @@ Everything under `memory/`, `scratchpad/`, and `worktrees/` is per-workspace and
 
 Roles run in separate contexts and hand off through files, never shared memory — the [handoff contract](agents/README.md#handoff).
 
-**Absolute paths.** Every role's cwd is inside a worktree, so `llm/scratchpad/` is not below it. Set `WS` once per session ([AGENTS.md › Workspace paths](../AGENTS.md#workspace-paths)) and use it verbatim; a relative path writes a file no later role finds.
+**Absolute paths.** Every role's cwd is inside a worktree, so `harness/scratchpad/` is not below it. Set `WS` once per session ([AGENTS.md › Workspace paths](../AGENTS.md#workspace-paths)) and use it verbatim; a relative path writes a file no later role finds.
 
 <a id="shell-quoting"></a>
 **Posting text through a shell.** Findings and PR bodies contain backticks, `$`, and quotes; inside `"…"` the shell executes backticks as command substitutions and silently drops the result. Always pass generated text through a quoted heredoc, never a double-quoted argument:

@@ -24,7 +24,7 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Inputs
 
-`$WS/llm/scratchpad/plans/<TICKET>.md` — take only the requirements and work items for your repo, including the pinned contract you must implement exactly.
+`$WS/harness/scratchpad/plans/<TICKET>.md` — take only the requirements and work items for your repo, including the pinned contract you must implement exactly.
 
 ## Rules
 
@@ -47,4 +47,4 @@ Profile style, layering, tests, commands are gates. Also:
 
 ## Output
 
-Write `$WS/llm/scratchpad/plans/<TICKET>-backend-dev.md`: branch · worktree/create-or-join · files · test node IDs→sources · verification/results · actual contract · gaps. No test results.
+Write `$WS/harness/scratchpad/plans/<TICKET>-backend-dev.md`: branch · worktree/create-or-join · files · test node IDs→sources · verification/results · actual contract · gaps. No test results.

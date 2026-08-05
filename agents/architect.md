@@ -19,7 +19,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Scope
 
-- Write only `$WS/llm/scratchpad/plans/<TICKET>.md`; no code, branch, worktree.
+- Write only `$WS/harness/scratchpad/plans/<TICKET>.md`; no code, branch, worktree.
 - Respect profile scope/ownership. Name unowned work.
 - Human decides unsafe scope/behavior questions; record safe assumptions. [Plan review](../skills/plan-review.md) approves.
 
@@ -58,4 +58,4 @@ Plan must pin:
 
 ## Output
 
-Write `$WS/llm/scratchpad/plans/<TICKET>.md` from [template](../skills/plan-template.md). Return path, repo order, contracts, sources/unread items, blockers.
+Write `$WS/harness/scratchpad/plans/<TICKET>.md` from [template](../skills/plan-template.md). Return path, repo order, contracts, sources/unread items, blockers.

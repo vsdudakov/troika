@@ -16,10 +16,10 @@ Run once per repo: one PR regardless of contributing roles. Commit/push repos co
 All must pass:
 
 ```bash
-ls "$WS/llm/scratchpad/plans/<TICKET>-review-"*.md   # read the highest <n>: Approve / Approve with nits
-ls "$WS/llm/scratchpad/plans/<TICKET>-tests-"*.md    # read the highest <n>: Pass
-ls "$WS/llm/scratchpad/plans/<TICKET>-qa-"*.md       # read the highest <n>: Pass
-ls "$WS/llm/scratchpad/proofs/<TICKET>/"             # one artifact per requirement ([qa-verify](qa-verify.md#8-proofs-for-the-pr))
+ls "$WS/harness/scratchpad/plans/<TICKET>-review-"*.md   # read the highest <n>: Approve / Approve with nits
+ls "$WS/harness/scratchpad/plans/<TICKET>-tests-"*.md    # read the highest <n>: Pass
+ls "$WS/harness/scratchpad/plans/<TICKET>-qa-"*.md       # read the highest <n>: Pass
+ls "$WS/harness/scratchpad/proofs/<TICKET>/"             # one artifact per requirement ([qa-verify](qa-verify.md#8-proofs-for-the-pr))
 ```
 
 - Read verdict files directly. Tests must cover final code; later changes return to review/test. Carry QA's **Not verified** into the PR.
@@ -100,7 +100,7 @@ Run [pr-review.md](pr-review.md) during CI. Blocker/Major → owner fixes; push,
 After push and green CI, remove worktrees from the repo using absolute paths:
 
 ```bash
-git worktree remove "$WS/llm/worktrees/<repo>-<TICKET>"   # --force only to discard uncommitted changes
+git worktree remove "$WS/harness/worktrees/<repo>-<TICKET>"   # --force only to discard uncommitted changes
 git worktree prune                                        # stale entries
 ```
 

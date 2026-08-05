@@ -25,8 +25,8 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Inputs
 
-- `$WS/llm/scratchpad/plans/<TICKET>.md` — the requirements and the test plan (click path or API call per requirement).
-- `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` — each dev role's worktree path and changed screens/routes, which become the stack's path overrides.
+- `$WS/harness/scratchpad/plans/<TICKET>.md` — the requirements and the test plan (click path or API call per requirement).
+- `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` — each dev role's worktree path and changed screens/routes, which become the stack's path overrides.
 
 ## Rules
 
@@ -39,7 +39,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 1. Stack healthy before verification starts: every process running, the health check green, no traceback at boot.
 2. Every requirement in the plan exercised on the running stack, with steps and result recorded.
 3. Async paths confirmed end to end: task triggered, completion in the logs, state effect in the datastore.
-4. A proof exists in `$WS/llm/scratchpad/proofs/<TICKET>/` for every requirement — before/after GIFs for UI, a request + datastore transcript for API and async — named so the PR can reference it.
+4. A proof exists in `$WS/harness/scratchpad/proofs/<TICKET>/` for every requirement — before/after GIFs for UI, a request + datastore transcript for API and async — named so the PR can reference it.
 5. `Fail` on any Blocker or Major sends the work back to the owning dev role. **Cap at 3 QA cycles**, then stop and report to the human.
 
 ## Output
@@ -61,4 +61,4 @@ Stack: <branches under test> · started with `<exact command>` · processes: <al
 <Pass | Fail> — <one sentence>
 ```
 
-Write `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md`; return it and stack state.
+Write `$WS/harness/scratchpad/plans/<TICKET>-qa-<n>.md`; return it and stack state.

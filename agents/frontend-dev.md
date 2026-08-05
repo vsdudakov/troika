@@ -25,7 +25,7 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Inputs
 
-`$WS/llm/scratchpad/plans/<TICKET>.md` — the frontend requirements and the pinned contract. When the backend runs in parallel, the contract is all you get; do not read the backend worktree to infer behaviour.
+`$WS/harness/scratchpad/plans/<TICKET>.md` — the frontend requirements and the pinned contract. When the backend runs in parallel, the contract is all you get; do not read the backend worktree to infer behaviour.
 
 ## Rules
 
@@ -48,4 +48,4 @@ Profile style, tests, commands are gates. Also:
 
 ## Output
 
-Write `$WS/llm/scratchpad/plans/<TICKET>-frontend-dev.md`: branch · worktree/create-or-join · files · tests→sources · verification/results · changed screens/routes · gaps. No test results.
+Write `$WS/harness/scratchpad/plans/<TICKET>-frontend-dev.md`: branch · worktree/create-or-join · files · tests→sources · verification/results · changed screens/routes · gaps. No test results.

@@ -38,12 +38,12 @@ Account for every `??` — an untracked, unreviewed file ships unseen. `git add 
 Preferred for independent review. `--uncommitted` covers staged, unstaged, and untracked files.
 
 ```bash
-cd "$WS/llm/worktrees/<repo>-<TICKET>"
+cd "$WS/harness/worktrees/<repo>-<TICKET>"
 cat "$WS/AGENTS.md" \
-    "$WS/llm/agents/reviewer.md" \
-    "$WS/llm/skills/internal-review.md" \
-    "$WS/llm/scratchpad/plans/<TICKET>.md" \
-    "$WS/llm/scratchpad/plans/<TICKET>-<role>.md" \
+    "$WS/harness/agents/reviewer.md" \
+    "$WS/harness/skills/internal-review.md" \
+    "$WS/harness/scratchpad/plans/<TICKET>.md" \
+    "$WS/harness/scratchpad/plans/<TICKET>-<role>.md" \
   | codex exec review --uncommitted -
 ```
 
@@ -70,7 +70,7 @@ Blocker/Major → owner fixes/verifies; re-review. Fix cheap nits.
 
 ## Output
 
-Write the report to `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. That file is the release gate's evidence — [releaser](../agents/releaser.md) runs in a separate context and reads the highest-numbered one ([handoff contract](../agents/README.md#handoff)).
+Write the report to `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. That file is the release gate's evidence — [releaser](../agents/releaser.md) runs in a separate context and reads the highest-numbered one ([handoff contract](../agents/README.md#handoff)).
 
 Nothing leaves the workspace, so this report skips [commenter](../agents/commenter.md) — internal, terse, for the dev role to act on.
 

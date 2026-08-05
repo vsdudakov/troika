@@ -7,7 +7,7 @@ description: The structure of an approved plan — problem, numbered requirement
 
 Trusted plan; no downstream product decisions required.
 
-**Kind** template · **Used by** [architect](../agents/architect.md) · **When** the ticket is understood and the code is read (develop-flow step 1) · **Ends with** `$WS/llm/scratchpad/plans/<TICKET>.md`, ready for the [plan-review](plan-review.md) gate
+**Kind** template · **Used by** [architect](../agents/architect.md) · **When** the ticket is understood and the code is read (develop-flow step 1) · **Ends with** `$WS/harness/scratchpad/plans/<TICKET>.md`, ready for the [plan-review](plan-review.md) gate
 
 ## Fill rules
 

@@ -2,7 +2,7 @@
 
 Dated, provisional observations about the workspace this harness is cloned into: what happened, when, and what it cost.
 
-**Gitignored.** Only this README is tracked. Memory is per-workspace — an observation about one organisation's CI or stack is noise, or a leak, in another's. There is no index file for the same reason: read the entries by listing this directory (`ls llm/memory/*.md`) before planning or implementing.
+**Gitignored.** Only this README is tracked. Memory is per-workspace — an observation about one organisation's CI or stack is noise, or a leak, in another's. There is no index file for the same reason: read the entries by listing this directory (`ls harness/memory/*.md`) before planning or implementing.
 
 Prescriptive instructions belong elsewhere:
 

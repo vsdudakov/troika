@@ -1,6 +1,6 @@
 # Skills
 
-Tool-neutral procedures, references, templates. Run: `run llm/skills/develop-flow.md for <TICKET>`. Frontmatter enables discovery.
+Tool-neutral procedures, references, templates. Run: `run harness/skills/develop-flow.md for <TICKET>`. Frontmatter enables discovery.
 
 **Kind** fixes shape:
 

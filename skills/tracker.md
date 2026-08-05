@@ -26,7 +26,7 @@ Read requirements, state, ordered comments, attachments, fields, and every link.
 
 Profile alone authorizes and names transitions:
 
-| Profile says | What every "transition the ticket" instruction in `llm/` means |
+| Profile says | What every "transition the ticket" instruction in `harness/` means |
 | --- | --- |
 | Transitions exist, with names | run the named transition at the step that calls for it |
 | **No transitions** — the board's state is the humans' | do nothing to the state; the profile names the equivalent write instead (usually a comment), and that is the whole obligation |

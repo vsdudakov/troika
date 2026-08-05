@@ -24,9 +24,9 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tes
 
 ## Inputs
 
-- `$WS/llm/scratchpad/plans/<TICKET>.md` — the requirements the tests must prove.
-- `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` — each dev role's work log: branch, worktree path, files changed, tests written.
-- `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md` — the internal review verdict; this role runs after it passes.
+- `$WS/harness/scratchpad/plans/<TICKET>.md` — the requirements the tests must prove.
+- `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` — each dev role's work log: branch, worktree path, files changed, tests written.
+- `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md` — the internal review verdict; this role runs after it passes.
 - The diff itself, which is what the selection is computed from — not the work log's prose.
 
 ## Rules
@@ -49,6 +49,6 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tes
 
 ## Output
 
-Write `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` in [test output format](../skills/run-unit-tests.md#output).
+Write `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` in [test output format](../skills/run-unit-tests.md#output).
 
 Node IDs are exact and copy-pasteable — the human re-runs them.

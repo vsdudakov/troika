@@ -25,6 +25,7 @@ killed and counts as a miss rather than hanging the suite.
 """
 
 import argparse
+import concurrent.futures as cf
 import os
 import re
 import shutil
@@ -35,11 +36,14 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-LLM = ROOT.parent
+HARNESS = ROOT.parent
 FIXTURES = ROOT / "fixtures"
 CASES = ROOT / "cases"
 DEFAULT_CMD = "claude -p --model claude-fable-5 --effort high"
 DEFAULT_TIMEOUT = 600
+# Cases are independent subprocesses, so the only cost of running them together is load on
+# whatever HARNESS_CMD talks to. Serially a full --runs 5 is hours; this makes it minutes.
+DEFAULT_JOBS = 6
 
 SEVERITIES = ("Blocker", "Major", "Nit")
 # The verdict labels agents/reviewer.md § Output actually defines. "Block" is not one of
@@ -167,10 +171,10 @@ def build_prompt(case: Path, spec: dict, diff: str) -> str:
     read = lambda p: p.read_text(encoding="utf-8")
     parts = [
         ("PROJECT PROFILE (AGENTS.md)", read(FIXTURES / "AGENTS.md")),
-        (f"ROLE ({spec['role']}.md)", read(LLM / "agents" / f"{spec['role']}.md")),
-        (f"SKILL ({spec['skill']}.md)", read(LLM / "skills" / f"{spec['skill']}.md")),
-        ("PLAN ($WS/llm/scratchpad/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
-        ("WORK LOG ($WS/llm/scratchpad/plans/TOY-1-backend-dev.md)", work_log(case)),
+        (f"ROLE ({spec['role']}.md)", read(HARNESS / "agents" / f"{spec['role']}.md")),
+        (f"SKILL ({spec['skill']}.md)", read(HARNESS / "skills" / f"{spec['skill']}.md")),
+        ("PLAN ($WS/harness/scratchpad/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
+        ("WORK LOG ($WS/harness/scratchpad/plans/TOY-1-backend-dev.md)", work_log(case)),
         ("DIFF UNDER REVIEW (git diff, new files staged with add -N)", diff),
     ]
     body = "\n\n".join(f"===== {name} =====\n{text}" for name, text in parts)
@@ -314,7 +318,7 @@ def check_spec(spec: dict) -> list:
         name = spec.get(field)
         if not name:
             problems.append(f"no {field} named")
-        elif not (LLM / folder / f"{name}.md").is_file():
+        elif not (HARNESS / folder / f"{name}.md").is_file():
             problems.append(f"{field} '{name}' has no {folder}/{name}.md")
     want = spec.get("expect_finding")
     if not want:
@@ -368,7 +372,7 @@ def check_fixtures() -> int:
     for dup in sorted(a for a in anchors if declared.count(a) > 1):
         problems.append(f"fixtures/AGENTS.md declares #{dup} more than once")
     needed = set()
-    for f in list((LLM / "agents").glob("*.md")) + list((LLM / "skills").glob("*.md")):
+    for f in list((HARNESS / "agents").glob("*.md")) + list((HARNESS / "skills").glob("*.md")):
         for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
             path, _, frag = target.partition("#")
             if frag and path.endswith("AGENTS.md"):
@@ -418,10 +422,14 @@ def main() -> int:
     ap.add_argument("--check", action="store_true", help="validate fixtures only")
     ap.add_argument("--timeout", type=int, default=env_timeout(),
                     help="seconds per run before it counts as a miss")
+    ap.add_argument("--jobs", type=int, default=DEFAULT_JOBS,
+                    help="cases graded concurrently (each still runs its --runs in order)")
     args = ap.parse_args()
 
     if args.runs < 1:
         ap.error("--runs must be at least 1")
+    if args.jobs < 1:
+        ap.error("--jobs must be at least 1")
 
     if args.check:
         return check_fixtures()
@@ -431,18 +439,24 @@ def main() -> int:
     cmd = os.environ.get("HARNESS_CMD", DEFAULT_CMD)
     results, failed = {}, False
 
+    prompts = {}
     for name in names:
         case = CASES / name
         spec = load_expect(case)
         with tempfile.TemporaryDirectory() as tmp:
             diff = build_worktree(case, spec, Path(tmp) / "toyapp")
-            prompt = build_prompt(case, spec, diff)
+            prompts[name] = (spec, build_prompt(case, spec, diff))
 
-        if args.dry_run:
+    if args.dry_run:
+        for name, (_, prompt) in prompts.items():
             print(f"===== {name} — {len(prompt)} chars, ~{len(prompt)//4} tokens =====")
             print(prompt)
-            continue
+        return 0
 
+    def run_case(name):
+        """Every run is an isolated subprocess over a prompt built up front, so the only
+        thing concurrency changes is wall clock. Serially this is runs × cases × minutes."""
+        spec, prompt = prompts[name]
         caught, notes = 0, []
         for _ in range(args.runs):
             try:
@@ -457,15 +471,23 @@ def main() -> int:
             caught += ok
             if not ok:
                 notes.append(why)
+        return caught, notes
 
-        rate = caught / args.runs
-        results[name] = rate
-        mark = "PASS" if rate == 1 else ("FLAKY" if rate else "FAIL")
-        if rate < 1:
-            failed = True
-        print(f"{mark:6} {name:32} {caught}/{args.runs}")
-        for n in dict.fromkeys(notes):
-            print(f"       {n}")
+    with cf.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+        pending = {pool.submit(run_case, n): n for n in names}
+        for future in cf.as_completed(pending):
+            name = pending[future]
+            caught, notes = future.result()
+            rate = caught / args.runs
+            results[name] = rate
+            mark = "PASS" if rate == 1 else ("FLAKY" if rate else "FAIL")
+            if rate < 1:
+                failed = True
+            # Flushed, because a full run is long and stdout block-buffers the moment it is
+            # redirected to a file: without this the run reports nothing until it ends.
+            print(f"{mark:6} {name:32} {caught}/{args.runs}", flush=True)
+            for n in dict.fromkeys(notes):
+                print(f"       {n}", flush=True)
 
     if results:
         overall = sum(results.values()) / len(results)

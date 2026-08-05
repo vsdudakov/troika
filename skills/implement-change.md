@@ -13,9 +13,9 @@ Set `WS`; scratchpad paths are absolute.
 
 ## 1. Read the plan
 
-Read `$WS/llm/scratchpad/plans/<TICKET>.md`. Take only your repo. Missing or contradictory work stops; never re-plan.
+Read `$WS/harness/scratchpad/plans/<TICKET>.md`. Take only your repo. Missing or contradictory work stops; never re-plan.
 
-Read the workspace's memory too — `ls $WS/llm/memory/*.md`, there is no index file ([memory](../memory/README.md)). These entries are written by dev and test roles about exactly this work: a repo mid-migration, a suite that only fails in parallel, a green result that did not mean what it looked like.
+Read the workspace's memory too — `ls $WS/harness/memory/*.md`, there is no index file ([memory](../memory/README.md)). These entries are written by dev and test roles about exactly this work: a repo mid-migration, a suite that only fails in parallel, a green result that did not mean what it looked like.
 
 ## 2. Branch in a worktree — one per repo, not one per role
 
@@ -30,7 +30,7 @@ git worktree list | grep "<repo>-<TICKET>"
 
 ```bash
 git fetch <remote>
-git worktree add "$WS/llm/worktrees/<repo>-<TICKET>" -b <branch, per the profile> <BASE>
+git worktree add "$WS/harness/worktrees/<repo>-<TICKET>" -b <branch, per the profile> <BASE>
 ```
 
 Use profile dependency symlinks; do not reinstall. Apply profile signing config, once per worktree. Index the worktree as its own root.
@@ -39,9 +39,9 @@ Use profile dependency symlinks; do not reinstall. Apply profile signing config,
 **Claim the lane before writing anything.** The work log only exists once you finish, so it cannot mark a lane that is *in progress* — the claim file is what makes "one role writes a worktree at a time" checkable instead of merely stated ([worktree › Lane claim](worktree.md#claim)):
 
 ```bash
-LANE="$WS/llm/scratchpad/lanes/<repo>-<TICKET>"
+LANE="$WS/harness/scratchpad/lanes/<repo>-<TICKET>"
 cat "$LANE" 2>/dev/null && echo "held — stop and report"   # another role has it
-mkdir -p "$WS/llm/scratchpad/lanes" && echo "<role> $(date -u +%FT%TZ)" > "$LANE"
+mkdir -p "$WS/harness/scratchpad/lanes" && echo "<role> $(date -u +%FT%TZ)" > "$LANE"
 ```
 
 Release it as the last thing you do, after the work log is written: `rm -f "$LANE"`. A stale claim from a crashed role is reported, never deleted silently — it means a worktree may hold half-finished work.
@@ -97,7 +97,7 @@ Pre-existing failures on the base branch are not yours to fix — name them in t
 
 ## Output
 
-Write `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` by absolute path.
+Write `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` by absolute path.
 
 Contents, and the same back to the orchestrator: branch · worktree path (and whether you created or joined it) · files changed · **the exact node IDs of every test you wrote or changed**, and which source file each mirrors · the verification commands you ran and their results (decisive line on failure) · the contract as actually implemented · anything you could not test without running something · anything from the plan not done and why.
 

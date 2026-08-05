@@ -2,7 +2,7 @@
 """Structural checks for the agents/ and skills/ trees.
 
 The anchors this tree links into the project profile are a contract
-(llm/README.md); so are the file shapes in agents/README.md and skills/README.md.
+(harness/README.md); so are the file shapes in agents/README.md and skills/README.md.
 Nothing here validates prose — only the things that break silently.
 
     python3 tests/check.py        # exits non-zero on any failure

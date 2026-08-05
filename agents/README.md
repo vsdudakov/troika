@@ -46,7 +46,7 @@ Values are not automatic; pass them at launch/session.
 
 Claude effort: `low|medium|high|xhigh|max`. Subagents inherit session effort. Defaults are not gates; verify available IDs before pinning.
 
-Usage: `read llm/agents/backend-dev.md and act as that role for <TICKET>`. Full flow: [develop-flow](../skills/develop-flow.md).
+Usage: `read harness/agents/backend-dev.md and act as that role for <TICKET>`. Full flow: [develop-flow](../skills/develop-flow.md).
 
 ## File shape
 
@@ -67,14 +67,14 @@ Roles communicate through files. Use absolute `$WS` paths.
 
 | File | Written by | Read by |
 | --- | --- | --- |
-| `$WS/llm/scratchpad/plans/<TICKET>.md` | [architect](architect.md) | everyone |
-| `$WS/llm/scratchpad/plans/<TICKET>-plan-review-<n>.md` | [reviewer](reviewer.md), plan pass | architect, orchestrator |
-| `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` | each dev role | reviewer, qa, release |
-| `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md` | [reviewer](reviewer.md), internal pass | dev roles, release |
-| `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` | [tester](tester.md) | dev roles, release |
-| `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` | [qa](qa.md) | dev roles, release |
-| `$WS/llm/scratchpad/proofs/<TICKET>/*.gif\|png` | [qa](qa.md) | release |
-| `$WS/llm/scratchpad/lanes/<repo>-<TICKET>` | whoever holds the lane | any role about to join it ([claim](../skills/worktree.md#claim)) |
+| `$WS/harness/scratchpad/plans/<TICKET>.md` | [architect](architect.md) | everyone |
+| `$WS/harness/scratchpad/plans/<TICKET>-plan-review-<n>.md` | [reviewer](reviewer.md), plan pass | architect, orchestrator |
+| `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` | each dev role | reviewer, qa, release |
+| `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md` | [reviewer](reviewer.md), internal pass | dev roles, release |
+| `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` | [tester](tester.md) | dev roles, release |
+| `$WS/harness/scratchpad/plans/<TICKET>-qa-<n>.md` | [qa](qa.md) | dev roles, release |
+| `$WS/harness/scratchpad/proofs/<TICKET>/*.gif\|png` | [qa](qa.md) | release |
+| `$WS/harness/scratchpad/lanes/<repo>-<TICKET>` | whoever holds the lane | any role about to join it ([claim](../skills/worktree.md#claim)) |
 
 `<role>` is frontmatter name; `<n>` starts at 1. Release reads highest review/tests/QA files. Lane logs are evidence, not gates.
 

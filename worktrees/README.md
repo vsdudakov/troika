@@ -2,9 +2,9 @@
 
 One git checkout per branch, all in this folder — mechanics and naming in [../skills/worktree.md](../skills/worktree.md).
 
-**Gitignored.** Only this README is tracked; the checkouts belong to the workspace, not to the harness repo. Each subfolder is a worktree of a *product* repo and carries its own `.git` file pointing back at that repo — nothing here is ever committed to `llm/`.
+**Gitignored.** Only this README is tracked; the checkouts belong to the workspace, not to the harness repo. Each subfolder is a worktree of a *product* repo and carries its own `.git` file pointing back at that repo — nothing here is ever committed to `harness/`.
 
-**Not configuration.** A tool loading the `llm/` tree reads [`../agents/`](../agents/README.md) and [`../skills/`](../skills/README.md) only; never recurse into here.
+**Not configuration.** A tool loading the `harness/` tree reads [`../agents/`](../agents/README.md) and [`../skills/`](../skills/README.md) only; never recurse into here.
 
 ## Layout
 
@@ -22,6 +22,6 @@ A worktree's dependencies are symlinked from the primary clone, never reinstalle
 
 Created by [implement-change](../skills/implement-change.md) or [pr-review](../skills/pr-review.md), removed by [release-pr](../skills/release-pr.md) once everything is pushed and CI is green. Work stays uncommitted in here until release, so a stray `git worktree remove --force` destroys it — check [AGENTS.md › Gotchas](../../AGENTS.md#gotchas) for the workspace commands that do exactly that.
 
-**`git clean -xfd` from `llm/` is one of them.** This folder is ignored by `llm/`'s own `.gitignore`, and `-x` is precisely the flag that removes ignored files — one command takes every uncommitted branch here, plus `../scratchpad/` and `../memory/`. Clean `llm/` with explicit paths (`git clean -fd agents skills`) or not at all.
+**`git clean -xfd` from `harness/` is one of them.** This folder is ignored by `harness/`'s own `.gitignore`, and `-x` is precisely the flag that removes ignored files — one command takes every uncommitted branch here, plus `../scratchpad/` and `../memory/`. Clean `harness/` with explicit paths (`git clean -fd agents skills`) or not at all.
 
 A missing worktree means it was removed, not that the branch is gone: the branch survives; cut a fresh one from it.

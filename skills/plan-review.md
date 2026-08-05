@@ -13,10 +13,10 @@ Read-only. Architect rewrites. Set `WS` first.
 
 ## 1. Inputs
 
-- `$WS/llm/scratchpad/plans/<TICKET>.md` — the plan, written to [plan-template.md](plan-template.md).
+- `$WS/harness/scratchpad/plans/<TICKET>.md` — the plan, written to [plan-template.md](plan-template.md).
 - **The whole ticket, every surface** ([AGENTS.md › Tracker](../../AGENTS.md#tracker)) — the plan is checked against the ticket, never against the plan's own summary of it.
 - The code the plan touches — a plan pinned to a symbol that moved is wrong before dev starts ([AGENTS.md › Code search](../../AGENTS.md#code-search)).
-- `ls $WS/llm/memory/*.md` — an entry can invalidate a plan outright ([memory](../memory/README.md)).
+- `ls $WS/harness/memory/*.md` — an entry can invalidate a plan outright ([memory](../memory/README.md)).
 
 <a id="ticket-surfaces"></a>
 ### Every ticket surface
@@ -40,9 +40,9 @@ Preferred, because the plan is normally written by Claude:
 
 ```bash
 cat "$WS/AGENTS.md" \
-    "$WS/llm/agents/reviewer.md" \
-    "$WS/llm/skills/plan-review.md" \
-    "$WS/llm/scratchpad/plans/<TICKET>.md" \
+    "$WS/harness/agents/reviewer.md" \
+    "$WS/harness/skills/plan-review.md" \
+    "$WS/harness/scratchpad/plans/<TICKET>.md" \
   | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -
 ```
 
@@ -95,7 +95,7 @@ On `Approve`, **if the profile declares an in-progress transition** ([AGENTS.md 
 <a id="output"></a>
 ## Output
 
-Write to `$WS/llm/scratchpad/plans/<TICKET>-plan-review-<n>.md` (`<n>` = cycle, from 1) and return it to the orchestrator.
+Write to `$WS/harness/scratchpad/plans/<TICKET>-plan-review-<n>.md` (`<n>` = cycle, from 1) and return it to the orchestrator.
 
 ```markdown
 - Sources read: description · comments (<count>) · attachments (<count>, viewed) · links (<count>, followed) · fields — <anything unreachable, named>

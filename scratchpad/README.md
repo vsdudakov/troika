@@ -4,12 +4,12 @@ The handoff files roles write to each other during one ticket: plans, work logs,
 
 **Gitignored.** Only this README is tracked — these files belong to one ticket in one workspace, never to the harness repo. Every product repo is a sibling of this tree, so these files sit outside all of them, but a worktree-relative `git add` can still pull them in: [release-pr](../skills/release-pr.md) runs `git status --short` before staging and expects no scratchpad entries and no proofs.
 
-**Not configuration.** A tool loading the `llm/` tree reads [`../agents/`](../agents/README.md) and [`../skills/`](../skills/README.md) only, and never recurses into here. Nothing in this directory instructs a role; it is the output of one and the input of the next.
+**Not configuration.** A tool loading the `harness/` tree reads [`../agents/`](../agents/README.md) and [`../skills/`](../skills/README.md) only, and never recurses into here. Nothing in this directory instructs a role; it is the output of one and the input of the next.
 
-**Absolute paths only.** Every role runs with its cwd inside a worktree, so `llm/scratchpad/` is not below it. Set `WS` once per session ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)) and use it verbatim:
+**Absolute paths only.** Every role runs with its cwd inside a worktree, so `harness/scratchpad/` is not below it. Set `WS` once per session ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)) and use it verbatim:
 
 ```bash
-ls "$WS/llm/scratchpad/plans/<TICKET>.md"
+ls "$WS/harness/scratchpad/plans/<TICKET>.md"
 ```
 
 A relative path does not error loudly — it writes a file no later role finds, and uploads nothing to the ticket.

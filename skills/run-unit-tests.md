@@ -14,13 +14,13 @@ Read-only. Owner fixes failures. Set `WS`.
 <a id="selection"></a>
 ## 1. Select the tests — from the diff, not from the tree
 
-Read `ls $WS/llm/memory/*.md` first — there is no index file ([memory](../memory/README.md)). Entries about swallowed crashes, zero-collection passes, and suites that only fail in parallel are written by this role, for this role.
+Read `ls $WS/harness/memory/*.md` first — there is no index file ([memory](../memory/README.md)). Entries about swallowed crashes, zero-collection passes, and suites that only fail in parallel are written by this role, for this role.
 
 Per worktree, use profile `<BASE>`. Intent-to-add exposes untracked files:
 
 ```bash
 BASE=<remote>/<default-branch>        # AGENTS.md › Branches
-cd "$WS/llm/worktrees/<worktree>"
+cd "$WS/harness/worktrees/<worktree>"
 git fetch "${BASE%%/*}"
 git add -N -- .
 git --no-pager diff --name-only "$BASE"...HEAD
@@ -42,7 +42,7 @@ One lane per profile command area. Run ready lanes concurrently in their worktre
 
 Inside a lane, use the runner's parallel flag where the profile documents one — except where the profile marks a suite sequential, which is correctness, not a speed trade ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
 
-Use parallel workers or joined background shells. Log each lane to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>-<area>.log` — a failing lane is read from its log, never re-run to see what happened.
+Use parallel workers or joined background shells. Log each lane to `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>-<area>.log` — a failing lane is read from its log, never re-run to see what happened.
 
 Never run an area's `test`-style target unnarrowed: those walk the whole tree.
 
@@ -70,7 +70,7 @@ After fix, re-review; rerun same selection plus new/changed tests. Cap at 3 cycl
 
 ## Output
 
-Write to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. [releaser](../agents/releaser.md) reads the highest-numbered one ([handoff contract](../agents/README.md#handoff)).
+Write to `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. [releaser](../agents/releaser.md) reads the highest-numbered one ([handoff contract](../agents/README.md#handoff)).
 
 ```markdown
 - Selection: <count> tests · <count> changed test files · <count> mirror tests · <count> symbol-tied tests

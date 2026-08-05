@@ -24,10 +24,10 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Inputs
 
-- `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md` — highest `<n>`; must read `Approve` / `Approve with nits`.
-- `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` — highest `<n>`; must read `Pass` ([tester](tester.md)).
-- `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` — highest `<n>`; must read `Pass`.
-- `$WS/llm/scratchpad/proofs/<TICKET>/` — the proof files, by absolute path.
+- `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md` — highest `<n>`; must read `Approve` / `Approve with nits`.
+- `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` — highest `<n>`; must read `Pass` ([tester](tester.md)).
+- `$WS/harness/scratchpad/plans/<TICKET>-qa-<n>.md` — highest `<n>`; must read `Pass`.
+- `$WS/harness/scratchpad/proofs/<TICKET>/` — the proof files, by absolute path.
 - Each dev role's work log for branch and worktree paths.
 
 Read verdict files directly.
@@ -45,7 +45,7 @@ Read verdict files directly.
 1. Internal review verdict is `Approve` / `Approve with nits`, read from `-review-<n>.md`.
 2. Unit-test verdict is `Pass`, read from `-tests-<n>.md`, and it covers the **final** code — anything changed since goes back through review and the tester, never around them. This role runs no tests.
 3. QA verdict is `Pass`, read from `-qa-<n>.md`.
-4. A proof exists in `$WS/llm/scratchpad/proofs/<TICKET>/` for every user-visible requirement.
+4. A proof exists in `$WS/harness/scratchpad/proofs/<TICKET>/` for every user-visible requirement.
 5. Where the profile declares a "PR opened" transition, the ticket is in the state it requires before it is attempted; where it declares none, no state write is made at all.
 6. **Every CI check is green and, where the profile defines a review bot, its latest pass is silent** before the worktrees are removed or the ticket is reported shipped. No bot means no automated-review gate.
 

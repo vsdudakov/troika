@@ -28,7 +28,7 @@ Fetch and isolate latest branch:
 
 ```bash
 git fetch <remote>
-git worktree add "$WS/llm/worktrees/review-<repo>-<N>" <remote>/<headRefName>
+git worktree add "$WS/harness/worktrees/review-<repo>-<N>" <remote>/<headRefName>
 ```
 
 Resolve profile remote/base; wire dependencies per [setup](worktree.md#setup).
@@ -56,7 +56,7 @@ EOF
 ## 5. Clean up
 
 ```bash
-git worktree remove "$WS/llm/worktrees/review-<repo>-<N>"
+git worktree remove "$WS/harness/worktrees/review-<repo>-<N>"
 ```
 
 ## Output

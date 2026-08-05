@@ -26,8 +26,8 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Inputs
 
-- `$WS/llm/scratchpad/plans/<TICKET>.md` — the requirements the diff must meet.
-- `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` — the dev role's work log (branch, worktree path, what it claims is done).
+- `$WS/harness/scratchpad/plans/<TICKET>.md` — the requirements the diff must meet.
+- `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` — the dev role's work log (branch, worktree path, what it claims is done).
 - The diff itself: local branch diff for the internal pass, the PR diff for the PR pass.
 
 ## Rules
@@ -71,4 +71,4 @@ Check all nine on the whole diff and required context.
 <Approve | Approve with nits | Request changes> — <one sentence>
 ```
 
-Plan uses [plan output](../skills/plan-review.md#output). Internal writes `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md`. PR passes findings through commenter and a quoted heredoc.
+Plan uses [plan output](../skills/plan-review.md#output). Internal writes `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md`. PR passes findings through commenter and a quoted heredoc.

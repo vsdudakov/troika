@@ -11,7 +11,7 @@ Model and effort are passed at spawn, never read from the file ([agents › Mode
 
 ```bash
 # architect — Claude, high effort
-claude --model claude-fable-5 --effort high -p "read $WS/llm/agents/architect.md and act as that role for <TICKET>"
+claude --model claude-fable-5 --effort high -p "read $WS/harness/agents/architect.md and act as that role for <TICKET>"
 # reviewer — Codex, high effort, different family from whoever wrote the code
 codex -m gpt-5.6-sol -c model_reasoning_effort="high" ...
 ```
@@ -94,7 +94,7 @@ Start together; join before planning:
 
 1. Refresh each repo index from its root ([code search](../../AGENTS.md#code-search)); dev repeats this in its worktree.
 2. Read every ticket surface ([plan-review](plan-review.md#ticket-surfaces)).
-3. Run `ls $WS/llm/memory/*.md`; read every entry ([memory](../memory/README.md)).
+3. Run `ls $WS/harness/memory/*.md`; read every entry ([memory](../memory/README.md)).
 
 ## 1. Collect requirements and plan
 
@@ -102,7 +102,7 @@ Run [agents/architect.md](../agents/architect.md) on the step 0 material — tra
 
 Fan out reading, not decisions: one read-only probe per area finds behavior, shape, and tests with `file:line` evidence. Architect decides. Ticket keys use profile casing; a false "missing" issue suggests stale auth.
 
-The architect writes `$WS/llm/scratchpad/plans/<TICKET>.md` per [plan-template.md](plan-template.md).
+The architect writes `$WS/harness/scratchpad/plans/<TICKET>.md` per [plan-template.md](plan-template.md).
 
 ## 2. Plan review + rewrite loop — gate, no human
 
@@ -112,7 +112,7 @@ Run [plan-review.md](plan-review.md) with [reviewer](../agents/reviewer.md), usi
 2. Blocker/Major → architect rewrites `<TICKET>.md`; re-review.
 3. Cap at 3 cycles; then stop.
 
-Each pass writes `$WS/llm/scratchpad/plans/<TICKET>-plan-review-<n>.md`.
+Each pass writes `$WS/harness/scratchpad/plans/<TICKET>-plan-review-<n>.md`.
 
 Ask the human only for scope/behavior with no safe assumption, unowned scope, undefined completion, or a hit cap ([human](plan-review.md#human)). `Approve` authorizes downstream commits and PRs.
 
@@ -139,7 +139,7 @@ Run [internal-review.md](internal-review.md) on each local diff before push. Not
 3. Blocker/Major → owner fixes and verifies; re-review. Fix cheap nits.
 4. Cap at 3 cycles.
 
-Each pass writes `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md`; release reads the highest `<n>`.
+Each pass writes `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md`; release reads the highest `<n>`.
 
 ## 5. Unit tests — the change's tests only, in parallel
 
@@ -150,17 +150,17 @@ Run [run-unit-tests.md](run-unit-tests.md) per repo as soon as review passes. Th
 3. Verify collection, counts, and coverage — not only exit zero.
 4. Fail → owner fixes; repeat review, then tests. Cap at 3 cycles.
 
-Each pass writes `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` plus one log per lane; release reads the highest `<n>`.
+Each pass writes `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` plus one log per lane; release reads the highest `<n>`.
 
 ## 6. QA on the local stack + fix loop
 
 Run [qa-verify.md](qa-verify.md) on the dev worktrees and [local stack](../../AGENTS.md#stack).
 
-1. Verify every requirement and adjacent regression; parallelize independent flows. Save one proof per requirement under `$WS/llm/scratchpad/proofs/<TICKET>/`.
+1. Verify every requirement and adjacent regression; parallelize independent flows. Save one proof per requirement under `$WS/harness/scratchpad/proofs/<TICKET>/`.
 2. Blocker/Major → owner fixes; repeat review, tests, QA.
 3. Cap at 3 cycles.
 
-Each pass writes `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)), and what is listed ships on unit tests alone.
+Each pass writes `$WS/harness/scratchpad/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)), and what is listed ships on unit tests alone.
 
 ## 7. Release
 

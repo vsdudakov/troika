@@ -5,7 +5,7 @@ description: The one-worktree-per-branch convention — the base ref, creation, 
 
 # Branches and worktrees
 
-One checkout per branch under `$WS/llm/worktrees/`; share primary dependencies.
+One checkout per branch under `$WS/harness/worktrees/`; share primary dependencies.
 
 **Kind** reference · **Used by** [implement-change](implement-change.md) · [internal-review](internal-review.md) · [run-unit-tests](run-unit-tests.md) · [pr-review](pr-review.md) · [qa-verify](qa-verify.md) · [release-pr](release-pr.md) · **When** a branch is created, diffed, reviewed, run by the stack, or cleaned up · **Ends with** a correctly named worktree with shared dependencies, or a removed one
 
@@ -30,16 +30,16 @@ QA/release depend on exact directory names:
 
 | Work | Directory | Branch |
 | --- | --- | --- |
-| Ticket work | `$WS/llm/worktrees/<repo>-<TICKET>` | per [AGENTS.md › Branches](../../AGENTS.md#branches) |
-| No ticket | `$WS/llm/worktrees/<repo>-<fix-description>` | per the profile |
-| Reviewing a PR | `$WS/llm/worktrees/review-<repo>-<N>` | detached at `<remote>/<headRefName>` |
+| Ticket work | `$WS/harness/worktrees/<repo>-<TICKET>` | per [AGENTS.md › Branches](../../AGENTS.md#branches) |
+| No ticket | `$WS/harness/worktrees/<repo>-<fix-description>` | per the profile |
+| Reviewing a PR | `$WS/harness/worktrees/review-<repo>-<N>` | detached at `<remote>/<headRefName>` |
 
 **One worktree per repo per ticket**, not per role: several roles working the same repo share it ([develop-flow › Lanes](develop-flow.md#lanes)).
 
 <a id="claim"></a>
 ## Lane claim
 
-Sharing a worktree is safe only if the roles take turns, and "one role writes a worktree at a time" is otherwise just an assertion — the work log that records a lane is written when a role *finishes*, so nothing marks a lane that is in progress. `$WS/llm/scratchpad/lanes/<repo>-<TICKET>` closes that window: written before the first edit, removed after the work log, and read by anyone about to join ([implement-change › Claim](implement-change.md#claim)).
+Sharing a worktree is safe only if the roles take turns, and "one role writes a worktree at a time" is otherwise just an assertion — the work log that records a lane is written when a role *finishes*, so nothing marks a lane that is in progress. `$WS/harness/scratchpad/lanes/<repo>-<TICKET>` closes that window: written before the first edit, removed after the work log, and read by anyone about to join ([implement-change › Claim](implement-change.md#claim)).
 
 It lives in the scratchpad, never in the worktree — a claim file inside the checkout would show up as an untracked `??` entry and land in the review diff.
 
@@ -49,14 +49,14 @@ It lives in the scratchpad, never in the worktree — a claim file inside the ch
 
 ```bash
 git fetch <remote>
-git worktree add "$WS/llm/worktrees/<repo>-<TICKET>" -b <branch, per the profile> "$BASE"
+git worktree add "$WS/harness/worktrees/<repo>-<TICKET>" -b <branch, per the profile> "$BASE"
 ```
 
 **Reviewing a branch** — check it out read-only:
 
 ```bash
 git fetch <remote>   # or the ref is stale
-git worktree add "$WS/llm/worktrees/review-<repo>-<N>" <remote>/<headRefName>
+git worktree add "$WS/harness/worktrees/review-<repo>-<N>" <remote>/<headRefName>
 ```
 
 <a id="setup"></a>
@@ -73,7 +73,7 @@ Fresh worktrees lack ignored dependencies/env. Symlink/copy per profile; do not 
 When the PR merges, the review ends, or the run finishes with everything pushed:
 
 ```bash
-git worktree remove "$WS/llm/worktrees/<dir>"   # --force only to discard uncommitted changes
+git worktree remove "$WS/harness/worktrees/<dir>"   # --force only to discard uncommitted changes
 git worktree prune                              # stale entries
 git worktree list                               # what's active
 ```

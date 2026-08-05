@@ -114,7 +114,7 @@ The toy stack has an in-memory store, so it proves nothing about migrations or a
 <a id="tracker"></a>
 ## Tracker
 
-**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in `llm/` means: do nothing. The ticket is the plan file at `$WS/llm/scratchpad/plans/<TICKET>.md`.
+**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in `harness/` means: do nothing. The ticket is the plan file at `$WS/harness/scratchpad/plans/<TICKET>.md`.
 
 <a id="pull-requests"></a>
 ## Pull requests
@@ -164,4 +164,4 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 <a id="workspace-paths"></a>
 ## Workspace paths
 
-`WS` is the workspace root — the directory holding `AGENTS.md`, `llm/`, and `toyapp/`. Every scratchpad path is absolute.
+`WS` is the workspace root — the directory holding `AGENTS.md`, `harness/`, and `toyapp/`. Every scratchpad path is absolute.

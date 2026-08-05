@@ -36,7 +36,7 @@ A narrower route (single services, container fallback) usually ignores the workt
 
 ## 3. Split the change
 
-From the dev work logs, classify each requirement in `$WS/llm/scratchpad/plans/<TICKET>.md`:
+From the dev work logs, classify each requirement in `$WS/harness/scratchpad/plans/<TICKET>.md`:
 
 | Change | Verify with | Proof |
 | --- | --- | --- |
@@ -76,7 +76,7 @@ List applicable [stack limits](../../AGENTS.md#stack-limits) and alternate cover
 
 ## 8. Proofs for the PR
 
-One directory per ticket, `$WS/llm/scratchpad/proofs/<TICKET>/`, one file per requirement per side, named after the requirement:
+One directory per ticket, `$WS/harness/scratchpad/proofs/<TICKET>/`, one file per requirement per side, named after the requirement:
 
 ```
 req-2-portfolio-filter-before.gif
@@ -91,14 +91,14 @@ Map filenames to requirements. Never fabricate; unexercised work goes under **No
 Run profile teardown; verify no worktree process survives:
 
 ```bash
-pgrep -fl "$WS/llm/worktrees" || echo "no worktree processes left"
+pgrep -fl "$WS/harness/worktrees" || echo "no worktree processes left"
 ```
 
 Kill leftovers; close tabs. Leave running only by request and report it.
 
 ## Output
 
-Write the report to `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` (`<n>` = QA cycle, from 1) **and** return it to the orchestrator — [releaser](../agents/releaser.md) runs in a separate context and gates on that file ([handoff contract](../agents/README.md#handoff)).
+Write the report to `$WS/harness/scratchpad/plans/<TICKET>-qa-<n>.md` (`<n>` = QA cycle, from 1) **and** return it to the orchestrator — [releaser](../agents/releaser.md) runs in a separate context and gates on that file ([handoff contract](../agents/README.md#handoff)).
 
 Use the [QA report format](../agents/qa.md#output) and include: the exact command and directory that started the stack, the branches under test, every requirement's result with its proof filenames, the **Not verified** list, and each defect with its repro.
 
