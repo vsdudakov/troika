@@ -7,7 +7,7 @@ description: Working with the issue tracker — verifying auth, reading a ticket
 
 How roles talk to the issue tracker. The tracker's URL, project key, CLI, transition names, and auth check are per-workspace: [AGENTS.md › Tracker](../../AGENTS.md#tracker). This file is the part that does not change between workspaces.
 
-**Kind** reference · **Used by** [architect](../agents/architect.md) (develop-flow step 1) · [releaser](../agents/releaser.md) (step 6) · **When** reading a ticket, commenting, transitioning, or attaching a proof · **Ends with** the ticket read or updated, with the response checked
+**Kind** reference · **Used by** [architect](../agents/architect.md) (develop-flow step 1) · [releaser](../agents/releaser.md) (step 7) · **When** reading a ticket, commenting, transitioning, or attaching a proof · **Ends with** the ticket read or updated, with the response checked
 
 ## Verify auth before blaming the ticket
 
@@ -29,7 +29,7 @@ One comment per event, carrying the facts and the links: PR URL, what changed in
 
 **Transition names are not status names.** List what is valid from the current state before moving; a transition that is invalid from the current state fails, and the cause is usually a state the flow skipped earlier.
 
-The flow uses two: one when the plan is approved ([develop-flow](develop-flow.md) step 2) and one when the PR opens (step 6). The second is normally invalid unless the first has run — which is why the approval gate does it rather than leaving it to release.
+The flow uses two: one when the plan clears review ([develop-flow](develop-flow.md) step 2) and one when the PR opens (step 7). The second is normally invalid unless the first has run — which is why the plan-review gate does it rather than leaving it to release.
 
 ## Attach proofs
 

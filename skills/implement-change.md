@@ -1,13 +1,13 @@
 ---
 name: implement-change
-description: Implements one repo's part of an approved plan in its own worktree, with unit tests, ending at green tests and lint — no commit, no PR.
+description: Implements one repo's part of an approved plan in its own worktree, with unit tests written but not run, ending at green lint — no commit, no PR.
 ---
 
 # Implement change (one repo)
 
 One repo's share of an approved plan, in its own worktree, with the tests that prove it.
 
-**Kind** procedure · **Used by** [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) · **When** the plan is approved (develop-flow step 3) · **Ends with** your own tests green at the profile's coverage gate and lint green — **not** a commit or PR; [release-pr.md](release-pr.md) does that after review and QA
+**Kind** procedure · **Used by** [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) · **When** the plan passes review (develop-flow step 3) · **Ends with** the code written, its tests written **and not run**, and the repo's full lint and type check green — **not** a commit or PR; [release-pr.md](release-pr.md) does that after review, tests, and QA
 
 Set `WS` first — every scratchpad path below is absolute ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
 
@@ -38,49 +38,44 @@ Follow the project profile — [Rules](../../AGENTS.md#rules) · [Style](../../A
 
 Migrations: generate with the repo's command ([AGENTS.md › Commands](../../AGENTS.md#commands)) — never hand-edit an applied migration.
 
-## 4. Tests, with the code
+<a id="tests"></a>
+## 4. Tests, with the code — written, not run
 
-Running fewer tests locally raises the bar on *writing* them: CI runs the full coverage gate over the whole package, so any line of yours left uncovered fails the PR, not your laptop. Write for full coverage of everything you touched, first time.
+**You write the tests. You do not run them.** [tester](../agents/tester.md) runs them once, for every repo at the same time, in develop-flow step 5 ([run-unit-tests](run-unit-tests.md)); the full suite runs on CI when the PR opens. Two runs, both later, neither yours.
 
-Framework, naming, location, the coverage gate, and what may be mocked are in [AGENTS.md › Tests](../../AGENTS.md#tests) — that is the whole spec, and it is a gate. The one thing this skill adds is *when to stop*: read the missing-lines output of your targeted run (step 5) and close every line it lists before reporting done. That report is the same one CI will produce, narrowed to your files.
+That is a real constraint: **you get no red-green loop**, so the tests have to be right on the first pass. Write them the way you would review them.
+
+- **Every changed or created source file ships its mirror test**, at the path the profile fixes ([AGENTS.md › Tests](../../AGENTS.md#tests)). A changed file with no test is what stops the pipeline two steps later.
+- **Cover every branch you touched** — each guard, each `except`, each early return, each error state. There is no coverage report in front of you; walk the diff line by line instead and name the test that covers each one.
+- Framework, naming, location, and what may be mocked are in [AGENTS.md › Tests](../../AGENTS.md#tests) — the whole spec, and a gate.
+- **Assert real behaviour**, not that the code was called. A test written blind that asserts a mock is a test that passes for the wrong reason and proves nothing when the tester runs it.
+- **Node IDs go in your work log** — the exact paths and test names you wrote. The tester's selection starts from the diff, and your list is what it checks itself against.
+
+Read your tests once more before reporting: a typo in a fixture or an import is a whole fix cycle in step 5.
 
 <a id="verify"></a>
 ## 5. Verify — gate
 
-**Run your own tests, not the whole suite.** The full suite runs on CI when the PR opens — that is what catches regressions outside your diff. Locally you prove one thing: the code you wrote works and is covered. A full local suite costs tens of minutes per fix cycle and buys a signal CI is about to give for free.
+**Lint, type check, build. Not tests.**
 
-**Lint is not a suite** — always run the repo's full lint, and the build where the type check lives inside it. It is fast and it is the type gate.
+The repo's **full lint** and the build where the type check lives inside it ([AGENTS.md › Commands](../../AGENTS.md#commands)) — both green on the final code, both fast, and together they are the only automated signal you get. A syntax error, a bad import, a type mismatch, or an unused symbol in a test file surfaces here, and here is the cheapest place for it.
 
-<a id="targeted"></a>
-### Targeted tests
+**Never run the repo's formatter target in a worktree whose dependency directory is a symlink** — it walks the shared environment and rewrites it. Remove the symlink first, or format from the primary clone ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
 
-The exact command per repo is in [AGENTS.md › Commands](../../AGENTS.md#commands). The shape is always the same: the repo's normal test runner, narrowed to the sources you changed and the tests you wrote, with the coverage gate left at its full value. Coverage stays at the profile's number — scoped to what you changed, so the gate still means something.
+<a id="notests"></a>
+### Why not run them here
 
-A repo's `make test`-style target usually runs the whole tree; a targeted run calls the test runner directly with the same flags, narrowed.
+A dev role running its own tests re-runs them on every fix cycle, in series with the other dev role, in a session that is already long. Step 5 runs the change's tests **once, across every repo's lane at the same time**, with a selection computed from the diff rather than from memory — and it does it after review has already removed the defects a test run would have found the slow way.
 
-<a id="fullsuite"></a>
-### When to run the full suite anyway
-
-Targeted tests cannot see a regression you caused somewhere else. Run the repo's full suite **before reporting done** when your diff touches shared ground:
-
-- a model, schema, base class, mixin, or shared util that other modules import
-- config, settings, dependency injection, middleware, or a migration
-- a signature, return type, or exception contract of an existing public function
-- anything you removed or renamed
-
-Otherwise skip it and say so in the report: **which tests you ran, and that the full suite is CI's gate**. A CI failure on the PR comes back to you ([release-pr](release-pr.md)); it is not the reviewer's or QA's to fix.
-
-**A zero exit code is not always a pass.** Check [AGENTS.md › Gotchas](../../AGENTS.md#gotchas) — a repo may wrap its test target in a way that swallows a crash and never evaluates the coverage gate. Confirm the run reached the coverage summary before calling it green.
-
-**Never run the repo's formatter target in a worktree whose dependency directory is a symlink** — it walks the shared environment and rewrites it. Remove the symlink first, or format from the primary clone.
+If a test cannot be written without running something — a fixture whose shape you cannot infer, a snapshot that must be generated — say so in the work log and hand the node ID to the tester. Do not turn that into a full local suite run.
 
 Pre-existing failures on `main` are not yours to fix — name them in the report instead of hiding them.
 
 ## 6. Self-check before reporting
 
 - Every requirement for this repo implemented; nothing extra.
-- Every changed source file has a test, and the targeted run's missing-lines list is empty for your files — CI gates over the whole package and it is not negotiable there.
-- Full suite run, or a deliberate skip you can justify against the shared-ground list above.
+- Every changed source file has its mirror test, and you can name the test covering each branch you added — nobody has run them yet, so this reading is the only check there is.
+- Lint and the type check green on the final code.
 - New files complete (`wc -l`, import check) — truncated files have shipped before.
 - No import inside a function, method, or component in the diff — scan the added lines for your language's import form; if one is there, the fix is the cycle, not the placement.
 - No secrets, no `.env`, no debug prints, no AI attribution anywhere.
@@ -89,10 +84,12 @@ Pre-existing failures on `main` are not yours to fix — name them in the report
 
 Write the work log to `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` — absolute path; your cwd is inside the worktree, and a relative `llm/scratchpad/` would create one inside the product repo. `<role>` is your role's `name` (`backend-dev`, `frontend-dev`).
 
-Contents, and the same back to the orchestrator: branch · worktree path · files changed · **exactly which tests you ran** and their result, with the coverage line for your files (decisive line on failure) · whether you ran the full suite and why or why not · lint result · the contract as actually implemented · anything from the plan not done and why.
+Contents, and the same back to the orchestrator: branch · worktree path · files changed · **the exact node IDs of every test you wrote or changed**, and which changed source file each one mirrors · lint and type-check result (decisive line on failure) · the contract as actually implemented · anything you could not test without running something · anything from the plan not done and why.
+
+**No test results** — you ran none. A work log claiming a green test run in this phase is wrong by construction.
 
 ## Stop conditions
 
 Write a [`memory/`](../memory/README.md) entry when something failed for a reason the docs did not predict, or a green result turned out not to mean what it looked like — with the cost, which is why the next run reads it.
 
-Stop and report instead of improvising when: the plan is missing something you need or contradicts the code; the work would touch another role's repo or one the workspace marks out of scope; the branch needs a dependency change you cannot make without breaking the shared environment; or tests fail for a reason that predates your diff.
+Stop and report instead of improvising when: the plan is missing something you need or contradicts the code; the work would touch another role's repo or one the workspace marks out of scope; the branch needs a dependency change you cannot make without breaking the shared environment; or lint fails for a reason that predates your diff.

@@ -7,9 +7,20 @@ description: Verifies a change on the real local stack — browser E2E with befo
 
 Verifies the change on the real stack and produces the proofs the PR and the ticket carry.
 
-**Kind** procedure · **Used by** [qa](../agents/qa.md) · **When** internal review passes, before release (develop-flow step 5) · **Ends with** a QA report file, a proof per user-visible requirement on disk, and a `Pass`/`Fail` verdict
+**Kind** procedure · **Used by** [qa](../agents/qa.md) · **When** every lane has cleared review and its tests (develop-flow step 6); the stack boot starts earlier, in parallel with step 3 · **Ends with** a QA report file, a proof per user-visible requirement on disk, and a `Pass`/`Fail` verdict
 
 Never edits product code. Test-data scripts go in `$WS/llm/scratchpad/`. Every stack command, port, and reset comes from [AGENTS.md › Local stack](../../AGENTS.md#stack).
+
+<a id="prewarm"></a>
+## 0. Pre-warm — start this the moment the first dev lane reports done
+
+Stack boot and test-data seeding cost minutes, depend on the checkout rather than on any verdict, and block nothing. Start them **in parallel with steps 3–5**, not after them:
+
+- Boot the stack from the worktree of the first lane that finishes ([step 1](#1-point-the-stack-at-the-branch-under-test)), and seed the accounts, orgs, and fixtures the plan's QA paths need.
+- When a later fix changes that worktree, the stack picks it up on restart — cheaper than a cold boot every cycle.
+- If the change spans two repos in one monorepo checkout, wait for both before pointing the stack; if they are separate repos, pre-warm each independently.
+
+A pre-warmed stack that then fails its health check is reported as a stack problem now, not discovered at step 6 with everything else already waiting on it.
 
 ## 1. Point the stack at the branch under test
 

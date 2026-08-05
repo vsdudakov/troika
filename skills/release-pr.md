@@ -7,9 +7,9 @@ description: Ships one repo — signed commit, push, PR from the team template w
 
 One repo, from a verified worktree to an open, reviewed PR with the ticket updated.
 
-**Kind** procedure · **Used by** [releaser](../agents/releaser.md) · **When** internal review is `Approve`/`Approve with nits` and QA is `Pass` (develop-flow step 6) · **Ends with** a PR URL, **CI green**, proofs on the ticket, ticket transitioned, worktrees removed
+**Kind** procedure · **Used by** [releaser](../agents/releaser.md) · **When** internal review is `Approve`/`Approve with nits`, the tester's verdict is `Pass`, and QA is `Pass` (develop-flow step 7) · **Ends with** a PR URL, **CI green**, proofs on the ticket, ticket transitioned, worktrees removed
 
-Run once per repo, in [dependency order](../../AGENTS.md#dependency-order). Set `WS` first — the cwd is the worktree, and the scratchpad is not below it.
+Run once per repo. **Commit and push run concurrently across repos; the PRs open in [dependency order](../../AGENTS.md#dependency-order)** — the provider's PR must exist before the consumer's body can link it ([cross-repo](cross-repo.md)). Set `WS` first — the cwd is the worktree, and the scratchpad is not below it.
 
 ## 1. Gates
 
@@ -17,12 +17,13 @@ Stop and report instead of releasing if any of these fails:
 
 ```bash
 ls "$WS/llm/scratchpad/plans/<TICKET>-review-"*.md   # read the highest <n>: Approve / Approve with nits
+ls "$WS/llm/scratchpad/plans/<TICKET>-tests-"*.md    # read the highest <n>: Pass
 ls "$WS/llm/scratchpad/plans/<TICKET>-qa-"*.md       # read the highest <n>: Pass
 ls "$WS/llm/scratchpad/proofs/<TICKET>/"             # one artifact per requirement ([qa-verify](qa-verify.md#8-proofs-for-the-pr))
 ```
 
-- Both verdicts read from their own files — never taken second-hand ([handoff contract](../agents/README.md#handoff)).
-- Repo tests and lint green on the final code; re-run if anything changed since. A zero exit is not always a pass ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
+- All three verdicts read from their own files — never taken second-hand ([handoff contract](../agents/README.md#handoff)).
+- The tester's run covers the **final** code: anything changed after `-tests-<n>.md` was written goes back through review and the tester, not around them. This role runs no tests of its own.
 - The QA report's **Not verified** list is carried into the PR body, not dropped.
 
 ## 2. Commit
@@ -60,7 +61,7 @@ Body follows [pr-template](pr-template.md), whose fill rules point at the worksp
 
 Answer every question in the template honestly, elaborate on a "yes", and never leave a bare "No" where there is something to say. Cross-repo work declares its upstream PRs ([cross-repo](cross-repo.md)). Testing notes carry the QA steps, the proof list, and the QA report's **Not verified** items.
 
-The body text comes from [commenter](../agents/commenter.md) — pass it the facts (what changed, evidence, links, proof names), post what it returns.
+The body text comes from [commenter](../agents/commenter.md) — pass it the facts (what changed, evidence, links, proof names), post what it returns. **Draft it during QA**, while the stack work is running: only the QA verdict and the proof names arrive late.
 
 ## 4. Proofs
 
@@ -77,15 +78,15 @@ Cross-repo: comment the full PR chain in dependency order so reviewers merge in 
 <a id="ci"></a>
 ## 6. CI — watch until green, fix what it reds
 
-**CI is where the full test suite runs.** Dev roles run only their own tests locally ([implement-change › Verify](implement-change.md#verify)), so this step is the first time the whole suite sees the branch. The PR is not done until CI is green — do not clean up worktrees, do not report the ticket shipped, while a check is red or still running.
+**CI is where the full test suite runs.** Dev roles run no tests at all ([implement-change › Tests](implement-change.md#tests)) and the tester runs only the change's own ([run-unit-tests](run-unit-tests.md)), so this step is the first time anything outside the diff sees the branch. The PR is not done until CI is green — do not clean up worktrees, do not report the ticket shipped, while a check is red or still running.
 
-Watch every check to completion with the command in [AGENTS.md › Pull requests](../../AGENTS.md#pull-requests). It can run for tens of minutes; background it rather than blocking the session. When it comes back non-zero, list the failing checks and read the failing job's log only, not the whole run.
+Watch every check to completion with the command in [AGENTS.md › Pull requests](../../AGENTS.md#pull-requests). It can run for tens of minutes; background it rather than blocking the session, watch **every PR concurrently**, and run [step 7](#7-pr-review) while the checks are still running — it reads the diff, not the checks. When it comes back non-zero, list the failing checks and read the failing job's log only, not the whole run.
 
 Then, per failure:
 
 | Failure | Who fixes it | Where |
 | --- | --- | --- |
-| test failure outside the diff — a regression the targeted local run couldn't see | owning dev role | its worktree, [implement-change](implement-change.md) |
+| test failure outside the diff — a regression the change's own tests could not see | owning dev role | its worktree, [implement-change](implement-change.md) |
 | coverage below the gate on a changed file | owning dev role — write the missing test, never lower the gate | same |
 | lint / type / migration-chain check | owning dev role | same |
 | flake — passes on re-run, unrelated to the diff | releaser: re-run the failed jobs once, then say so in the report | — |
@@ -111,9 +112,10 @@ After pushing, the bot normally re-reviews on the new commits; if it doesn't, re
 
 Loop CI and the bot together: push once, wait for both, handle both, push again. **Max 3 waves** — if it is still producing new substantive comments after three, stop and hand back with the open threads listed; a loop that never converges is usually a design disagreement, and that is the human's call.
 
+<a id="7-pr-review"></a>
 ## 7. PR review
 
-Run [pr-review.md](pr-review.md) on the open PR and post it. Blockers and Majors go back to the owning dev role; after the fix, push, wait for CI (step 6) again, and re-review.
+Run [pr-review.md](pr-review.md) on the open PR and post it — concurrently with the CI watch in step 6, not after it. Blockers and Majors go back to the owning dev role; after the fix, push, wait for CI (step 6) again, and re-review.
 
 ## 8. Clean up
 

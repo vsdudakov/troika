@@ -11,7 +11,7 @@ A tool-neutral agent harness: roles, procedures, templates. Plain markdown, so C
   <repos…>         the product repos, each an independent clone
 ```
 
-- [`agents/`](agents/README.md) — the roles: architect, backend-dev, frontend-dev, reviewer, qa, releaser, commenter. Who acts, what gates them, which model and effort each runs on.
+- [`agents/`](agents/README.md) — the roles: architect, backend-dev, frontend-dev, reviewer, tester, qa, releaser, commenter. Who acts, what gates them, which model and effort each runs on.
 - [`skills/`](skills/README.md) — the procedures, references, and templates. The pipeline is [develop-flow](skills/develop-flow.md).
 - [`memory/`](memory/README.md) — dated, provisional observations about the workspace it is cloned into. **Gitignored** — memory is per-workspace, not shared.
 - [`worktrees/`](worktrees/README.md) — the per-branch checkouts. **Gitignored**, and not configuration: never recurse into it when loading this tree.

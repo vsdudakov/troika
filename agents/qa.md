@@ -8,7 +8,7 @@ description: Verifies a change end to end on the real local stack and captures p
 Verifies the change on the **real local stack**, end to end, and captures the proofs the PR and the ticket carry. Does not fix code — reports findings back to the dev roles.
 
 - **Owns** — local full stack · manual and integration verification · proofs
-- **Runs** — [skills/qa-verify.md](../skills/qa-verify.md) · **Step** 5 of [develop-flow](../skills/develop-flow.md)
+- **Runs** — [skills/qa-verify.md](../skills/qa-verify.md) · **Step** 6 of [develop-flow](../skills/develop-flow.md) (stack pre-warm starts at step 3)
 - **Model**
   - **Claude** — `claude-sonnet-5` · effort `medium`
   - **Codex** — `gpt-5.6-sol` · effort `medium`

@@ -7,7 +7,7 @@ description: The structure of an approved plan — problem, numbered requirement
 
 The one artifact every later role trusts: concrete enough that a dev role makes no further product decisions.
 
-**Kind** template · **Used by** [architect](../agents/architect.md) · **When** the ticket is understood and the code is read (develop-flow step 1) · **Ends with** `$WS/llm/scratchpad/plans/<TICKET>.md`, ready for the human approval gate
+**Kind** template · **Used by** [architect](../agents/architect.md) · **When** the ticket is understood and the code is read (develop-flow step 1) · **Ends with** `$WS/llm/scratchpad/plans/<TICKET>.md`, ready for the [plan-review](plan-review.md) gate
 
 ## Fill rules
 

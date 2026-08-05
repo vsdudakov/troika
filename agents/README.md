@@ -9,9 +9,10 @@ Every role inherits the workspace's [AGENTS.md](../../AGENTS.md) — the project
 | Role | Owns |
 | --- | --- |
 | [architect](architect.md) | requirements, plan, repo split, contracts; writes no product code |
-| [backend-dev](backend-dev.md) | server-side repos + their unit tests |
-| [frontend-dev](frontend-dev.md) | the client app named in [AGENTS.md › Ownership](../../AGENTS.md#ownership) + its unit tests |
-| [reviewer](reviewer.md) | internal (pre-PR) and PR review; read-only, never runs tests |
+| [backend-dev](backend-dev.md) | server-side repos + their unit tests (written, never run) |
+| [frontend-dev](frontend-dev.md) | the client app named in [AGENTS.md › Ownership](../../AGENTS.md#ownership) + its unit tests (written, never run) |
+| [reviewer](reviewer.md) | plan review, internal (pre-PR) review, and PR review; read-only, never runs tests |
+| [tester](tester.md) | the local unit-test run — the change's own tests only, in parallel lanes; writes nothing |
 | [qa](qa.md) | the local stack, manual + integration verification, proofs |
 | [releaser](releaser.md) | commits (the only ones in the flow), PR, proofs, tracker |
 | [commenter](commenter.md) | every outward-facing text, in the workspace's [voice](../../AGENTS.md#voice) |
@@ -28,13 +29,14 @@ Two dials, set separately. **Model** decides what the role *can* do; **effort** 
 | [backend-dev](backend-dev.md) | `claude-fable-5` → `claude-opus-5` | high | high |
 | [frontend-dev](frontend-dev.md) | `claude-sonnet-5` | medium | medium |
 | [reviewer](reviewer.md) | `claude-fable-5` → `claude-opus-5` | high | high |
+| [tester](tester.md) | `claude-sonnet-5` | medium | medium |
 | [qa](qa.md) | `claude-sonnet-5` | medium | medium |
 | [releaser](releaser.md) | `claude-sonnet-5` | low | medium |
 | [commenter](commenter.md) | `claude-fable-5` → `claude-opus-5` | low | low |
 
 Codex runs `gpt-5.6-sol` for every role — only the effort differs, so it gets no column of its own. `→` means fallback: use the first, drop to the next when the tool or plan doesn't offer it.
 
-**Why these.** Fable is the top pick where the output is judgment or prose — plan, code design, review, written text. The three execution roles stay on Sonnet on purpose: long, tool-heavy sessions where the work is following a procedure, not reasoning about it.
+**Why these.** Fable is the top pick where the output is judgment or prose — plan, code design, review, written text. The four execution roles stay on Sonnet on purpose: long, tool-heavy sessions where the work is following a procedure, not reasoning about it.
 
 **Why the two dials don't move together.** [commenter](commenter.md) runs the strongest model at the lowest effort — voice comes from the model, not from more thinking. [releaser](releaser.md) runs a mid model at low effort — the numbered procedure is the safeguard, not reasoning. Raise **effort** when a role is losing to *depth* on a task it already understands; raise the **model** when it is losing to *capability*. Each role file carries its own `Why` / `Raise it when` / `Drop it when` lines.
 
@@ -72,11 +74,15 @@ Roles run in separate contexts and communicate through files. `$WS` is the works
 | File | Written by | Read by |
 | --- | --- | --- |
 | `$WS/llm/scratchpad/plans/<TICKET>.md` | [architect](architect.md) | everyone |
+| `$WS/llm/scratchpad/plans/<TICKET>-plan-review-<n>.md` | [reviewer](reviewer.md), plan pass | architect, orchestrator |
 | `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` | each dev role | reviewer, qa, release |
 | `$WS/llm/scratchpad/plans/<TICKET>-review-<n>.md` | [reviewer](reviewer.md), internal pass | dev roles, release |
+| `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` | [tester](tester.md) | dev roles, release |
 | `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` | [qa](qa.md) | dev roles, release |
 | `$WS/llm/scratchpad/proofs/<TICKET>/*.gif\|png` | [qa](qa.md) | release |
 
-`<role>` is the role's frontmatter `name` (`backend-dev`, `frontend-dev`). `<n>` is the cycle number, starting at 1. [releaser](releaser.md) gates on the **highest-numbered** `-review-<n>.md` and `-qa-<n>.md`; both must exist.
+`<role>` is the role's frontmatter `name` (`backend-dev`, `frontend-dev`). `<n>` is the cycle number, starting at 1. [releaser](releaser.md) gates on the **highest-numbered** `-review-<n>.md`, `-tests-<n>.md`, and `-qa-<n>.md`; all three must exist. Test lanes also leave `-tests-<n>-<area>.log` next to the report — evidence, not a gate.
 
 A role that finishes returns: branch name, worktree path, what changed, commands run with results, anything left undone.
+
+**Roles run concurrently wherever the flow says so** ([develop-flow › Parallelism](../skills/develop-flow.md#parallelism)) — two dev lanes, review dimensions inside a lane, test lanes per area, CI watches per PR. Files are what makes that safe: a role writes only its own handoff file and only inside its own worktree. Two roles writing one worktree is the one thing the contract cannot protect.

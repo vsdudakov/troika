@@ -7,14 +7,15 @@ description: Reviews the local branch diff before QA and before any push — cat
 
 The pre-push pass on the local branch diff. Catches what QA can't see (layering, coverage, style) and what CI would otherwise catch late.
 
-**Kind** procedure · **Used by** [reviewer](../agents/reviewer.md) · **When** dev roles report done, before QA and before any push (develop-flow step 4) · **Ends with** a verdict file and a loop back to the dev role, nothing posted outside the workspace
+**Kind** procedure · **Used by** [reviewer](../agents/reviewer.md) · **When** dev roles report done, before the tests run and before any push (develop-flow step 4) · **Ends with** a verdict file and a loop back to the dev role, nothing posted outside the workspace
 
-Read-only and lint-only: never edit code, never run the test suite, never push. Set `WS` first ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
+Read-only and lint-only: never edit code, **never run a test** — no test has run yet at this point and running one is not this pass's job ([tester](../agents/tester.md) does it in step 5) — never push. Set `WS` first ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
 
 ## 1. Requirements
 
 Read `$WS/llm/scratchpad/plans/<TICKET>.md` and the dev role's work log `$WS/llm/scratchpad/plans/<TICKET>-<role>.md`. Those are the requirements the diff must meet.
 
+<a id="diff-new-files"></a>
 ## 2. Diff
 
 From the dev role's worktree:
@@ -58,8 +59,9 @@ The nine checks and their definitions live in [reviewer › Rules](../agents/rev
 Three are done differently here than in the PR pass:
 
 - **Lint** — run the repo's lint command ([AGENTS.md › Commands](../../AGENTS.md#commands)) in the worktree, plus the build where the type check lives inside it. Quote the shortest decisive failing line.
-- **Tests present** — verify from the diff that each changed source file has its test and that coverage will hold at the profile's gate. Do not run the suite. This check carries more weight now that dev roles run only their own tests locally: CI is the first full-suite run, so an untested branch in the diff is a PR that will go red. Read the dev's work log for *which* tests it ran, and check [AGENTS.md › Gotchas](../../AGENTS.md#gotchas) before trusting a green test result — a wrapper may be masking a crash.
-- **Regression risk the targeted run couldn't see** — call out a diff that touches a shared model, base class, util, config, middleware, migration, or an existing public signature without the dev having run the repo's full suite ([implement-change › When to run the full suite](implement-change.md#fullsuite)). Cheaper to say here than to discover on CI.
+- **Tests present** — the heaviest check in this pass, because **nothing has run these tests yet**. Verify from the diff that every changed source file has its mirror test ([AGENTS.md › Tests](../../AGENTS.md#tests)), that each test asserts real behaviour rather than a mock having been called, and that every branch in the diff — each guard, `except`, and early return — has a test that reaches it. A missing or hollow test is a **Blocker**: it costs a cycle in step 5 and a red PR on CI. Cross-check the node IDs in the dev's work log against the test files actually in the diff; a claimed test that is not there is the failure mode this catches.
+- **Tests that will not run** — read them as a runner would: an import that does not resolve, a fixture that does not exist, a parametrize list that collects nothing, a test name that does not match the runner's discovery pattern. The dev role wrote these blind, so a mechanical defect here is likely and costs a whole cycle in step 5.
+- **Regression risk nobody will see before CI** — step 5 runs only the change's own tests, so call out a diff touching a shared model, base class, util, config, middleware, migration, or an existing public signature. Name the blast radius in the report: it is what CI is being trusted to cover.
 
 ## 4. Report
 
@@ -67,7 +69,7 @@ Use the [reviewer output format](../agents/reviewer.md#output).
 
 ## 5. Loop
 
-Blockers and Majors go back to the owning dev role; it fixes and re-runs tests and lint, then this skill runs again on the new diff. Nits are fixed when cheap. Repeat until `Approve` / `Approve with nits`.
+Blockers and Majors go back to the owning dev role; it fixes and re-runs lint, then this skill runs again on the new diff. Nits are fixed when cheap. Repeat until `Approve` / `Approve with nits`.
 
 ## Output
 
@@ -77,4 +79,4 @@ Nothing leaves the workspace here, so this report skips [commenter](../agents/co
 
 ## Stop conditions
 
-**Cap at 3 cycles.** If the third review still has Blockers or Majors, stop the flow and report the unresolved findings to the human — don't advance to QA on a failing review. Also stop if the diff no longer matches the plan's scope, or if a worktree named in the work log is missing ([worktree › Gotchas](worktree.md#gotchas)).
+**Cap at 3 cycles.** If the third review still has Blockers or Majors, stop the flow and report the unresolved findings to the human — don't advance to the test run on a failing review. Also stop if the diff no longer matches the plan's scope, or if a worktree named in the work log is missing ([worktree › Gotchas](worktree.md#gotchas)).

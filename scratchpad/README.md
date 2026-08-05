@@ -17,16 +17,21 @@ A relative path does not error loudly — it writes a file no later role finds, 
 ## Layout
 
 ```
-plans/<TICKET>.md               the plan — requirements, repo split, pinned contracts
-plans/<TICKET>-<role>.md        one dev role's work log
-plans/<TICKET>-review-<n>.md    internal review, cycle <n>
-plans/<TICKET>-qa-<n>.md        QA report, cycle <n>
-proofs/<TICKET>/                one artifact per user-visible requirement
+plans/<TICKET>.md                    the plan — requirements, repo split, pinned contracts
+plans/<TICKET>-plan-review-<n>.md    plan review (the pre-code gate), cycle <n>
+plans/<TICKET>-<role>.md             one dev role's work log
+plans/<TICKET>-review-<n>.md         internal review, cycle <n>
+plans/<TICKET>-tests-<n>.md          unit-test run, cycle <n>
+plans/<TICKET>-tests-<n>-<area>.log  one test lane's raw output
+plans/<TICKET>-qa-<n>.md             QA report, cycle <n>
+proofs/<TICKET>/                     one artifact per user-visible requirement
 ```
 
-Who writes and who reads each file is the [handoff contract](../agents/README.md#handoff). `<role>` is the role's frontmatter `name` (`backend-dev`, `frontend-dev`). `<n>` is the cycle number, from 1 — a new cycle adds a file, it never overwrites the previous one, so the history of what was rejected stays readable. [releaser](../agents/releaser.md) gates on the **highest-numbered** `-review-<n>.md` and `-qa-<n>.md`; both must exist and must read `Approve` / `Approve with nits` and `Pass`.
+Who writes and who reads each file is the [handoff contract](../agents/README.md#handoff). `<role>` is the role's frontmatter `name` (`backend-dev`, `frontend-dev`). `<n>` is the cycle number, from 1 — a new cycle adds a file, it never overwrites the previous one, so the history of what was rejected stays readable. [releaser](../agents/releaser.md) gates on the **highest-numbered** `-review-<n>.md`, `-tests-<n>.md`, and `-qa-<n>.md`; all three must exist and must read `Approve` / `Approve with nits`, `Pass`, and `Pass`.
 
-Plan files follow [plan-template](../skills/plan-template.md). Proofs are named after the requirement they prove (`req-2-portfolio-filter.gif`) — see [qa-verify › Proofs](../skills/qa-verify.md#6-proofs) for what counts as one per kind of change. Never fabricate a proof; unexercised requirements go under **Not verified** in the QA report.
+Plan files follow [plan-template](../skills/plan-template.md). Proofs are named after the requirement they prove (`req-2-portfolio-filter.gif`) — see [qa-verify › Proofs](../skills/qa-verify.md#8-proofs-for-the-pr) for what counts as one per kind of change. Never fabricate a proof; unexercised requirements go under **Not verified** in the QA report.
+
+Lanes that run concurrently write **different files** — that is what keeps them safe to parallelise ([develop-flow › Parallelism](../skills/develop-flow.md#parallelism)). Two roles never append to one handoff file.
 
 Test-data and one-off scripts a role needs mid-flow also live here ([qa](../agents/qa.md), which may never edit product code). Keep them under the ticket they belong to.
 

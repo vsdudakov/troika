@@ -15,8 +15,10 @@ Each file declares its **Kind** in the header line, which fixes its body shape:
 | Skill | File | Run by |
 | --- | --- | --- |
 | Develop flow (ticket → merge-ready PR) | [develop-flow.md](develop-flow.md) | orchestrator |
+| Plan review (pre-code gate, replaces human approval) | [plan-review.md](plan-review.md) | [reviewer](../agents/reviewer.md) |
 | Implement change (one repo) | [implement-change.md](implement-change.md) | [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) |
 | Internal review (pre-PR, local diff) | [internal-review.md](internal-review.md) | [reviewer](../agents/reviewer.md) |
+| Run unit tests (changed only, parallel lanes) | [run-unit-tests.md](run-unit-tests.md) | [tester](../agents/tester.md) |
 | QA verify (local stack) | [qa-verify.md](qa-verify.md) | [qa](../agents/qa.md) |
 | Release PR (commit, PR, proofs, ticket) | [release-pr.md](release-pr.md) | [releaser](../agents/releaser.md) |
 | PR review (post-PR, posted to the PR host) | [pr-review.md](pr-review.md) | [reviewer](../agents/reviewer.md) |
