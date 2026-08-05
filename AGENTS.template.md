@@ -76,8 +76,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 ## Commands
 <per-area table: narrowed tests (tester's) | the dev role's verification commands, named exactly; plus full suite, formatter traps>
 <a command not in that table is not a verification gate; say so, or a role will count one>
-<migrations: where they live, the generator command, and whether an applied revision may be
- hand-edited or renumbered — reviewer check 7 has nothing to cite if this is unstated>
+<migrations: where they live, the generator command, and whether an already-applied revision may be hand-edited or renumbered — the reviewer's migrations check has nothing to cite if this is unstated>
 <a id="parallel-tests"></a>
 <one lane per area; the parallel flag each runner takes; suites that must stay sequential>
 

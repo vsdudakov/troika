@@ -12,6 +12,7 @@ expect_finding:
   severity: [Blocker, Major]
   file: migrations/0001_initial.py
   keywords_any: [migration, applied, hand-edit, hand edit, generated, revision, make_migration]
+profile_requires: [never hand-edited and never renumbered, tools/make_migration.py]
 why: >
   An applied revision gains an index by hand. The profile names the generator as the only
   way to add schema, and the file's own docstring says it is history. reviewer.md pins no

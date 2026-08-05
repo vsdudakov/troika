@@ -105,12 +105,20 @@ expect_finding:                 # or `null` for a clean case
   file: app/service/allocation.py   # or `any`, when the citation is not predictable
   keywords_any: [mirror, missing test, untested]
 forbid_severity: [Blocker, Major]   # clean cases only
+profile_requires: [Mirror path]     # profile wording this case grades against
 why: >
   Why this case is unambiguous.
 ```
 
-`--check` rejects a severity or verdict label that is not one the harness recognises: a typo
+`--check` rejects a severity, verdict, role, or skill the harness does not recognise: a typo
 there makes a case unpassable, and without the check that only surfaces after a paid run.
+
+**`profile_requires` is what keeps a case honest.** A case does not test the reviewer against
+some universal standard — it tests it against a rule `fixtures/AGENTS.md` states. Reword or
+drop that rule and the case keeps running, keeps passing or failing, and no longer measures
+what it claims to. Listing the wording makes that a fixture failure instead of a silent one.
+`--check` also fails an anchor that resolves to a bare heading, which is a dead link that
+happens to render: the role follows it and learns nothing.
 
 Grading is deliberately fuzzy on wording and strict on structure: the finding must carry the
 right **severity**, name the right **file**, and hit at least one keyword. Models will not

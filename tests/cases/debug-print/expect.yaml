@@ -6,5 +6,6 @@ expect_finding:
   severity: Major
   file: app/service/allocation.py
   keywords_any: [print, debug, logging]
+profile_requires: [no debug prints]
 why: >
   A DEBUG print left in the hot path.

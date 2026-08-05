@@ -6,5 +6,6 @@ expect_finding:
   severity: Blocker
   file: app/service/allocation.py
   keywords_any: [secret, key, credential, token, sk_live]
+profile_requires: [No secrets]
 why: >
   A live-looking API key hardcoded at module level.

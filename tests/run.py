@@ -260,9 +260,15 @@ def run_agent(cmd: str, prompt: str, timeout: int) -> tuple:
 
 def env_timeout() -> int:
     """A zero or a typo would expire every run instantly and score the whole suite a miss
-    with no hint why, so anything that is not a positive integer falls back."""
-    raw = os.environ.get("HARNESS_TIMEOUT", "")
-    return int(raw) if raw.isdigit() and int(raw) > 0 else DEFAULT_TIMEOUT
+    with no hint why, so anything that is not a positive integer falls back — loudly, since
+    a silently ignored setting is how someone reads a catch rate that measured nothing."""
+    raw = os.environ.get("HARNESS_TIMEOUT", "").strip()
+    if raw.isdigit() and int(raw) > 0:
+        return int(raw)
+    if raw:
+        print(f"HARNESS_TIMEOUT={raw!r} is not a positive integer; using {DEFAULT_TIMEOUT}s",
+              file=sys.stderr)
+    return DEFAULT_TIMEOUT
 
 
 def check_spec(spec: dict) -> list:
@@ -296,12 +302,19 @@ def check_spec(spec: dict) -> list:
     return problems
 
 
+def profile_sections(text: str) -> dict:
+    """Each `<a id>` anchor mapped to the prose beneath it, up to the next anchor."""
+    parts = re.split(r'<a id="([^"]+)"></a>', text)
+    return {parts[i]: parts[i + 1] for i in range(1, len(parts) - 1, 2)}
+
+
 def check_fixtures() -> int:
     problems = []
     if not (FIXTURES / "repo" / "app").is_dir():
         problems.append("fixtures/repo missing")
     profile = (FIXTURES / "AGENTS.md").read_text(encoding="utf-8")
     anchors = set(re.findall(r'<a id="([^"]+)"', profile))
+    sections = profile_sections(profile)
     needed = set()
     for f in list((LLM / "agents").glob("*.md")) + list((LLM / "skills").glob("*.md")):
         for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
@@ -310,6 +323,13 @@ def check_fixtures() -> int:
                 needed.add(frag)
     for miss in sorted(needed - anchors):
         problems.append(f"fixtures/AGENTS.md lacks #{miss} — a role would read a dead link")
+    # An anchor that resolves to a bare heading is a dead link that happens to render: the
+    # role follows it and learns nothing, and no existing check notices.
+    for anchor in sorted(needed & anchors):
+        prose = "\n".join(l for l in sections.get(anchor, "").splitlines()
+                          if not l.startswith("#")).strip()
+        if not prose:
+            problems.append(f"fixtures/AGENTS.md #{anchor} is a heading with no content")
     for case in sorted(CASES.iterdir()):
         if not case.is_dir() or case.name.startswith("_"):
             continue
@@ -319,6 +339,13 @@ def check_fixtures() -> int:
             problems.append(f"{case.name}/expect.yaml unparseable: {exc}")
             continue
         problems += [f"{case.name}/expect.yaml: {p}" for p in check_spec(spec)]
+        # A case grades against a rule the profile states. Reword the profile and the case
+        # silently stops testing what it claims to; this makes that a fixture failure.
+        for phrase in as_list(spec.get("profile_requires")):
+            if phrase.lower() not in profile.lower():
+                problems.append(
+                    f"{case.name}: fixtures/AGENTS.md no longer says '{phrase}' — "
+                    "the case grades against a rule the profile does not state")
     for p in problems:
         print(f"  {p}")
     print(f"{'FAIL' if problems else 'ok'} — fixtures, {len(needed)} profile anchors required")

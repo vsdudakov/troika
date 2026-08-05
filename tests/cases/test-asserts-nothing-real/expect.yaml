@@ -6,6 +6,7 @@ expect_finding:
   severity: Blocker
   file: tests/service/test_allocation.py
   keywords_any: [hollow, real behaviour, real behavior, is not none, isinstance, asserts nothing, meaningless]
+profile_requires: [assert real behaviour]
 why: >
   Three tests that check only non-None and isinstance. They would pass against a
   function returning an empty dict for every input.

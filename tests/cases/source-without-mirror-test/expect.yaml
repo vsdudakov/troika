@@ -9,6 +9,7 @@ expect_finding:
   severity: Blocker
   file: app/service/allocation.py
   keywords_any: [mirror, test_allocation, no test, missing test, untested, coverage]
+profile_requires: [Mirror path]
 why: >
   A new source file ships with no tests/service/test_allocation.py. The profile fixes
   the mirror path, so this is mechanically checkable from the diff alone.

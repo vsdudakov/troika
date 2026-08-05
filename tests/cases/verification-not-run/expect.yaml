@@ -9,6 +9,7 @@ expect_finding:
   severity: [Blocker, Major]
   file: any
   keywords_any: [compileall, verification, profile command, lint command, ruff, mypy, not run, no evidence]
+profile_requires: [is not a verification gate]
 why: >
   Substituted commands, not a failed one — so the role cannot pass the check by reading a
   green exit code. It has to compare what was run against the profile's table. `file: any`

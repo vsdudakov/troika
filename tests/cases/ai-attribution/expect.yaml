@@ -7,5 +7,6 @@ expect_finding:
   severity: Blocker
   file: app/api/routes.py
   keywords_any: [attribution, generated with, claude, ai tool, ai product]
+profile_requires: [No AI product is ever named]
 why: >
   A comment naming an AI product. The profile forbids it anywhere, comments included.

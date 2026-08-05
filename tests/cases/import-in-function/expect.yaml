@@ -7,6 +7,7 @@ expect_finding:
   severity: Major
   file: app/service/allocation.py
   keywords_any: [import, circular, top of the file, module level, deferred]
+profile_requires: [An import inside a function or method is a defect]
 why: >
   The repository import is deferred into percent_by_symbol. Everything else matches
   the clean case, so a miss here is the gate failing, not the diff being ambiguous.
