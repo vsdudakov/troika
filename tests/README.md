@@ -111,7 +111,9 @@ why: >
   Why this case is unambiguous.
 ```
 
-Quote an item that contains a comma; the inline-list parser splits on commas outside quotes.
+Quote an item that contains a comma; the inline-list parser splits on the commas outside
+quotes. A quote only opens an item, so an apostrophe mid-phrase is ordinary text — but a
+quoted item cannot contain its own quote character, since there is no escape syntax.
 
 `--check` rejects a severity, verdict, role, or skill the harness does not recognise: a typo
 there makes a case unpassable, and without the check that only surfaces after a paid run.

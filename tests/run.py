@@ -51,14 +51,20 @@ VERDICTS = ("Approve with nits", "Request changes", "Approve")
 
 def split_items(raw: str) -> list:
     """Split an inline list on the commas outside quotes, so a quoted item may contain one.
-    `profile_requires` and `plan_requires` carry prose, and prose has commas in it."""
+    `profile_requires` and `plan_requires` carry prose, and prose has commas in it.
+
+    A quote only opens an item, never interrupts one: prose is also full of apostrophes, and
+    treating `the plan's contract` as an opening quote would swallow every comma after it and
+    fold the rest of the list into one phrase that can never match. No escape handling — a
+    quoted item cannot itself contain its own quote character.
+    """
     items, buf, quote = [], [], ""
     for ch in raw:
         if quote:
             buf.append(ch)
             if ch == quote:
                 quote = ""
-        elif ch in "\"'":
+        elif ch in "\"'" and not "".join(buf).strip():
             quote = ch
             buf.append(ch)
         elif ch == ",":
@@ -335,10 +341,23 @@ def profile_sections(text: str) -> dict:
     return {parts[i]: parts[i + 1] for i in range(1, len(parts) - 1, 2)}
 
 
+def report(problems: list, anchors: int) -> int:
+    for p in problems:
+        print(f"  {p}")
+    print(f"{'FAIL' if problems else 'ok'} — fixtures, {anchors} profile anchors required")
+    return 1 if problems else 0
+
+
 def check_fixtures() -> int:
     problems = []
     if not (FIXTURES / "repo" / "app").is_dir():
         problems.append("fixtures/repo missing")
+    # A missing profile or plan is a fixture problem like any other; reading them
+    # unguarded turned it into a traceback, which is not a check result.
+    missing = [f for f in ("AGENTS.md", "plan.md") if not (FIXTURES / f).is_file()]
+    if missing:
+        problems += [f"fixtures/{f} missing — nothing downstream can be checked" for f in missing]
+        return report(problems, 0)
     profile = (FIXTURES / "AGENTS.md").read_text(encoding="utf-8")
     plan = (FIXTURES / "plan.md").read_text(encoding="utf-8")
     declared = ANCHOR.findall(profile)
@@ -354,8 +373,14 @@ def check_fixtures() -> int:
             path, _, frag = target.partition("#")
             if frag and path.endswith("AGENTS.md"):
                 needed.add(frag)
+    # An id that is present but not as a well-formed tag is a different defect from one that
+    # is absent, and saying "dead link" about a link that resolves sends the reader nowhere.
+    loose = set(re.findall(r'<a\s+[^>]*id="([^"]+)"', profile))
     for miss in sorted(needed - anchors):
-        problems.append(f"fixtures/AGENTS.md lacks #{miss} — a role would read a dead link")
+        if miss in loose:
+            problems.append(f'fixtures/AGENTS.md #{miss} is not a well-formed <a id="…"></a> tag')
+        else:
+            problems.append(f"fixtures/AGENTS.md lacks #{miss} — a role would read a dead link")
     # An anchor that resolves to a bare heading is a dead link that happens to render: the
     # role follows it and learns nothing, and no existing check notices.
     for anchor in sorted(needed & anchors):
@@ -382,10 +407,7 @@ def check_fixtures() -> int:
                     problems.append(
                         f"{case.name}: {where} no longer says '{phrase}' — the case grades "
                         "against wording the fixture does not carry")
-    for p in problems:
-        print(f"  {p}")
-    print(f"{'FAIL' if problems else 'ok'} — fixtures, {len(needed)} profile anchors required")
-    return 1 if problems else 0
+    return report(problems, len(needed))
 
 
 def main() -> int:
