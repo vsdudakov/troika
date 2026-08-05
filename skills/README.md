@@ -1,0 +1,39 @@
+# Skills
+
+Tool-neutral procedures, references, and templates. Invoke one by pointing the agent tool at the file: `run llm/skills/develop-flow.md for <TICKET>`. The YAML frontmatter (`name`, `description`) lets tools that auto-discover skills pick the right one.
+
+Each file declares its **Kind** in the header line, which fixes its body shape:
+
+| Kind | Body | Read it as |
+| --- | --- | --- |
+| procedure | numbered `## 1.` … steps, then `## Output`, `## Stop conditions` | every step is a gate — don't advance until it holds |
+| reference | topic sections, then `## Gotchas` | look up what you need |
+| template | `## Fill rules`, then `## Template` | copy the block, fill it, delete what doesn't apply |
+
+## Procedures
+
+| Skill | File | Run by |
+| --- | --- | --- |
+| Develop flow (ticket → merge-ready PR) | [develop-flow.md](develop-flow.md) | orchestrator |
+| Implement change (one repo) | [implement-change.md](implement-change.md) | [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) |
+| Internal review (pre-PR, local diff) | [internal-review.md](internal-review.md) | [reviewer](../agents/reviewer.md) |
+| QA verify (local stack) | [qa-verify.md](qa-verify.md) | [qa](../agents/qa.md) |
+| Release PR (commit, PR, proofs, ticket) | [release-pr.md](release-pr.md) | [releaser](../agents/releaser.md) |
+| PR review (post-PR, posted to the PR host) | [pr-review.md](pr-review.md) | [reviewer](../agents/reviewer.md) |
+
+## References
+
+| Skill | File | Used by |
+| --- | --- | --- |
+| Branches and worktrees | [worktree.md](worktree.md) | all dev / review / QA roles |
+| Cross-repo order and PR linking | [cross-repo.md](cross-repo.md) | orchestrator · [releaser](../agents/releaser.md) |
+| Tracker — auth, read, comment, transitions, attachments | [tracker.md](tracker.md) | [architect](../agents/architect.md) · [releaser](../agents/releaser.md) |
+
+## Templates
+
+| Skill | File | Filled by |
+| --- | --- | --- |
+| Plan | [plan-template.md](plan-template.md) | [architect](../agents/architect.md) |
+| PR body and title | [pr-template.md](pr-template.md) | [releaser](../agents/releaser.md) via [commenter](../agents/commenter.md) |
+
+Skills carry no repo names, commands, URLs, or tracker keys — those are read from the workspace's [AGENTS.md](../../AGENTS.md) by anchor ([why](../README.md)). Shell quoting and the absolute-path rule are in [llm/README.md › Conventions](../README.md#conventions).

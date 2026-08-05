@@ -1,0 +1,13 @@
+# Per-workspace, never shared between organisations.
+# Each folder keeps its tracked README.md so it survives a fresh clone.
+
+worktrees/*
+!worktrees/README.md
+
+scratchpad/*
+!scratchpad/README.md
+
+memory/*
+!memory/README.md
+
+.DS_Store
