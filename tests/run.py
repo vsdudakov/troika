@@ -9,6 +9,7 @@ catch it actually does. The claim under test is not "the model is good" — it i
     python3 tests/run.py --runs 5            # real runs, report catch rate
     python3 tests/run.py --case clean        # one case
     python3 tests/run.py --check             # fixtures only, no model
+    python3 tests/run.py --timeout 900       # seconds per run before it counts as a miss
 
 Models are stochastic, so a single run proves nothing: --runs 5 and read the rate.
 Compare rates across two versions of agents/ and skills/ to measure a prompt change.
@@ -19,8 +20,8 @@ role's reply to stdout:
     HARNESS_CMD='claude -p --model claude-fable-5 --effort high'  python3 tests/run.py
     HARNESS_CMD='codex exec -m gpt-5.6-sol -'                     python3 tests/run.py
 
-HARNESS_TIMEOUT caps a single run in seconds (default 600); a run that overruns counts
-as a miss rather than hanging the suite.
+HARNESS_TIMEOUT sets --timeout's default (600); a run that overruns has its process group
+killed and counts as a miss rather than hanging the suite.
 """
 
 import argparse
@@ -258,8 +259,10 @@ def run_agent(cmd: str, prompt: str, timeout: int) -> tuple:
 
 
 def env_timeout() -> int:
+    """A zero or a typo would expire every run instantly and score the whole suite a miss
+    with no hint why, so anything that is not a positive integer falls back."""
     raw = os.environ.get("HARNESS_TIMEOUT", "")
-    return int(raw) if raw.isdigit() else DEFAULT_TIMEOUT
+    return int(raw) if raw.isdigit() and int(raw) > 0 else DEFAULT_TIMEOUT
 
 
 def check_spec(spec: dict) -> list:

@@ -167,7 +167,11 @@ def check_agent_shape():
         header = re.findall(r"^- \*\*(Owns|Runs|Model)\*\*", text, re.M)
         if header != ["Owns", "Runs", "Model"]:
             fail(f, f"header list {header} != ['Owns', 'Runs', 'Model']")
-        sub = re.findall(r"^  - \*\*([A-Za-z ]+)\*\*", text, re.M)
+        # Only the bullets nested under **Model**, not every two-space bullet in the file:
+        # a nested list anywhere else is legal prose, and reporting it as a Model sub-bullet
+        # would fail the build with the wrong reason.
+        block = re.search(r"^- \*\*Model\*\*.*?(?=^\S|\Z)", text, re.M | re.S)
+        sub = re.findall(r"^  - \*\*([A-Za-z ]+)\*\*", block.group(0) if block else "", re.M)
         if sub[:3] != MODEL_SUBS:
             fail(f, f"Model sub-bullets start {sub[:3]} != {MODEL_SUBS}")
         # An undeclared sub-bullet is drift the README does not describe.

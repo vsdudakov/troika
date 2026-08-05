@@ -16,7 +16,7 @@ The harness in `llm/` is organisation-neutral: roles and skills link into this f
 | `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
 | `#branches` | **remote name and default branch (the base ref every diff and worktree uses)**, branch naming, worktree dependency setup, push quirks | dev roles, reviewer, tester, releaser |
 | `#dependency-order` | provider → consumer order across repos, and how shared libraries are released | architect, releaser |
-| `#commands` | per repo or area: narrowed tests, **the exact verification commands a dev role must run as its gate** (lint, and a type check or build only if that is how this workspace runs it), full suite, migrations, per-runner parallel flags | dev roles, reviewer, tester |
+| `#commands` | per repo or area: narrowed tests, **the exact verification commands a dev role must run as its gate** (lint, and a type check or build only if that is how this workspace runs it), full suite, per-runner parallel flags; and for migrations, **the generator command plus what may be done to a revision that has already been applied** | dev roles, reviewer, tester |
 | `#style` | per-language style rules | dev roles, reviewer |
 | `#layering` | the architectural layers, if the codebase has them | backend-dev, reviewer |
 | `#tests` | test framework, naming, location, coverage gate, who runs them and when | dev roles, reviewer, tester |
@@ -74,7 +74,10 @@ The project profile for the harness in llm/. Roles reference these sections by a
 
 <a id="commands"></a>
 ## Commands
-<per-area table: narrowed tests (tester's) | the dev role's verification commands, named exactly; plus full suite, migrations, formatter traps>
+<per-area table: narrowed tests (tester's) | the dev role's verification commands, named exactly; plus full suite, formatter traps>
+<a command not in that table is not a verification gate; say so, or a role will count one>
+<migrations: where they live, the generator command, and whether an applied revision may be
+ hand-edited or renumbered — reviewer check 7 has nothing to cite if this is unstated>
 <a id="parallel-tests"></a>
 <one lane per area; the parallel flag each runner takes; suites that must stay sequential>
 
