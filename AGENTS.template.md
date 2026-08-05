@@ -13,19 +13,24 @@ The harness in `llm/` is organisation-neutral: roles and skills link into this f
 | `#repo-map` | which repos exist, what each is, what is out of scope | everyone |
 | `#ownership` | which role owns which repo or app | everyone |
 | `#workspace-paths` | the workspace root and the absolute-path rule | everyone |
-| `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer |
+| `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
 | `#branches` | default branch, branch naming, worktree dependency setup, push quirks | dev roles, releaser |
 | `#dependency-order` | provider → consumer order across repos, and how shared libraries are released | architect, releaser |
-| `#commands` | per repo: targeted tests, full lint, full suite, migrations | dev roles, reviewer |
+| `#commands` | per repo: narrowed tests, full lint, full suite, migrations, per-runner parallel flags | dev roles, reviewer, tester |
 | `#style` | per-language style rules | dev roles, reviewer |
 | `#layering` | the architectural layers, if the codebase has them | backend-dev, reviewer |
-| `#tests` | test framework, naming, location, coverage gate | dev roles, reviewer |
+| `#tests` | test framework, naming, location, coverage gate, who runs them and when | dev roles, reviewer, tester |
 | `#stack` | how to run the product locally and point it at a worktree | qa |
 | `#stack-limits` | what the local stack cannot verify | qa, architect |
 | `#tracker` | tracker URL, project key, CLI, auth check, transition names | architect, releaser |
 | `#pull-requests` | PR host, title format, CI watch, review-bot loop | releaser |
 | `#pr-template` | the PR body the team uses | releaser, commenter |
-| `#gotchas` | destructive commands and traps specific to this workspace | everyone |
+| `#deploy` | the environments, what triggers each, how a deploy is dispatched and watched | releaser |
+| `#release` | version scheme, release branches and tags, the procedure, which steps are the human's | releaser |
+| `#demo` | the demo label, integration branch, and environment — or that there is no demo cadence | releaser |
+| `#announcements` | where releases, deploys, and incidents are announced, and who may post | releaser, commenter |
+| `#observability` | the platform, how to query it, credentials, per-platform traps | architect, backend-dev |
+| `#gotchas` | destructive commands, production-access rules, traps specific to this workspace | everyone |
 
 ## Skeleton
 
@@ -69,7 +74,9 @@ The project profile for the harness in llm/. Roles reference these sections by a
 
 <a id="commands"></a>
 ## Commands
-<per-repo table: targeted tests | lint; plus full suite, migrations, formatter traps>
+<per-repo table: narrowed tests (tester's) | lint (the dev role's gate); plus full suite, migrations, formatter traps>
+<a id="parallel-tests"></a>
+<one lane per area; the parallel flag each runner takes; suites that must stay sequential>
 
 <a id="style"></a>
 ## Style
@@ -80,6 +87,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 <a id="tests"></a>
 ## Tests
 <framework, naming, location, coverage gate, mocking policy>
+<who runs them and when — dev roles write, tester runs at step 5, CI runs the full suite>
 
 <a id="stack"></a>
 ## Local stack
@@ -99,13 +107,33 @@ The project profile for the harness in llm/. Roles reference these sections by a
 ### PR body
 <the template>
 
+<a id="deploy"></a>
+## Deploy
+<environments, what triggers each, the dispatch and watch commands, what a failed run leaves behind>
+
+<a id="release"></a>
+## Release
+<version scheme, release branch and tag naming, the ordered procedure, which steps only the human does>
+
+<a id="demo"></a>
+## Demo prep
+<demo label, integration branch, environment — or one line saying there is no demo cadence here>
+
+<a id="announcements"></a>
+## Announcements
+<each channel, what posts automatically, what a role may post and what needs the human's go-ahead>
+
+<a id="observability"></a>
+## Observability
+<platform, where it is wired in, how to query it, whether credentials exist locally at all>
+
 <a id="voice"></a>
 ## Voice
 <who the text sounds like, with do/don't examples>
 
 <a id="gotchas"></a>
 ## Gotchas
-<destructive commands, masked failures, environment traps>
+<destructive commands, masked failures, environment traps, production-access rules>
 ```
 
 ## Rules for writing it
