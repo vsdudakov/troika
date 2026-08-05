@@ -20,12 +20,16 @@ def test_owner_summary_covers_every_portfolio():
 
 
 def test_owner_summary_lists_symbols_unique_and_sorted():
-    # GIVEN a portfolio holding two distinct symbols
+    # GIVEN one owner whose portfolios hold distinct symbols, and one whose portfolio
+    # holds two lots of CCC plus a later AAA
     # WHEN the summary is built
-    result = portfolio.owner_summary("ada")
-    # THEN its symbols are unique and in ascending order
-    assert result[0]["symbols"] == ["AAA", "BBB"]
-    assert result[1]["symbols"] == ["AAA"]
+    ada = portfolio.owner_summary("ada")
+    bob = portfolio.owner_summary("bob")
+    # THEN each portfolio's symbols are deduplicated and in ascending order — bob's is
+    # what proves it, since ada's data reads the same with or without the dedup
+    assert ada[0]["symbols"] == ["AAA", "BBB"]
+    assert ada[1]["symbols"] == ["AAA"]
+    assert bob[0]["symbols"] == ["AAA", "CCC"]
 
 
 def test_owner_summary_is_empty_for_unknown_owner():

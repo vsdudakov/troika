@@ -39,7 +39,7 @@ Check all nine on the whole diff and required context.
 3. **Verification** — profile commands only; quote decisive failure.
 4. **Layering** — [AGENTS.md › Layering](../../AGENTS.md#layering): no layer skipped, no cross-layer reach-around.
 5. **Queries** — N+1, missing prefetch/eager loading, unindexed or unbounded queries.
-6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included ([AGENTS.md › Tests](../../AGENTS.md#tests)); a collected count in the work log matching the tests written ([collect](../skills/implement-change.md#collect)) — missing or short is a Blocker. Never run.
+6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included ([AGENTS.md › Tests](../../AGENTS.md#tests)); a collected count in the work log matching the tests written ([collect](../skills/implement-change.md#collect)) — a count that is missing, short, or overstated is a Blocker, and an overstated one is the worse case because it reads as coverage that was never written. Never run.
 7. **Migrations** — generated not hand-edited; no applied migration modified.
 8. **Contract match** — the implemented API shape equals the plan's pinned contract, and the consumer uses exactly that.
 9. **Hygiene** — no secrets, no `.env`, no debug prints, no commented-out code, no AI attribution ([no-ai-attribution](../../AGENTS.md#no-ai-attribution)), no truncated or empty new files.

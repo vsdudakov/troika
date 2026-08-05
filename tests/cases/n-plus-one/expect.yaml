@@ -4,7 +4,7 @@ role: reviewer
 skill: internal-review
 verdict: [Request changes]
 expect_finding:
-  severity: Major
+  severity: [Blocker, Major]
   file: app/service/allocation.py
   keywords_any: [n+1, "n + 1", per portfolio, loop, batch, holdings_for_portfolios]
 plan_requires: [one repository call]

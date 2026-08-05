@@ -3,7 +3,7 @@ role: reviewer
 skill: internal-review
 verdict: [Request changes]
 expect_finding:
-  severity: Major
+  severity: [Blocker, Major]
   file: app/service/allocation.py
   keywords_any: [print, debug, logging]
 profile_requires: [no debug prints]

@@ -4,7 +4,7 @@ role: reviewer
 skill: internal-review
 verdict: [Request changes]
 expect_finding:
-  severity: Major
+  severity: [Blocker, Major]
   file: app/service/allocation.py
   keywords_any: [contract, dict, list, shape, signature, return type]
 plan_requires: ["dict[str, float]"]

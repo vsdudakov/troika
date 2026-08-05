@@ -47,25 +47,34 @@ therefore the gate failing, never the diff being ambiguous.
 | `clean` | nothing | `Approve` / `Approve with nits` | **control** |
 | `nits-only` | two comments restating the code | `Approve with nits` — Nits must **not** gate | **control** |
 | `requirement-not-implemented` | requirement 3's route absent, work log claims it done | `Blocker` | 1 |
-| `scope-creep` | a destructive route the plan never asked for | `Major` | 1 |
+| `scope-creep` | a destructive route the plan never asked for | `Blocker` / `Major` | 1 |
 | `import-in-function` | repository import deferred into the function body | `Major` | 2 |
 | `verification-not-run` | clean code, work log reports `ruff`/`mypy` — commands the profile does not define | `Blocker` / `Major` | 3 |
-| `layering-violation` | `api` imports `repository`, skipping `service` | `Major` | 4 |
-| `n-plus-one` | per-portfolio repository call, batched one sits unused | `Major` | 5 |
+| `layering-violation` | `api` imports `repository`, skipping `service` | `Blocker` / `Major` | 4 |
+| `n-plus-one` | per-portfolio repository call, batched one sits unused | `Blocker` / `Major` | 5 |
 | `source-without-mirror-test` | new `allocation.py`, its mirror test deleted | `Blocker` | 6 |
 | `test-asserts-nothing-real` | tests assert only `is not None` / `isinstance` | `Blocker` | 6 |
 | `work-log-overstates-collection` | clean code, work log claims 14 collected against 9 written | `Blocker` | 6 |
 | `migration-hand-edited` | an index added by hand to an applied revision | `Blocker` / `Major` | 7 |
-| `contract-mismatch` | returns `list[tuple]`, plan pins `dict[str, float]` | `Major` | 8 |
+| `contract-mismatch` | returns `list[tuple]`, plan pins `dict[str, float]` | `Blocker` / `Major` | 8 |
 | `secret-in-diff` | hardcoded live-looking API key | `Blocker` | 9 |
 | `ai-attribution` | comment naming an AI product | `Blocker` | 9 |
-| `debug-print` | `print("DEBUG …")` left in the hot path | `Major` | 9 |
+| `debug-print` | `print("DEBUG …")` left in the hot path | `Blocker` / `Major` | 9 |
 | `truncated-file` | new file ends mid-function, no return | `Blocker` | 9 |
 
-All nine of the [reviewer's checks](../agents/reviewer.md#rules) have at least one case. Two of
-them — 3 and 7 — are graded against `severity: [Blocker, Major]`, because `reviewer.md` pins no
-single rating on either and both ratings gate the flow. Where it does pin one, the case pins the
-same one and a downgrade is a miss.
+All nine of the [reviewer's checks](../agents/reviewer.md#rules) have at least one case.
+
+**A case may only pin a severity that `reviewer.md` pins.** The file states one in exactly two
+rules — check 2 ("an import inside a function is a **Major**") and check 6 ("missing, short, or
+overstated is a **Blocker**"). Every other rule leaves the rating to judgement, so its cases
+grade against `severity: [Blocker, Major]`: both gate the flow, and demanding one over the
+other tests the grader's taste rather than the role's work.
+
+This was measured, not assumed. A full run rated Blocker wherever a case pinned Major on an
+unpinned check — `debug-print` 0/5, `n-plus-one` 1/5, `contract-mismatch` 2/5 — while
+identifying the defect correctly in all 25 of those runs. Nothing was escaping the gate. The
+cases for the two pinned checks scored 5/5, which is the evidence that a stated rating is
+followed: to make a rule carry a severity, state it in `reviewer.md` and pin the case to match.
 
 **The two controls matter as much as the fifteen defects.** A gate that flags everything
 passes every injection test and is worthless — `clean` catches that, and `nits-only` catches

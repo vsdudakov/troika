@@ -235,7 +235,13 @@ def grade(reply: str, spec: dict) -> tuple[bool, str]:
         forbidden = [s for s in as_list(spec.get("forbid_severity"))
                      if any(f"**{s}**" in l for l in findings)]
         if forbidden:
-            return False, f"false positive: raised {'/'.join(forbidden)} on a clean diff"
+            # Quote the offending finding. Without it a control failure says only that
+            # something was raised, and the next question — is the reviewer over-flagging,
+            # or does the base fixture have a real hole? — costs a separate run to answer.
+            # It cost one to learn the fixture was at fault.
+            first = next(l for l in findings if any(f"**{s}**" in l for s in forbidden))
+            return False, (f"false positive: raised {'/'.join(forbidden)} on a clean diff: "
+                           f"{first.strip()[:160]}")
         return (verdict_ok, "ok" if verdict_ok else f"verdict {got or '?'} not in {want_verdict}")
 
     # `file: any` — the finding is real but its citation is not predictable (it may name
@@ -256,6 +262,15 @@ def grade(reply: str, spec: dict) -> tuple[bool, str]:
         and any(k.lower() in l.lower() for k in want["keywords_any"])
     ]
     if not hits:
+        # Three different misses. Blaming severity for a keyword that did not match sends
+        # the reader to the wrong file: `truncated-file` reported "not as Blocker" while
+        # quoting a **Blocker**, because the reviewer wrote "ends mid-function" and no
+        # keyword covered that phrasing.
+        right_sev = [l for l in findings if in_file(l)
+                     and any(f"**{s}**" in l for s in wanted_sev)]
+        if right_sev:
+            return False, (f"{sev_label} on the right file but no keyword matched "
+                           f"{want['keywords_any']}: {right_sev[0].strip()[:110]}")
         near = [l for l in findings if in_file(l)]
         if near:
             return False, f"found it but not as {sev_label}: {near[0].strip()[:90]}"

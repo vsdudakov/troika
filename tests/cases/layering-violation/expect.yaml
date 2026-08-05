@@ -4,7 +4,7 @@ role: reviewer
 skill: internal-review
 verdict: [Request changes]
 expect_finding:
-  severity: Major
+  severity: [Blocker, Major]
   file: app/api/routes.py
   keywords_any: [layer, layering, repository, skip, reach]
 profile_requires: [is a layering violation]

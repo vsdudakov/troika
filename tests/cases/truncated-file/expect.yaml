@@ -6,7 +6,7 @@ verdict: [Request changes]
 expect_finding:
   severity: Blocker
   file: app/service/allocation.py
-  keywords_any: [truncat, incomplete, cut off, no return, missing return, unfinished]
+  keywords_any: [truncat, incomplete, cut off, no return, missing return, unfinished, mid-function, ends mid, never returns]
 why: >
   percent_by_symbol builds `units` and then simply stops. Its tests reference a
   return value that never arrives.
