@@ -1,8 +1,8 @@
 # Skills
 
-Tool-neutral procedures, references, and templates. Invoke one by pointing the agent tool at the file: `run llm/skills/develop-flow.md for <TICKET>`. The YAML frontmatter (`name`, `description`) lets tools that auto-discover skills pick the right one.
+Tool-neutral procedures, references, templates. Run: `run llm/skills/develop-flow.md for <TICKET>`. Frontmatter enables discovery.
 
-Each file declares its **Kind** in the header line, which fixes its body shape:
+**Kind** fixes shape:
 
 | Kind | Body | Read it as |
 | --- | --- | --- |
@@ -43,4 +43,4 @@ Each file declares its **Kind** in the header line, which fixes its body shape:
 | Plan | [plan-template.md](plan-template.md) | [architect](../agents/architect.md) |
 | PR body and title | [pr-template.md](pr-template.md) | [releaser](../agents/releaser.md) via [commenter](../agents/commenter.md) |
 
-Skills carry no repo names, commands, URLs, or tracker keys — those are read from the workspace's [AGENTS.md](../../AGENTS.md) by anchor ([why](../README.md)). A skill whose anchor the workspace does not define simply does not apply there: no release cadence, no [release-cut](release-cut.md); no observability platform, no [incident-triage](incident-triage.md). Shell quoting and the absolute-path rule are in [llm/README.md › Conventions](../README.md#conventions).
+Skills contain no organization facts; read them from workspace [AGENTS.md](../../AGENTS.md). Missing anchor means not applicable. See [conventions](../README.md#conventions).

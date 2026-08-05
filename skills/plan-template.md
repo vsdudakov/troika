@@ -5,20 +5,20 @@ description: The structure of an approved plan — problem, numbered requirement
 
 # Plan template
 
-The one artifact every later role trusts: concrete enough that a dev role makes no further product decisions.
+Trusted plan; no downstream product decisions required.
 
 **Kind** template · **Used by** [architect](../agents/architect.md) · **When** the ticket is understood and the code is read (develop-flow step 1) · **Ends with** `$WS/llm/scratchpad/plans/<TICKET>.md`, ready for the [plan-review](plan-review.md) gate
 
 ## Fill rules
 
 - Delete sections that don't apply; never leave a placeholder in.
-- Requirements are numbered and testable — every later role cites them by number.
+- Requirements are numbered and testable — every later role cites them by number, so the numbers stay stable across rewrites.
 - Repo order follows [AGENTS.md › Dependency order](../../AGENTS.md#dependency-order).
-- Every cross-repo boundary gets a pinned contract, or the repos are marked sequential ([cross-repo](cross-repo.md)).
-- Every requirement gets at least one test: a unit test, a QA step, or both.
-- Anything the local stack cannot exercise ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)) is named here, with what covers it instead.
-- Out of scope is explicit, and names any repo the workspace keeps out of every role's reach ([AGENTS.md › Ownership](../../AGENTS.md#ownership)).
-- Open questions that change scope or user-visible behaviour block approval; everything else is recorded as an assumption and repeated in the PR body.
+- Pin cross-repo contracts or mark sequential.
+- Map every requirement to unit/QA proof.
+- Name stack limits and alternate coverage.
+- Make out-of-scope explicit, including forbidden repos.
+- Block on scope/behavior questions; record other assumptions for PR body.
 
 ## Template
 

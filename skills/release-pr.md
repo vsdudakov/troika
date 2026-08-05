@@ -5,15 +5,15 @@ description: Ships one repo — profile-compliant commit, push, PR from the team
 
 # Release PR
 
-One repo, from a verified worktree to an open, reviewed PR with the ticket updated.
+Verified worktree to reviewed PR.
 
 **Kind** procedure · **Used by** [releaser](../agents/releaser.md) · **When** internal review is `Approve`/`Approve with nits`, the tester's verdict is `Pass`, and QA is `Pass` (develop-flow step 7) · **Ends with** a PR URL, **CI green**, proofs on the ticket, the ticket updated as the profile allows, worktrees removed
 
-Run once per repo — **one PR per repository, however many roles contributed to it** ([develop-flow › Lanes](develop-flow.md#lanes)). **Commit and push run concurrently across repos; the PRs open in [dependency order](../../AGENTS.md#dependency-order)** — the provider's PR must exist before the consumer's body can link it ([cross-repo](cross-repo.md)). Set `WS` first — the cwd is the worktree, and the scratchpad is not below it.
+Run once per repo: one PR regardless of contributing roles. Commit/push repos concurrently; open PRs in [dependency order](../../AGENTS.md#dependency-order). Set `WS` first.
 
 ## 1. Gates
 
-Stop and report instead of releasing if any of these fails:
+All must pass:
 
 ```bash
 ls "$WS/llm/scratchpad/plans/<TICKET>-review-"*.md   # read the highest <n>: Approve / Approve with nits
@@ -22,13 +22,11 @@ ls "$WS/llm/scratchpad/plans/<TICKET>-qa-"*.md       # read the highest <n>: Pas
 ls "$WS/llm/scratchpad/proofs/<TICKET>/"             # one artifact per requirement ([qa-verify](qa-verify.md#8-proofs-for-the-pr))
 ```
 
-- All three verdicts read from their own files, never second-hand ([handoff contract](../agents/README.md#handoff)).
-- The tester's run covers the **final** code: anything changed after `-tests-<n>.md` goes back through review and the tester, not around them. This role runs no tests.
-- The QA report's **Not verified** list goes into the PR body, not the bin.
+- Read verdict files directly. Tests must cover final code; later changes return to review/test. Carry QA's **Not verified** into the PR.
 
 ## 2. Commit
 
-From the worktree, use the profile's exact commit-signing rule: sign when it requires signing, pass its no-signing option when it forbids signing, and add neither when it declares neither. Put the ticket key in the message **in the form the profile's tracker contract asks for** — a tracker with a VCS integration wants the key in the casing it detects; a tracker without one links from the PR body instead ([tracker › Link](tracker.md#link-the-branch-and-pr)). Inspect *before* staging — once `git add -A` has run, a stray `.env` or scratchpad file shows up as a normal staged change and stops looking wrong:
+Use the profile's exact signing mode and ticket-key form ([tracker](tracker.md#link-the-branch-and-pr)). Inspect before staging:
 
 ```bash
 git status --short                  # expect only your source changes; no .env, no scratchpad, no proofs
@@ -41,9 +39,7 @@ git commit <profile-required-signing-option, if any> -F - <<'EOF'
 EOF
 ```
 
-The heredoc keeps backticks and `$` in the message intact ([shell quoting](../README.md#shell-quoting)).
-
-No AI attribution — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji. Strip anything the tooling appends ([AGENTS.md](../../AGENTS.md#no-ai-attribution)). If the profile requires signing and it fails, follow the profile's documented recovery and never fall back to an unsigned commit. If the profile forbids signing, a signing attempt is the defect: retry with its required no-signing option.
+The heredoc preserves shell-sensitive text. **No AI attribution** — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji; strip anything the tooling appends ([AGENTS.md](../../AGENTS.md#no-ai-attribution)). Required signing failure follows profile recovery; forbidden signing retries with the profile's no-sign option.
 
 ## 3. Push and open the PR
 
@@ -55,30 +51,20 @@ EOF
 )"
 ```
 
-Push quirks (a branch touching CI config may need a different remote or scope) are in [AGENTS.md › Branches](../../AGENTS.md#branches).
-
-Body follows [pr-template](pr-template.md), whose fill rules point at the workspace's actual template ([AGENTS.md › PR body](../../AGENTS.md#pr-template)). If the repo has its own template file and it differs, **the repo's file wins — but strip any AI product name from it first**, HTML comments included ([no-ai-attribution](../../AGENTS.md#no-ai-attribution)).
-
-Answer every template question honestly, elaborate on a "yes", never leave a bare "No" where there is something to say. Cross-repo work declares its upstream PRs ([cross-repo](cross-repo.md)). Testing notes carry the QA steps, the proof list, and the **Not verified** items.
-
-The body text comes from [commenter](../agents/commenter.md) — pass it the facts (what changed, evidence, links, proof names), post what it returns. **Draft it during QA**, while the stack work is running: only the QA verdict and the proof names arrive late.
+Follow profile push rules and the repo template (repo file wins). Strip AI attribution, including HTML comments. Answer every field; link upstream PRs; include QA, proofs, and **Not verified**. [Commenter](../agents/commenter.md) drafts during QA.
 
 ## 4. Proofs
 
-Attach every file in the ticket's proof directory — both sides of each before/after pair — and reference them by name from the PR body against their requirement; PR hosts generally have no CLI upload for body images ([AGENTS.md › Tracker](../../AGENTS.md#tracker) has the attachment call). Use absolute paths, and check the response is an attachment record, not an error — a discarded body hides it. A GIF inline in the PR needs the human to drag it in.
+Attach every proof, including both before/after files. Map names to requirements in the PR. Use absolute paths and validate attachment responses. An inline GIF in the PR body needs the human to drag it in — say so rather than attempting it.
 
 ## 5. Ticket
 
-Comment the PR URL and one line of what changed. Then transition the ticket **only if the profile declares a "PR opened" transition** ([AGENTS.md › Tracker](../../AGENTS.md#tracker) · [tracker › Transitions](tracker.md#transitions)) — check what is valid from the current state first, since transition names are not status names and that transition is usually invalid unless the "started" one already ran. Where the profile declares none, the comment above is the entire tracker write for this step; do not touch the ticket's state.
-
-Cross-repo: comment the full PR chain in dependency order so reviewers merge in sequence.
+Comment PR URL + summary. Run only a profile-declared "PR opened" transition, after validating state. No declared transition means no state write. For cross-repo work, comment the ordered PR chain.
 
 <a id="ci"></a>
 ## 6. CI — watch until green, fix what it reds
 
-**CI is where the full suite runs** — dev roles ran none ([implement-change › Tests](implement-change.md#tests)) and the tester ran only the change's own ([run-unit-tests](run-unit-tests.md)), so this is the first time anything outside the diff sees the branch. The PR is not done until CI is green: no worktree cleanup, no "shipped", while a check is red or running.
-
-Watch every check to completion with the command in [AGENTS.md › Pull requests](../../AGENTS.md#pull-requests) — background it (suites run tens of minutes), watch **every PR concurrently**, and run [step 7](#7-pr-review) meanwhile; it reads the diff, not the checks. On non-zero, list the failing checks and read only the failing job's log.
+**CI is the only place the full suite runs** — dev roles ran no tests and the tester ran only the change's own. Watch every check to completion with the command in [AGENTS.md › Pull requests](../../AGENTS.md#pull-requests) — **background it, suites run tens of minutes** — watching every PR concurrently and running [step 7](#7-pr-review) meanwhile. On failure, read only failing logs. Never clean or claim shipped before green.
 
 Then, per failure:
 
@@ -90,43 +76,33 @@ Then, per failure:
 | flake — passes on re-run, unrelated to the diff | releaser: re-run the failed jobs once, then say so in the report | — |
 | infra / secrets / runner failure | stop and hand to the human | — |
 
-Fixes go on the same branch: amend or add a commit (same rules as step 2), push, watch again. **Max 3 cycles**, then hand back with the failing job and its decisive log line.
-
-Never make CI pass by weakening it: no coverage threshold lowered, no `skip`/`xfail` on a test that is genuinely failing, no lint rule disabled to clear an error.
+Fix on the same branch; push and watch. Cap at 3 cycles. **Never make CI pass by weakening it** — no lowered coverage threshold, no `skip`/`xfail` on a genuinely failing test, no disabled lint rule.
 
 <a id="review-bot"></a>
 ### Automated review comments — same loop, until it stops commenting
 
-Where the profile documents a review bot ([AGENTS.md › Pull requests](../../AGENTS.md#pull-requests)), it re-reviews after each push, so comments arrive in waves. Treat a bot wave like a red check: read, fix or reject each comment, push, then wait for the next automated pass. **For a configured bot, done means the latest pass produced no new comments.**
-
-Where the profile documents no review bot, skip the wave wait entirely. Handle human review comments that already exist using the same valid/reject rules below, but do not wait for a human to produce a silent follow-up pass and do not re-request review unless the profile explicitly makes that a gate.
+Configured bot: handle each wave, push, wait for silence. No bot: handle existing human comments once; no quiet-pass gate.
 
 Per comment, one of two outcomes — never silence:
 
 - **Valid** → fix in the worktree, with a test when behaviour changes, then reply saying what changed.
 - **Wrong or not applicable** → reply with the reason (the layering rule it missed, the test that covers it, the plan's deliberate trade-off). A reasoned rejection is a complete answer.
 
-Reply text is outward-facing — it comes from [commenter](../agents/commenter.md), in the workspace's [voice](../../AGENTS.md#voice), with no AI attribution.
-
-If a configured bot doesn't re-review after a push, re-request it; if that call is rejected, ask the human to press the button — never skip a required bot wave. This does not apply when the profile declares no bot.
-
-With a configured bot, loop CI and automated review together: push once, wait for both, handle both, push again. **Max 3 bot waves**, then hand back with the open threads listed — a loop that never converges is usually a design disagreement, and that is the human's call. Without a bot, CI remains the asynchronous gate; handle existing human comments without adding a silence requirement.
+Replies come from [commenter](../agents/commenter.md). If a configured bot stalls, re-request it; if rejected, ask the human. Loop bot with CI, capped at 3 waves.
 
 <a id="7-pr-review"></a>
 ## 7. PR review
 
-Run [pr-review.md](pr-review.md) on the open PR and post it — concurrently with the CI watch in step 6, not after it. Blockers and Majors go back to the owning dev role; after the fix, push, wait for CI (step 6) again, and re-review.
+Run [pr-review.md](pr-review.md) during CI. Blocker/Major → owner fixes; push, rewatch, re-review.
 
 ## 8. Clean up
 
-Everything pushed **and CI green** → remove the worktrees; removing one while CI is red destroys the place the fix has to happen. Run from the repo, with the absolute path:
+After push and green CI, remove worktrees from the repo using absolute paths:
 
 ```bash
 git worktree remove "$WS/llm/worktrees/<repo>-<TICKET>"   # --force only to discard uncommitted changes
 git worktree prune                                        # stale entries
 ```
-
-The branch survives; cut a fresh worktree if follow-ups land.
 
 ## Output
 

@@ -5,7 +5,7 @@ description: Implements the server-side part of an approved plan with unit tests
 
 # Backend dev
 
-Implements the server-side part of an approved plan, with unit tests. **Writes the tests, never runs them** — [tester](tester.md) does, in step 5. Ends with the profile's verification commands green, never with a commit or a PR.
+Implements approved backend work and its unit tests. Runs the profile's verification commands; never runs tests, commits, or opens PRs — [tester](tester.md) runs them in step 5.
 
 - **Owns** — the backend repos in [AGENTS.md › Ownership](../../AGENTS.md#ownership)
 - **Runs** — [skills/implement-change.md](../skills/implement-change.md) · **Step** 3 of [develop-flow](../skills/develop-flow.md)
@@ -19,10 +19,8 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Scope
 
-- One repo per run, one branch, one worktree, one PR — **per repository, not per role** ([develop-flow › Lanes](../skills/develop-flow.md#lanes)). If the frontend role already holds this repo's worktree for the ticket, join it instead of cutting a second branch. Multi-repo work is split by the [architect](architect.md) and run per repo in [dependency order](../../AGENTS.md#dependency-order).
-- Never touch a client app or a repo owned by another role ([AGENTS.md › Ownership](../../AGENTS.md#ownership)).
-- A repo you own but the plan doesn't name is not yours to change on this run.
-- Never edit the plan. If the plan is wrong, stop and report to the orchestrator.
+- One lane per repo; join an existing lane. Multi-repo follows dependency order.
+- Touch only planned, owned backend paths. Never edit plan; report defects.
 
 ## Inputs
 
@@ -30,13 +28,12 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Rules
 
-Style, layering, tests, and the per-repo commands live in the project profile — [Style](../../AGENTS.md#style) · [Layering](../../AGENTS.md#layering) · [Tests](../../AGENTS.md#tests) · [Commands](../../AGENTS.md#commands). They are gates, not suggestions. On top of them:
+Profile style, layering, tests, commands are gates. Also:
 
 - **Layering is a hard gate**, not a preference. A change that reaches around a layer is wrong even when it works.
 - **Imports at the top of the file.** A local import hides a circular import; fix the cycle, don't defer the import.
 - **Comments only for a non-obvious why** ([AGENTS.md](../../AGENTS.md#comments)); a docstring is not a comment and stays.
-- **Write the tests; do not run them.** No targeted run, no suite, no single node ID "just to check" ([implement-change › Tests](../skills/implement-change.md#tests)). [tester](tester.md) runs the change's tests once, across every lane at the same time (step 5); CI runs the whole suite on the PR. Your gate is exactly the verification commands the profile lists for the areas you touched ([AGENTS.md › Commands](../../AGENTS.md#commands)) — every one it names, none it does not.
-- **No red-green loop means the tests must be right blind.** Every changed source file gets its mirror test, every branch you touched is covered, assertions are on real behaviour and not on a mock having been called. Walk the diff line by line and name the test covering each line — that reading replaces the coverage report you do not get.
+- Write mirror/branch behavior tests; **execute none** — but collect them ([implement-change › Collect](../skills/implement-change.md#collect)), which runs no assertion and catches the import, fixture, and discovery defects blind writing produces. Record node IDs and the collected count. Run exactly profile verification.
 - **Migrations** are generated with the repo's command, never hand-edited once applied.
 
 ## Gates
@@ -50,4 +47,4 @@ Style, layering, tests, and the per-repo commands live in the project profile �
 
 ## Output
 
-Write the work log to `$WS/llm/scratchpad/plans/<TICKET>-backend-dev.md` ([handoff contract](README.md#handoff)) and return the same to the orchestrator: branch · worktree path · files changed (and whether you created or joined the worktree) · **the node IDs of every test written or changed**, each mapped to the source it mirrors · the verification commands run and their output (decisive line on failure) · the API contract as actually implemented · anything the plan asked for that is not done. No test results — you ran none.
+Write `$WS/llm/scratchpad/plans/<TICKET>-backend-dev.md`: branch · worktree/create-or-join · files · test node IDs→sources · verification/results · actual contract · gaps. No test results.

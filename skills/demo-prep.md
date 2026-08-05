@@ -5,40 +5,36 @@ description: Builds the demo integration branch — reset it from the default br
 
 # Demo prep
 
-One throwaway branch carrying every PR that will be shown, deployed to the pre-production environment.
+Throwaway branch of demo PRs, deployed pre-production.
 
 **Kind** procedure · **Used by** [releaser](../agents/releaser.md) · **When** a demo is scheduled and the human asks for the build · **Ends with** a reset integration branch with the demo PRs merged, deployed, and a notification waiting for the human's go-ahead
 
 The integration branch's name, the label that selects the demo PRs, and the deploy dispatch are in [AGENTS.md › Demo prep](../../AGENTS.md#demo) and [› Deploy](../../AGENTS.md#deploy).
 
-This branch is **owned by this skill**: resetting it is expected, and it is never merged back anywhere and never used as a PR base. Every other branch rule still holds — never push to the default or a release branch, never push to a demo PR's own branch, never dispatch a production deploy. Each demo PR still lands through its own review and merge, separately from this build.
+This skill may reset only the demo branch. Never merge it back, use it as PR base, push protected/demo-PR branches, or deploy production. Demo PRs land separately.
 
 ## 1. Collect the demo PRs
 
-List the open PRs carrying the demo label ([AGENTS.md › Demo prep](../../AGENTS.md#demo)), with number, title, URL, head ref, files, and author. If the label is ambiguous, ask the human which one.
-
-Surface the list before merging anything — it drives every later step, and its authors feed step 5.
+List labeled open PR number/title/URL/head/files/author. Resolve ambiguous label. Show list before merge.
 
 ## 2. Reset the integration branch
 
-Delete it and recut it from the current default branch, in its own worktree under `$WS/llm/worktrees/` ([worktree](worktree.md)), clearing leftovers from the previous demo first. Deleting and force-resetting is allowed **for this branch only**.
+Delete/re-cut from current default in its worktree. Force reset is allowed only here.
 
 ## 3. Plan the merge order
 
-Read each PR's diff and file list, then order the merges to minimise conflicts: PRs touching the same files go in dependency order (the one the others build on first), and PRs carrying schema migrations go in migration order. **State the chosen order and why before merging.**
+Order by dependency, overlapping files, then migration order. State order and reason first.
 
 ## 4. Merge, and stop at anything semantic
 
-Merge each PR's head ref in the planned order, fetching first so refs are fresh. After each merge, confirm the tree is still consistent — imports resolve, the migration sequence is intact — before moving to the next.
+Fetch and merge heads in order. After each: imports resolve, migration chain intact.
 
 - **Mechanical conflicts** (imports, adjacent lines, lockfiles) are resolved here, in the integration branch.
 - **Anything that requires changing a PR** — a renumbered migration, reworked code, a semantic conflict between two PRs — is not resolved here. **Stop and tell the human** which PR needs what change. Fixing it locally makes the demo branch diverge from what will actually land, and that divergence is invisible at demo time.
 
 ## 5. Deploy and prepare the notification
 
-Deploy the integration branch to the pre-production environment ([AGENTS.md › Deploy](../../AGENTS.md#deploy)) and watch every run to completion; a failed run stops the flow rather than producing a half-deployed demo.
-
-Then fill the demo notification with the merged PR list **grouped by author**, so each presenter sees their own items at a glance, and tell the human it is ready. **Post only if they explicitly ask** ([AGENTS.md › Announcements](../../AGENTS.md#announcements)).
+Deploy pre-production; watch all runs; failure stops. Prepare author-grouped notification; post only on explicit request.
 
 ## Output
 

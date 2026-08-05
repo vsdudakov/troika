@@ -5,77 +5,91 @@ description: Implements one repo's part of an approved plan in its own worktree,
 
 # Implement change (one repo)
 
-One repo's share of an approved plan, in that repo's worktree, with the tests that prove it.
+Implement one repo's approved work and tests.
 
-**Kind** procedure · **Used by** [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) · **When** the plan passes review (develop-flow step 3) · **Ends with** code written, tests written **and not run**, and every verification command the profile lists for the touched areas green — **not** a commit or PR; [release-pr.md](release-pr.md) does that after review, tests, and QA
+**Kind** procedure · **Used by** [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) · **When** the plan passes review (develop-flow step 3) · **Ends with** code written, tests written and **collected but never executed**, and every verification command the profile lists for the touched areas green — **not** a commit or PR; [release-pr.md](release-pr.md) does that after review, tests, and QA
 
-Set `WS` first — every scratchpad path below is absolute ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
+Set `WS`; scratchpad paths are absolute.
 
 ## 1. Read the plan
 
-`$WS/llm/scratchpad/plans/<TICKET>.md` — take only the requirements and work items for your repo. If something needed is missing or contradicts the code, stop and report; never re-plan silently.
+Read `$WS/llm/scratchpad/plans/<TICKET>.md`. Take only your repo. Missing or contradictory work stops; never re-plan.
+
+Read the workspace's memory too — `ls $WS/llm/memory/*.md`, there is no index file ([memory](../memory/README.md)). These entries are written by dev and test roles about exactly this work: a repo mid-migration, a suite that only fails in parallel, a green result that did not mean what it looked like.
 
 ## 2. Branch in a worktree — one per repo, not one per role
 
-**First check whether this repo's worktree for the ticket already exists** — another role may already own this lane ([develop-flow › Lanes](develop-flow.md#lanes)):
+Check for the repo lane first:
 
 ```bash
 git worktree list | grep "<repo>-<TICKET>"
 ```
 
-- **It exists** → work in it, on its branch. Read that role's work log first (`$WS/llm/scratchpad/plans/<TICKET>-<role>.md`) and stay inside your own [ownership](../../AGENTS.md#ownership) paths. Never cut a second branch or worktree for a repo that already has one — one repo is one branch and one PR however many roles touch it.
-- **It does not** → create it. `<BASE>` is the profile's base ref (remote plus default branch, e.g. `origin/main` — [AGENTS.md › Branches](../../AGENTS.md#branches)); the directory name `<repo>-<TICKET>` is a contract QA and release both depend on ([worktree › naming](worktree.md#naming)):
+- **Exists:** join it, read prior work log, stay in owned paths. Never create a second repo lane.
+- **Missing:** create from profile `<BASE>` with the contractual name:
 
 ```bash
 git fetch <remote>
 git worktree add "$WS/llm/worktrees/<repo>-<TICKET>" -b <branch, per the profile> <BASE>
 ```
 
-Wire up dependencies with the symlinks in [AGENTS.md › Branches](../../AGENTS.md#branches) — **do not reinstall** — using the absolute form (`"$WS/<repo>/…"`); the relative one is three or four `../` deep ([worktree › setup](worktree.md#setup)). Set signing per the profile's rules, once per worktree. Then index the worktree: it is its own root, and everything you search from here reads that index ([AGENTS.md › Code search](../../AGENTS.md#code-search)).
+Use profile dependency symlinks; do not reinstall. Apply profile signing config, once per worktree. Index the worktree as its own root.
+
+<a id="claim"></a>
+**Claim the lane before writing anything.** The work log only exists once you finish, so it cannot mark a lane that is *in progress* — the claim file is what makes "one role writes a worktree at a time" checkable instead of merely stated ([worktree › Lane claim](worktree.md#claim)):
+
+```bash
+LANE="$WS/llm/scratchpad/lanes/<repo>-<TICKET>"
+cat "$LANE" 2>/dev/null && echo "held — stop and report"   # another role has it
+mkdir -p "$WS/llm/scratchpad/lanes" && echo "<role> $(date -u +%FT%TZ)" > "$LANE"
+```
+
+Release it as the last thing you do, after the work log is written: `rm -f "$LANE"`. A stale claim from a crashed role is reported, never deleted silently — it means a worktree may hold half-finished work.
 
 ## 3. Implement
 
-Follow the profile — [Rules](../../AGENTS.md#rules) · [Style](../../AGENTS.md#style) · [Layering](../../AGENTS.md#layering) — and your role file. No layer skipped; new code goes where that kind of code already lives; comments only for a non-obvious why.
+Follow profile [rules](../../AGENTS.md#rules), [style](../../AGENTS.md#style), [layering](../../AGENTS.md#layering), and role.
 
-**Imports go at the top of every file.** A circular-import error means the cycle is the bug: fix the direction, move the shared piece down a layer, or split the module — never defer the import into a function. None of those possible inside the plan's scope → stop and report.
+Imports stay at top. Fix cycles by direction, lower layer, or split; never defer imports. Stop if scope cannot support the fix.
 
 Migrations: generate with the repo's command ([AGENTS.md › Commands](../../AGENTS.md#commands)) — never hand-edit an applied migration.
 
 <a id="tests"></a>
 ## 4. Tests, with the code — written, not run
 
-**You write the tests. You do not run them.** [tester](../agents/tester.md) runs them once, across every lane, in step 5 ([run-unit-tests](run-unit-tests.md)); CI runs the full suite on the PR. **You get no red-green loop**, so they must be right on the first pass — write them the way you would review them.
+Write tests; execute none. [Tester](../agents/tester.md) runs change tests (step 5); CI runs all (step 8). You get no red-green loop, so they must be right on the first pass — but you do get [collection](#collect), which is not a run.
 
-- **Every changed or created source file ships its mirror test**, at the path the profile fixes ([AGENTS.md › Tests](../../AGENTS.md#tests)).
-- **Cover every branch you touched** — each guard, each `except`, each early return, each error state. No coverage report is in front of you; walk the diff line by line and name the test covering each one.
-- Framework, naming, location, and what may be mocked are in [AGENTS.md › Tests](../../AGENTS.md#tests) — a spec and a gate.
-- **Assert real behaviour**, not that the code was called. A blind test asserting a mock passes for the wrong reason.
-- **Node IDs go in your work log** — exact paths and test names. The tester's selection starts from the diff and checks itself against your list.
+- Mirror every changed or created source file, at the path the profile fixes.
+- Cover every guard, exception, early return, and error state.
+- Follow profile framework/location/mocking rules.
+- Assert behavior, not calls.
+- Record exact node IDs mapped to sources.
 
-Read your tests once more before reporting: a typo in a fixture or import costs a whole fix cycle in step 5.
+Re-read fixtures, imports, discovery, assertions — then collect them ([below](#collect)).
 
 <a id="verify"></a>
 ## 5. Verify — gate
 
-**Run exactly the verification commands the profile lists for the areas you touched** ([AGENTS.md › Commands](../../AGENTS.md#commands)) — the full lint, plus a separate type check, build, or check target **only where the profile names one for that area**. Never invent a gate it does not list, never skip one it does. All green on the final code; they are the only automated signal you get, and a syntax error, bad import, type mismatch, or unused symbol in a test file surfaces here.
+Run exactly the profile's verification commands for touched areas — none invented, none skipped. Final code must pass.
 
-**No test command runs here**, targeted or otherwise.
+**No test executes here** — not a targeted run, not a single node ID "just to check".
+
+<a id="collect"></a>
+**Collect them, though.** Run the framework's collection-only mode over the test files you wrote — `pytest --collect-only <paths>` or the profile's equivalent ([AGENTS.md › Commands](../../AGENTS.md#commands)). It runs no assertion and no fixture body, so the no-red-green-loop design holds and the tester still owns the first real execution. What it does catch is exactly what a blind writer produces: an unresolved import, a missing fixture, a parametrize list that collects nothing, a name outside the discovery pattern. Each of those costs a full step 4 + step 5 cycle if it reaches the tester instead. Confirm the collected count equals the number of tests you wrote, and put both in the work log.
 
 **Never run a formatter or auto-fixing lint target in a worktree whose dependency directory is a symlink** — it walks the shared environment and rewrites it. Remove the symlink first, format from the primary clone, or use the profile's read-only variant ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
 
 <a id="notests"></a>
-### Why not run them here
+### No-test exception
 
-A dev role running its own tests re-runs them every fix cycle, in series with the other lane, in an already long session. Step 5 runs them **once, across every lane at the same time**, from a diff-derived selection, after review has removed the defects a run would have found the slow way.
-
-If a test cannot be written without running something — a fixture whose shape you cannot infer, a snapshot that must be generated — say so in the work log and hand the node ID to the tester. Do not turn that into a local suite run.
+If a fixture or snapshot cannot be written without executing something — a shape you cannot infer, a snapshot that must be generated — record it and its node ID for the tester. Collection is still allowed; a local run is not.
 
 Pre-existing failures on the base branch are not yours to fix — name them in the report.
 
 ## 6. Self-check before reporting
 
 - Every requirement for this repo implemented; nothing extra.
-- Every changed source file has its mirror test, and you can name the test covering each branch you added — nobody has run them, so this reading is the only check there is.
+- Every changed source and branch maps to a test, and collection reports that exact number.
 - Every verification command the profile lists for your areas is green.
 - New files complete (`wc -l`, import check) — truncated files have shipped before.
 - No import inside a function, method, or component in the diff.
@@ -83,11 +97,13 @@ Pre-existing failures on the base branch are not yours to fix — name them in t
 
 ## Output
 
-Write the work log to `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` — absolute path; your cwd is inside the worktree, and a relative `llm/scratchpad/` would create one inside the product repo. `<role>` is your role's `name` (`backend-dev`, `frontend-dev`).
+Write `$WS/llm/scratchpad/plans/<TICKET>-<role>.md` by absolute path.
 
 Contents, and the same back to the orchestrator: branch · worktree path (and whether you created or joined it) · files changed · **the exact node IDs of every test you wrote or changed**, and which source file each mirrors · the verification commands you ran and their results (decisive line on failure) · the contract as actually implemented · anything you could not test without running something · anything from the plan not done and why.
 
-**No test results** — you ran none. A work log claiming a green test run in this phase is wrong by construction.
+Include the **collection command and the count it reported**; review gates on that number matching the node IDs above.
+
+**No test results** — you executed none. A work log claiming a green test run in this phase is wrong by construction; a collected count is not a run.
 
 ## Stop conditions
 

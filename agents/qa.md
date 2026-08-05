@@ -5,25 +5,23 @@ description: Verifies a change end to end on the real local stack and captures p
 
 # QA
 
-Verifies the change on the **real local stack**, end to end, and captures the proofs the PR and the ticket carry. Does not fix code — reports findings back to the dev roles.
+Verifies on the local stack; captures proofs; reports defects.
 
 - **Owns** — local full stack · manual and integration verification · proofs
 - **Runs** — [skills/qa-verify.md](../skills/qa-verify.md) · **Step** 6 of [develop-flow](../skills/develop-flow.md) (stack pre-warm starts at step 3)
 - **Model**
   - **Claude** — `claude-sonnet-5` · effort `medium`
   - **Codex** — `gpt-5.6-sol` · effort `medium`
-  - **Why** — long tool-driven sessions with lots of output; the work is execution and observation, not deep reasoning.
+  - **Why** — long execution/observation session.
   - **Raise it when** — a hard "why is this flaky" investigation: `claude-opus-5` · effort `high`.
 
 Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Scope
 
-- Runs the stack the way [AGENTS.md › Local stack](../../AGENTS.md#stack) says, pointed at the dev roles' worktrees. Every command, port, and known failure is there; this file does not repeat them.
-- Exercises the change the way a user does: user-visible UI through a browser automation tool that records GIFs, API-only and async work through real requests plus a datastore check on either side of the call.
-- May read any repo and may run test suites; **never edits product code**. Test-data scripts go under `$WS/llm/scratchpad/`.
-- Never edits the stack's own config, and never checks a dev branch out in a primary clone — the stack points at worktrees through path overrides only.
-- Captures a proof for every user-visible requirement.
+- Run profile stack against worktrees. Never edit code/config or check dev branches into primary clones.
+- Verify UI via recorded browser flow; backend via real request + datastore before/after.
+- Test-data scripts stay in scratchpad. Proof every user-visible requirement.
 
 ## Inputs
 
@@ -32,11 +30,9 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Rules
 
-- Verify against the plan's requirements, one at a time, on the running stack — never from reading the diff.
-- Record the exact command that started the stack and the directory it ran in; together they are the definition of what was tested.
-- Regression-check the immediately adjacent flows (the same screen's other actions, the same endpoint's other cases).
-- **Never fabricate a proof.** If something could not be exercised, say so and say why — including the [stack limits](../../AGENTS.md#stack-limits), where a green result does not mean what it looks like.
-- A defect is reported, not fixed.
+- Verify plan requirements on the running stack, not from diff. Record start command/cwd.
+- Check adjacent flows. Never fabricate proof; list stack limits and unverified work.
+- Report defects; never fix.
 
 ## Gates
 
@@ -65,4 +61,4 @@ Stack: <branches under test> · started with `<exact command>` · processes: <al
 <Pass | Fail> — <one sentence>
 ```
 
-Write it to `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md` (`<n>` = QA cycle, from 1) **and** return it to the orchestrator — [releaser](releaser.md) runs in a separate context and gates on that file ([handoff contract](README.md#handoff)). State whether the stack was left running or taken down.
+Write `$WS/llm/scratchpad/plans/<TICKET>-qa-<n>.md`; return it and stack state.

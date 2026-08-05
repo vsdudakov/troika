@@ -5,19 +5,19 @@ description: Features spanning several repos — dependency order, when work can
 
 # Cross-repo features
 
-When the plan's requirements span more than one repo: which order, what can overlap, and how the PRs reference each other.
+Order, concurrency, and links for multi-repo work.
 
 **Kind** reference · **Used by** orchestrator · [architect](../agents/architect.md) · [releaser](../agents/releaser.md) · **When** the plan spans more than one repo (develop-flow step 3) · **Ends with** a repo order, a parallel/sequential call, and PRs linked in dependency order
 
-Split the work into one task per repo and run the per-repo flow for each. **Never mix two repos' changes in one branch or PR** — each repo is an independent clone with its own PR. The converse holds too: work that spans several areas of **one** repo is not cross-repo, and stays one branch and one PR ([develop-flow › Lanes](develop-flow.md#lanes)).
+One lane/branch/PR per repo. Multi-area single-repo work stays one lane.
 
 ## Order: providers before consumers
 
-The workspace's concrete order is [AGENTS.md › Dependency order](../../AGENTS.md#dependency-order). Derive it from who depends on whom; when two repos are on the same level with no contract between them, either order works, or both in parallel. Skip levels the plan doesn't touch.
+Use profile dependency order. Same-level independent repos may run in parallel. Skip untouched levels.
 
 ## Shared libraries released by tag
 
-A library consumed as a **pinned dependency** (a git tag, a published version) is not updated by merging it — the consumer only sees it after the release exists and the consumer bumps the pin in its own PR.
+Pinned libraries require a release and consumer pin bump:
 
 - The change lands in the library first.
 - Each consumer bumps the pin and refreshes its lockfile in its own PR.
@@ -26,7 +26,7 @@ A library consumed as a **pinned dependency** (a git tag, a published version) i
 
 ## Parallel vs sequential
 
-Two repos on different levels may still be developed in parallel when the [architect](../agents/architect.md) pinned the contract between them in the plan — the consumer codes against the pinned shape and declares the provider's PR as its upstream dependency. Without a pinned contract, run them sequentially in dependency order.
+Pinned contract permits parallel development; otherwise follow dependency order.
 
 ## Link the PRs
 
@@ -34,7 +34,7 @@ Every PR after the first declares its upstream PR(s) in the body ([pr-template](
 
 ## Verify per repo, then together
 
-Each repo's flow already gates on its own tests and lint. After the last repo, run the workspace's integration suite if it covers the touched services — but read what that result means first ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)): a suite that builds from its own default-branch checkouts is a regression check, not evidence for the branch.
+After per-repo gates, run the applicable integration suite — then read what its result means ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)): a suite building from its own default-branch checkouts is a regression check, never evidence for the branch.
 
 ## Gotchas
 
