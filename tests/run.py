@@ -132,7 +132,7 @@ def apply_overlay(overlay: Path, dest: Path) -> None:
             shutil.copy2(src, out)
 
 
-def build_worktree(case: Path, spec: dict, dest: Path) -> str:
+def build_worktree(case: Path, spec: dict, dest: Path) -> tuple:
     """Toy repo, then _base (a correct implementation of the plan), then the case's delta.
 
     Every case is the clean diff plus exactly one planted defect, so a miss is the gate
@@ -153,8 +153,22 @@ def build_worktree(case: Path, spec: dict, dest: Path) -> str:
         (dest / rel).unlink(missing_ok=True)
 
     run("git", "add", "-N", "--", ".")  # untracked files must enter the diff
-    return subprocess.run(["git", "--no-pager", "diff"], cwd=dest,
+    diff = subprocess.run(["git", "--no-pager", "diff"], cwd=dest,
                           capture_output=True, text=True).stdout
+
+    # The unchanged files the diff sits on top of. A role doing an internal review has the
+    # whole worktree and can open any of them; handing it a diff alone makes every claim
+    # about untouched code unverifiable, and it correctly says so. That cost a real finding:
+    # a test asserting on repository data the diff does not add reads as a test that may
+    # raise on first execution, because from inside the prompt it might.
+    touched = {p.relative_to(o) for o in (CASES / "_base" / "files", case / "files")
+               if o.is_dir() for p in o.rglob("*") if p.is_file()}
+    context = []
+    for src in sorted((FIXTURES / "repo").rglob("*")):
+        rel = src.relative_to(FIXTURES / "repo")
+        if src.is_file() and rel not in touched and "__pycache__" not in str(rel):
+            context.append(f"--- {rel} ---\n{src.read_text(encoding='utf-8')}")
+    return diff, "\n".join(context)
 
 
 def work_log(case: Path) -> str:
@@ -165,9 +179,10 @@ def work_log(case: Path) -> str:
     return (own if own.is_file() else CASES / "_base" / "work-log.md").read_text(encoding="utf-8")
 
 
-def build_prompt(case: Path, spec: dict, diff: str) -> str:
+def build_prompt(case: Path, spec: dict, diff: str, context: str) -> str:
     """Exactly what the role receives per its Inputs section: profile, role file,
-    skill, plan, the dev role's work log, and the diff."""
+    skill, plan, the dev role's work log, the diff — and the rest of the worktree it
+    would be able to open for itself."""
     read = lambda p: p.read_text(encoding="utf-8")
     parts = [
         ("PROJECT PROFILE (AGENTS.md)", read(FIXTURES / "AGENTS.md")),
@@ -175,6 +190,7 @@ def build_prompt(case: Path, spec: dict, diff: str) -> str:
         (f"SKILL ({spec['skill']}.md)", read(HARNESS / "skills" / f"{spec['skill']}.md")),
         ("PLAN ($WS/harness/scratchpad/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
         ("WORK LOG ($WS/harness/scratchpad/plans/TOY-1-backend-dev.md)", work_log(case)),
+        ("WORKTREE — files on main the diff does not touch, quoted in full", context),
         ("DIFF UNDER REVIEW (git diff, new files staged with add -N)", diff),
     ]
     body = "\n\n".join(f"===== {name} =====\n{text}" for name, text in parts)
@@ -182,6 +198,8 @@ def build_prompt(case: Path, spec: dict, diff: str) -> str:
         body
         + "\n\n===== TASK =====\n"
         + f"Act as the {spec['role']} role and run {spec['skill']} on the diff above.\n"
+        + "The WORKTREE section is the rest of the branch, quoted in full: treat a file\n"
+        + "shown there as present on disk, not as something the diff must establish.\n"
         + "You cannot execute anything. The work log's Verification section is the only\n"
         + "evidence that the profile's commands were run; judge it against the profile.\n"
         + "Reply with the reviewer output format only — the check rows, the Findings\n"
@@ -459,8 +477,8 @@ def main() -> int:
         case = CASES / name
         spec = load_expect(case)
         with tempfile.TemporaryDirectory() as tmp:
-            diff = build_worktree(case, spec, Path(tmp) / "toyapp")
-            prompts[name] = (spec, build_prompt(case, spec, diff))
+            diff, context = build_worktree(case, spec, Path(tmp) / "toyapp")
+            prompts[name] = (spec, build_prompt(case, spec, diff, context))
 
     if args.dry_run:
         for name, (_, prompt) in prompts.items():

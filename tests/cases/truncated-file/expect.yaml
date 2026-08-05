@@ -6,7 +6,12 @@ verdict: [Request changes]
 expect_finding:
   severity: Blocker
   file: app/service/allocation.py
-  keywords_any: [truncat, incomplete, cut off, no return, missing return, unfinished, mid-function, ends mid, never returns]
+  keywords_any: [truncat, incomplete, cut off, no return, missing return, unfinished, ends, no total]
+# `ends` rather than a list of phrasings. Three runs described this defect three ways
+# — "ends mid-function", "the function body ends at the accumulation loop", "file ends
+# mid-function" — and chasing each one is whack-a-mole. Paired with a Blocker on
+# allocation.py, which in this case is the clean implementation minus its ending, it
+# stays specific enough.
 why: >
   percent_by_symbol builds `units` and then simply stops. Its tests reference a
   return value that never arrives.
