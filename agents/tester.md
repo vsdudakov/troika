@@ -38,7 +38,7 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tes
 - **A zero exit code is not a pass.** Confirm the run collected the tests you named, the counts match, and the coverage summary was reached where the command produces one.
 - **A changed source with no mirror test is a defect, not a gap in the selection** — hand it back; do not write the missing test.
 - **Fix the test, not the code, when the test is the stale party** — a test asserting a contract the change deliberately moved is what changes. The reverse (loosening production code to satisfy a stale test) reverts a deliberate decision.
-- **Pre-existing failures on `main` are not the change's** — verify in the primary clone, then name them and move on.
+- **Pre-existing failures on the base branch are not the change's** — verify in the primary clone, then name them and move on.
 
 ## Gates
 

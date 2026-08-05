@@ -9,7 +9,7 @@ The post-PR pass on an open pull request; the report is posted as a PR comment. 
 
 **Kind** procedure · **Used by** [reviewer](../agents/reviewer.md) · **When** the PR is open (release-pr step 7, or on request) · **Ends with** one review comment on the PR and a verdict
 
-Read-only and lint-only — never run tests, edit code, or merge. Running tests is the author's job before opening the PR, and CI's afterward. Set `WS` first ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
+Read-only — never run tests, edit code, or merge; tests belong to the tester before the PR and to CI after it. Set `WS` first ([AGENTS.md › Workspace paths](../../AGENTS.md#workspace-paths)).
 
 ## 1. Requirements
 
@@ -27,11 +27,11 @@ Combine the PR body, the linked ticket, and any linked issues into the requireme
 Review the branch's latest code in isolation — fetch first or the ref is stale:
 
 ```bash
-git fetch origin
-git worktree add "$WS/llm/worktrees/review-<repo>-<N>" origin/<headRefName>
+git fetch <remote>
+git worktree add "$WS/llm/worktrees/review-<repo>-<N>" <remote>/<headRefName>
 ```
 
-Wire up dependencies per [worktree › setup](worktree.md#setup). The repo name is in the path because PRs in different repos share numbers.
+Remote and default branch come from [AGENTS.md › Branches](../../AGENTS.md#branches) ([base ref](worktree.md#base-ref)). Wire up dependencies per [worktree › setup](worktree.md#setup). The repo name is in the path because PRs in different repos share numbers.
 
 ## 3. Checks
 
@@ -39,7 +39,7 @@ Run all nine from [reviewer › Rules](../agents/reviewer.md#rules): requirement
 
 Two notes specific to this pass:
 
-- **Lint** — run the repo's lint command ([AGENTS.md › Commands](../../AGENTS.md#commands)) in the review worktree. Report failures verbatim.
+- **Lint** — run the verification commands the profile lists for the touched areas ([AGENTS.md › Commands](../../AGENTS.md#commands)) in the review worktree; report failures verbatim.
 - **Tests present** — verify from the diff that each changed or created file has a corresponding test and that it covers the change. Do not run it; the coverage gate is [AGENTS.md › Tests](../../AGENTS.md#tests).
 
 ## 4. Post

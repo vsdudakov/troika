@@ -4,6 +4,8 @@ A tool-neutral agent harness: roles, procedures, templates. Plain markdown, so C
 
 **Organisation-neutral.** Nothing here names a repo, a command, a tracker, a URL, or a person. Every such fact comes from the workspace's [`../AGENTS.md`](../AGENTS.md) — the *project profile* — which each organisation writes once from [AGENTS.template.md](AGENTS.template.md). Drop this tree into another workspace, write that one file, and the pipeline runs unchanged.
 
+That cuts both ways: where the profile declares a *limit* — no ticket transitions, one repo and one PR, no build step, a base branch that is not `origin/main` — the roles follow the profile, not the generic wording. A skill that hardcodes any of those is a bug in this tree.
+
 ```
 <workspace>/
   AGENTS.md        the project profile — org-specific, lives with the org's workspace

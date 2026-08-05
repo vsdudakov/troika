@@ -20,7 +20,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Scope
 
-- Read-only and lint-only. **Never edit code, never run a test, never merge.** Running tests belongs to [tester](tester.md) (step 5) and then CI (step 8); at the internal pass no test has run at all, and reading them is the point.
+- Read-only. **Never edit code, never run a test, never merge.** Tests belong to [tester](tester.md) (step 5) and CI (step 8); at the internal pass none has run at all, and reading them is the point.
 - Never rewrites the plan either — a better idea is a finding with a reason, and the [architect](architect.md) decides.
 - Reviews against the approved plan and the project profile — not against personal taste.
 - Internal review posts nothing to the PR host. PR review posts one comment, with the text written by [commenter](commenter.md).
@@ -37,7 +37,7 @@ Check all nine, every pass, on the whole diff — not a sample. Read the surroun
 
 1. **Requirements** — every numbered requirement in the plan is implemented; nothing implemented that the plan didn't ask for.
 2. **Code style** — [AGENTS.md › Style](../../AGENTS.md#style), per language. Cite `file:line`. **An import inside a function or method is a Major**, not a nit: it hides a circular import, so report the cycle and the layering fix, not just the import placement. Comments that restate the code are a nit, every time ([AGENTS.md › Rules](../../AGENTS.md#comments)).
-3. **Lint** — run the repo's lint command from [AGENTS.md › Commands](../../AGENTS.md#commands). Quote failures verbatim (shortest decisive line).
+3. **Lint and type check** — run the verification commands the profile lists for the touched areas ([AGENTS.md › Commands](../../AGENTS.md#commands)); no command it does not list. Quote failures verbatim (shortest decisive line).
 4. **Layering** — [AGENTS.md › Layering](../../AGENTS.md#layering): no layer skipped, no cross-layer reach-around.
 5. **Queries** — N+1, missing prefetch/eager loading, unindexed or unbounded queries.
 6. **Tests present, and able to run** — every changed source file has a matching test where the profile says it belongs, every branch in the diff is covered, tests assert real behaviour, only external services mocked, GIVEN/WHEN/THEN present ([AGENTS.md › Tests](../../AGENTS.md#tests)). Verify from the diff; never run it. These tests were written blind and have never executed, so also read for the mechanical defects a runner would hit: unresolved import, missing fixture, empty parametrize, a name discovery will not collect.

@@ -34,7 +34,7 @@ Each file declares its **Kind** in the header line, which fixes its body shape:
 | --- | --- | --- |
 | Branches and worktrees | [worktree.md](worktree.md) | all dev / review / QA roles |
 | Cross-repo order and PR linking | [cross-repo.md](cross-repo.md) | orchestrator · [releaser](../agents/releaser.md) |
-| Tracker — auth, read, comment, transitions, attachments | [tracker.md](tracker.md) | [architect](../agents/architect.md) · [releaser](../agents/releaser.md) |
+| Tracker — auth, read, comment, attachments, transitions where the profile declares any | [tracker.md](tracker.md) | [architect](../agents/architect.md) · [releaser](../agents/releaser.md) |
 
 ## Templates
 

@@ -36,15 +36,15 @@ A ticket link/key, an issue, or a plain description. With a ticket key, always s
 
 Cite the surface each requirement came from in the plan. Anything unreachable is named as unread, never silently dropped. Read the code the change touches before planning — never plan from ticket text alone. Refresh each touched repo's index first and search with the workspace's code-search tool, not a bare grep ([AGENTS.md › Code search](../../AGENTS.md#code-search)) — a plan pinned to symbols that moved is wrong before dev starts.
 
-List and read [`memory/`](../memory/README.md) too — `ls $WS/llm/memory/*.md`, there is no index file. An entry can change the plan outright: a repo mid-migration, an upstream PR blocking CI, a suite that fails on clean `main`.
+List and read [`memory/`](../memory/README.md) too — `ls $WS/llm/memory/*.md`, there is no index file. An entry can change the plan outright: a repo mid-migration, an upstream PR blocking CI, a suite that fails on the clean base branch.
 
 ## Rules
 
 The plan must be concrete enough that a dev role needs no further product decisions:
 
 - **Requirements** — numbered, testable, each traceable to a **named ticket surface** (description, comment N, attachment, link) or to a stated assumption.
-- **Repos touched** — in [dependency order](../../AGENTS.md#dependency-order). Say which can run in parallel.
-- **Contracts** — the exact API/schema shape shared between repos (endpoint, method, request/response fields, types, error cases). A pinned contract is what lets the repos run in parallel; without one, they are sequential ([cross-repo](../skills/cross-repo.md)).
+- **Repos touched** — in [dependency order](../../AGENTS.md#dependency-order). Say which can run in parallel. **Lanes are per repository** ([develop-flow › Lanes](../skills/develop-flow.md#lanes)): several roles in one repo means one branch and one PR, worked in order — never a branch per role.
+- **Contracts** — the exact API/schema shape shared **between repos** (endpoint, method, request/response fields, types, error cases). A pinned contract is what lets two repos run in parallel; without one they are sequential ([cross-repo](../skills/cross-repo.md)). Inside a single repo, pin the order instead — the later role reads the earlier one's code, not a contract.
 - **Per-repo work** — files and layers to change ([AGENTS.md › Layering](../../AGENTS.md#layering)), migrations, feature flags, config.
 - **Test plan** — unit tests per repo, plus what QA must verify by hand on the local stack (the exact click path or API call). Anything the stack cannot exercise ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)) is covered by unit tests instead, and said so.
 - **Out of scope** — explicitly, including anything that would land in a repo the workspace marks out of scope.
@@ -53,7 +53,7 @@ The plan must be concrete enough that a dev role needs no further product decisi
 ## Gates
 
 1. Requirements cover the whole ticket — nothing in the ticket left unplanned, nothing planned the ticket didn't ask for.
-2. Every cross-repo boundary has a pinned contract, or the repos are marked sequential.
+2. Every cross-repo boundary has a pinned contract, or the repos are marked sequential; work sharing one repo is ordered, not parallel.
 3. Every requirement has at least one test (unit or QA) that proves it.
 4. Every ticket surface was read — comments, attachments, links, fields — and anything unreachable is named in the plan as unread.
 5. The plan carries an `Approve` / `Approve with nits` verdict from [plan-review](../skills/plan-review.md) before any code work starts. Rewrite `<TICKET>.md` in place on each round of findings; **cap 3 rounds**, then the human decides.

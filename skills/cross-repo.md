@@ -9,7 +9,7 @@ When the plan's requirements span more than one repo: which order, what can over
 
 **Kind** reference · **Used by** orchestrator · [architect](../agents/architect.md) · [releaser](../agents/releaser.md) · **When** the plan spans more than one repo (develop-flow step 3) · **Ends with** a repo order, a parallel/sequential call, and PRs linked in dependency order
 
-Split the work into one task per repo and run the per-repo flow for each. **Never mix two repos' changes in one branch or PR** — each repo is an independent clone with its own PR.
+Split the work into one task per repo and run the per-repo flow for each. **Never mix two repos' changes in one branch or PR** — each repo is an independent clone with its own PR. The converse holds too: work that spans several areas of **one** repo is not cross-repo, and stays one branch and one PR ([develop-flow › Lanes](develop-flow.md#lanes)).
 
 ## Order: providers before consumers
 
@@ -40,4 +40,4 @@ Each repo's flow already gates on its own tests and lint. After the last repo, r
 
 - **A change in a pinned library usually cannot be exercised on the local stack** — the stack runs the consumer's installed copy, which is the pinned release, not the worktree. It ships on unit tests plus the consumer PR after the release is cut; say so in the QA report's **Not verified** list.
 - A consumer PR that is only waiting on a release is *blocked*, not broken — label it that way rather than forcing CI green.
-- One ticket, many PRs: the ticket transitions once, when the first PR opens, not per repo.
+- One ticket, many PRs: any transition the profile declares runs **once**, when the first PR opens — not per repo. Where the profile declares none, the PR-chain comment is the only tracker write.

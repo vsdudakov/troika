@@ -14,9 +14,9 @@ The newest existing notes file is the living **template** — read it first and 
 ## 1. Collect the range — from the previous release's branch head, never its tag
 
 ```bash
-git fetch origin --tags
-git log --oneline <prev-tag>..origin/<prev-release-branch>    # post-cut cherry-picks — expect a non-empty list
-git log --no-merges origin/<prev-release-branch>..<new-release-branch>       # the candidate range
+git fetch <remote> --tags
+git log --oneline <prev-tag>..<remote>/<prev-release-branch>    # post-cut cherry-picks — expect a non-empty list
+git log --no-merges <remote>/<prev-release-branch>..<new-release-branch>       # the candidate range
 ```
 
 The tag marks where the previous release was *cut*; the branch head is what it actually *shipped*. Fixes land on the default branch and are cherry-picked onto the release branch afterwards, so a tag-based range re-reports every post-cut cherry-pick as new work.
@@ -28,7 +28,7 @@ Attribution comes from the squash-merge PR-number suffix. A commit without one i
 Cherry-picks carry different SHAs, so ancestry alone will not exclude them:
 
 ```bash
-git cherry origin/<prev-release-branch> <new-release-branch>     # '-' marks patch-equivalent commits
+git cherry <remote>/<prev-release-branch> <new-release-branch>     # '-' marks patch-equivalent commits
 ```
 
 A `-` commit already shipped — **unless it was reverted on the previous branch**, in which case this release is its first. Confirm against the **tree**, not the log: pick a symbol the commit adds and check whether it is present in each branch. A dropped item takes its QA block with it; renumber the survivors.

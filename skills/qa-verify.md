@@ -14,27 +14,27 @@ Never edits product code. Test-data scripts go in `$WS/llm/scratchpad/`. Every s
 <a id="prewarm"></a>
 ## 0. Pre-warm — start this the moment the first dev lane reports done
 
-Stack boot and test-data seeding cost minutes, depend on the checkout rather than on any verdict, and block nothing. Start them **in parallel with steps 3–5**, not after them:
+Boot and seeding cost minutes, depend on the checkout rather than any verdict, and block nothing. Run them **in parallel with steps 3–5**:
 
-- Boot the stack from the worktree of the first lane that finishes ([step 1](#1-point-the-stack-at-the-branch-under-test)), and seed the accounts, orgs, and fixtures the plan's QA paths need.
-- When a later fix changes that worktree, the stack picks it up on restart — cheaper than a cold boot every cycle.
-- If the change spans two repos in one monorepo checkout, wait for both before pointing the stack; if they are separate repos, pre-warm each independently.
+- Boot from the worktree of the first lane that finishes ([step 1](#1-point-the-stack-at-the-branch-under-test)) and seed the accounts, orgs, and fixtures the plan's QA paths need.
+- A later fix in that worktree is picked up on restart — cheaper than a cold boot per cycle.
+- One repo, several roles: wait until the lane's roles are all done before pointing the stack. Separate repos: pre-warm each independently.
 
-A pre-warmed stack that then fails its health check is reported as a stack problem now, not discovered at step 6 with everything else already waiting on it.
+A pre-warmed stack failing its health check is a stack problem reported now, not at step 6 with everything waiting on it.
 
 ## 1. Point the stack at the branch under test
 
-Read the override mechanism from [AGENTS.md › Local stack](../../AGENTS.md#stack) — either per-repo path flags, or running the stack from inside the worktree directory. Use that one only: never check a dev branch out in a primary clone ([worktree](worktree.md)), never edit the stack's own config.
+Use the override mechanism in [AGENTS.md › Local stack](../../AGENTS.md#stack) — path flags, or running from inside the worktree — and only that one: never check a dev branch out in a primary clone ([worktree](worktree.md)), never edit the stack's config.
 
-Worktree paths come from each dev role's work log; a missing path does not fall back, the process dies at boot. Deps and env files are linked by the dev role — check, don't install.
+Worktree paths come from the dev work logs; a missing path doesn't fall back, the process dies at boot. Dependencies and env files are already linked — check, don't install.
 
 Record the exact command line **and the directory it ran in** — together they define what was tested.
 
 ## 2. Bring the stack up
 
-Run the profile's boot sequence, then gate on all four: dependency check passes · every process running · no traceback in the boot logs · health check returns its expected status.
+Run the profile's boot sequence, then gate on all four: dependency check passes · every process running · no traceback in the logs · health check returns its expected status.
 
-A narrower route (single services, container fallback) usually ignores the worktree and tests the primary clone — if you used one, say so in the report.
+A narrower route (single services, container fallback) usually ignores the worktree and tests the primary clone — say so in the report if you used one.
 
 ## 3. Split the change
 
@@ -50,16 +50,14 @@ A change that touches frontend code but no user-visible behaviour is verified as
 
 ## 4. Frontend — browser E2E, before/after GIF
 
-Drive the real running app with a browser automation tool that records GIFs (Claude in Chrome, or equivalent); fall back to before/after screenshots only if none exists.
+Drive the running app with a browser automation tool that records GIFs (Claude in Chrome, or equivalent); fall back to before/after screenshots only if none exists. Per user-visible requirement, walk the plan's click path and record two artifacts:
 
-Per user-visible requirement, walk the plan's click path and record two artifacts:
-
-- **before** — the same path on the base state (stack on the base checkout), showing the old behaviour. Net-new screens have no before: write `n/a — new` in the report rather than faking one.
+- **before** — the same path on the base checkout, showing the old behaviour. Net-new screens have none: write `n/a — new` rather than faking one.
 - **after** — the same path on the branch worktree, showing the requirement met.
 
-Capture a few frames before and after each action so playback is readable, and end the recording on the state that proves the requirement (the loaded list, the saved toast), not on the click. Read the browser console and network log during the run — an error there is a defect even when the screen looks right.
+Capture a few frames around each action so playback reads, and end on the state that proves the requirement (the loaded list, the saved toast), not the click. Watch the browser console and network log — an error there is a defect even when the screen looks right.
 
-Recording the before first, then restarting the stack onto the worktree, is one restart for the whole ticket — batch every before, then every after.
+Batch every before, then restart onto the worktree and take every after: one restart per ticket.
 
 ## 5. Backend — API E2E + datastore
 
@@ -70,17 +68,17 @@ Per requirement, exercise the endpoint or task against the running stack and cap
 3. **Datastore after** — the same query, showing the state effect.
 4. **Error cases** — bad auth, missing field, not-found — status and body shape checked against the pinned contract.
 
-Async requirements add the decisive log line between 2 and 3: the task picked up and completed. A response that says success without the row changing is a defect, not a pass.
+Async requirements add the decisive log line between 2 and 3 — task picked up, task completed. A success response without the row changing is a defect.
 
 ## 6. Regression and integration suite
 
-Exercise the adjacent paths — the same screen's other actions, the same endpoint's other cases. Then run the workspace's integration suite when one covers the touched services ([AGENTS.md › Local stack](../../AGENTS.md#stack)).
+Exercise adjacent paths — the same screen's other actions, the same endpoint's other cases — then the workspace's integration suite where one covers the touched services ([AGENTS.md › Local stack](../../AGENTS.md#stack)).
 
 **Read what its result means before reporting it.** A suite that builds from its own checkouts of the default branch says the default branch is healthy — nothing about your branch. Report it as a regression check, never as evidence for the change.
 
 ## 7. Stack limits
 
-[AGENTS.md › Stack limits](../../AGENTS.md#stack-limits) lists what a green run does not prove here. State each applicable one in the report rather than letting a `Pass` imply coverage, and name what covers it instead (unit tests, a manual out-of-band check, a consumer PR after a release tag).
+[AGENTS.md › Stack limits](../../AGENTS.md#stack-limits) lists what a green run does not prove. State each applicable one rather than letting `Pass` imply coverage, and name what covers it instead (unit tests, a manual out-of-band check, a consumer PR after a release tag).
 
 ## 8. Proofs for the PR
 
@@ -92,13 +90,13 @@ req-2-portfolio-filter-after.gif
 req-3-export-endpoint.md          # backend: the step-5 transcript
 ```
 
-List them in the report by filename against their requirement number — [release-pr](release-pr.md#4-proofs) attaches them to the ticket and references those names from the PR body, so a name that doesn't match a requirement row loses the link.
+List them by filename against their requirement number — [release-pr](release-pr.md#4-proofs) attaches them and references those names from the PR body, so a name that matches no requirement row loses the link.
 
 **Never fabricate a proof.** Anything not exercised goes under **Not verified**, with why.
 
 ## 9. Clean up
 
-Take the stack down with the profile's command, then verify nothing from a worktree survived — teardown is usually anchored to the primary clones, so a worker launched from a worktree can outlive it and run the old branch's code next cycle:
+Take the stack down with the profile's command, then verify nothing from a worktree survived — teardown is usually anchored to the primary clones, so a worktree-launched worker can outlive it and run old code next cycle:
 
 ```bash
 pgrep -fl "$WS/llm/worktrees" || echo "no worktree processes left"

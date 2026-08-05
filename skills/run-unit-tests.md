@@ -14,65 +14,67 @@ Never edits product code and never edits a test. Reports the failure; the owning
 <a id="selection"></a>
 ## 1. Select the tests — from the diff, not from the tree
 
-Per worktree, from the dev role's work log. Untracked files must be staged as intent-to-add first or new tests are invisible to `diff` ([internal-review › Diff](internal-review.md#diff-new-files)):
+Per worktree, from the dev role's work log. `<BASE>` is the profile's base ref, resolved once ([worktree › The base ref](worktree.md#base-ref)) — never hardcoded. Untracked files must be staged as intent-to-add first or new tests are invisible to `diff` ([internal-review › Diff](internal-review.md#diff-new-files)):
 
 ```bash
+BASE=<remote>/<default-branch>        # AGENTS.md › Branches
 cd "$WS/llm/worktrees/<worktree>"
+git fetch "${BASE%%/*}"
 git add -N -- .
-git --no-pager diff --name-only origin/main...HEAD
+git --no-pager diff --name-only "$BASE"...HEAD
 git --no-pager diff --name-only
 ```
 
 From that file list, three tiers — and nothing else:
 
-1. **Test files in the diff** — every test file added or modified. Always run, no exception.
-2. **The mirror test of every changed source file** — the profile fixes where a source file's test lives ([AGENTS.md › Tests](../../AGENTS.md#tests)); resolve each changed source to that path and run it if it exists. A changed source whose mirror test does **not** exist is a review defect, not a test-selection problem: report it and hand it back.
-3. **Tests directly tied to a changed symbol** — an existing test that imports the changed module, or exercises a function, class, endpoint, or migration the diff changed. Resolve this by symbol search over the test tree ([AGENTS.md › Code search](../../AGENTS.md#code-search)), not by guessing.
+1. **Test files in the diff** — every test file added or modified. Always run.
+2. **The mirror test of every changed source file** — the profile fixes where a source file's test lives ([AGENTS.md › Tests](../../AGENTS.md#tests)); resolve each changed source to that path and run it if it exists. A changed source with no mirror test is a review defect, not a selection problem: report it and hand it back.
+3. **Tests directly tied to a changed symbol** — an existing test that imports the changed module or exercises a function, class, endpoint, or migration the diff changed. Resolve by symbol search over the test tree ([AGENTS.md › Code search](../../AGENTS.md#code-search)), not by guessing.
 
-**Directly tied means the test names the thing.** A test that imports the changed module qualifies. A test two layers away that *might* be affected does not — that is a regression, and regressions are CI's job on the whole suite (develop-flow step 8). Do not widen the selection to a package, an app, or a directory because it "feels related": a run that widens to the suite defeats the point of this step and costs the fix cycle tens of minutes.
+**Directly tied means the test names the thing.** A test two layers away that *might* be affected is regression, and regression is CI's job (develop-flow step 8). Widening to a package, app, or directory because it "feels related" defeats the step and costs the fix cycle tens of minutes.
 
-Write the selected node IDs down before running. That list goes in the report and is what makes the run reproducible.
+Write the selected node IDs down before running: they go in the report and make the run reproducible.
 
 <a id="lanes"></a>
 ## 2. Run — one lane per area, all lanes at once
 
 Group the selected tests by **area** — the unit the profile gives a distinct test command to ([AGENTS.md › Commands](../../AGENTS.md#commands)): one backend package, one client app, one extension, one compiled service. Each area is one lane.
 
-**Lanes run concurrently, not in sequence, and across every worktree that is ready.** A repo still in development or still in review contributes no lanes and holds none up — run what is ready, run the rest when it arrives. Wall clock is the slowest lane, not the sum. Each lane runs in its own worktree directory with that area's test command from the profile, narrowed to that lane's node IDs, with the profile's coverage flags left at their full value.
+**Lanes run concurrently, across every ready worktree.** A repo still in development or review contributes no lanes and holds none up; wall clock is the slowest lane, not the sum. Each lane runs in its worktree with that area's profile command, narrowed to its node IDs, coverage flags at full value.
 
-Inside a lane, use the runner's own parallel flag where the profile documents one ([AGENTS.md › Commands](../../AGENTS.md#commands)) — except where the profile marks a suite sequential, which is a correctness constraint and not a speed trade ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
+Inside a lane, use the runner's parallel flag where the profile documents one — except where the profile marks a suite sequential, which is correctness, not a speed trade ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
 
-Two ways to get lanes concurrent, both acceptable: one subagent per lane, or background shells per lane joined at the end. Whichever runs, capture each lane's full output to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>-<area>.log` — a lane that fails is read from its log, not re-run to see what happened.
+Either one subagent per lane or background shells joined at the end. Capture each lane's full output to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>-<area>.log` — a failing lane is read from its log, not re-run to see what happened.
 
-Never run the area's `test`-style target unnarrowed: those targets walk the whole tree.
+Never run an area's `test`-style target unnarrowed: those walk the whole tree.
 
 <a id="reading"></a>
 ## 3. Read the result — a zero exit code is not a pass
 
 Per lane, confirm all four before calling it green:
 
-- The run collected the tests you selected — a typo in a node ID collects zero tests and still exits 0 on some runners.
+- The run collected the tests you selected — a typo in a node ID collects zero and still exits 0 on some runners.
 - The count run matches the count selected.
-- The coverage summary was reached, where the profile's command produces one, and the missing-lines list is empty for the changed files.
+- The coverage summary was reached where the profile's command produces one, and the missing-lines list is empty for the changed files.
 - No wrapper swallowed a crash ([AGENTS.md › Gotchas](../../AGENTS.md#gotchas)).
 
-Quote the shortest decisive line for each failure — the assertion or error line, not the whole traceback.
+Quote the shortest decisive line per failure — the assertion or error line, not the whole traceback.
 
 ## 4. Route failures
 
-A failure belongs to the dev role that owns the repo, never to this one:
+A failure belongs to the dev role that owns the code, never to this one:
 
-- **Test fails because the test is stale or wrong** — the production contract moved and the test still asserts the old shape → the **test** is what changes, never the production code loosened to make it pass.
-- **Test fails because the code is wrong** → the code changes, with the test left asserting the real requirement.
-- **Fails on clean `main` too** — verify in the primary clone before claiming it, then name it as pre-existing and do not fix it here.
+- **Test stale or wrong** — the production contract moved and the test asserts the old shape → the **test** changes; production code is never loosened to pass.
+- **Code wrong** → the code changes, with the test left asserting the real requirement.
+- **Fails on the base branch too** — verify in the primary clone before claiming it, then name it as pre-existing and do not fix it here.
 
-After the dev role fixes, re-run **the same selection** plus any test the fix added or changed, and re-run [internal-review.md](internal-review.md) on the new diff before advancing — a fix is a diff, and no diff reaches QA unreviewed.
+After the fix, re-run **the same selection** plus any test the fix added or changed, and re-run [internal-review.md](internal-review.md) on the new diff before advancing — a fix is a diff, and no diff reaches QA unreviewed.
 
-**Cap: 3 cycles.** Third run still failing → stop the flow and report the failing node IDs and their decisive lines to the human.
+**Cap: 3 cycles.** Third run still failing → stop and report the failing node IDs and their decisive lines.
 
 ## Output
 
-Write the report to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. [releaser](../agents/releaser.md) reads the highest-numbered one at its gate ([handoff contract](../agents/README.md#handoff)).
+Write to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. [releaser](../agents/releaser.md) reads the highest-numbered one ([handoff contract](../agents/README.md#handoff)).
 
 ```markdown
 - Selection: <count> tests · <count> changed test files · <count> mirror tests · <count> symbol-tied tests
@@ -81,7 +83,7 @@ Write the report to `$WS/llm/scratchpad/plans/<TICKET>-tests-<n>.md` (`<n>` = cy
 - Not selected on purpose: <what was in the diff's blast radius but left to CI>
 
 ### Failures
-- `<node id>` — <decisive line> · owner <role> · <test wrong | code wrong | pre-existing on main>
+- `<node id>` — <decisive line> · owner <role> · <test wrong | code wrong | pre-existing on base>
 
 ### Verdict
 <Pass | Fail> — <one sentence>

@@ -5,7 +5,7 @@ description: Implements the server-side part of an approved plan with unit tests
 
 # Backend dev
 
-Implements the server-side part of an approved plan, with unit tests. **Writes the tests, never runs them** — [tester](tester.md) does, in step 5. Ends with green lint and type check, never with a commit or a PR.
+Implements the server-side part of an approved plan, with unit tests. **Writes the tests, never runs them** — [tester](tester.md) does, in step 5. Ends with the profile's verification commands green, never with a commit or a PR.
 
 - **Owns** — the backend repos in [AGENTS.md › Ownership](../../AGENTS.md#ownership)
 - **Runs** — [skills/implement-change.md](../skills/implement-change.md) · **Step** 3 of [develop-flow](../skills/develop-flow.md)
@@ -19,7 +19,7 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Scope
 
-- One repo per run, one branch, one worktree, one PR. Multi-repo work is split by the [architect](architect.md) and run per repo in [dependency order](../../AGENTS.md#dependency-order).
+- One repo per run, one branch, one worktree, one PR — **per repository, not per role** ([develop-flow › Lanes](../skills/develop-flow.md#lanes)). If the frontend role already holds this repo's worktree for the ticket, join it instead of cutting a second branch. Multi-repo work is split by the [architect](architect.md) and run per repo in [dependency order](../../AGENTS.md#dependency-order).
 - Never touch a client app or a repo owned by another role ([AGENTS.md › Ownership](../../AGENTS.md#ownership)).
 - A repo you own but the plan doesn't name is not yours to change on this run.
 - Never edit the plan. If the plan is wrong, stop and report to the orchestrator.
@@ -35,19 +35,19 @@ Style, layering, tests, and the per-repo commands live in the project profile �
 - **Layering is a hard gate**, not a preference. A change that reaches around a layer is wrong even when it works.
 - **Imports at the top of the file.** A local import hides a circular import; fix the cycle, don't defer the import.
 - **Comments only for a non-obvious why** ([AGENTS.md](../../AGENTS.md#comments)); a docstring is not a comment and stays.
-- **Write the tests; do not run them.** No targeted run, no suite, no single node ID "just to check" ([implement-change › Tests](../skills/implement-change.md#tests)). [tester](tester.md) runs the change's tests once, across every repo's lane at the same time (step 5); CI runs the whole suite on the PR. Your gate is lint plus the type check.
+- **Write the tests; do not run them.** No targeted run, no suite, no single node ID "just to check" ([implement-change › Tests](../skills/implement-change.md#tests)). [tester](tester.md) runs the change's tests once, across every lane at the same time (step 5); CI runs the whole suite on the PR. Your gate is exactly the verification commands the profile lists for the areas you touched ([AGENTS.md › Commands](../../AGENTS.md#commands)) — every one it names, none it does not.
 - **No red-green loop means the tests must be right blind.** Every changed source file gets its mirror test, every branch you touched is covered, assertions are on real behaviour and not on a mock having been called. Walk the diff line by line and name the test covering each line — that reading replaces the coverage report you do not get.
 - **Migrations** are generated with the repo's command, never hand-edited once applied.
 
 ## Gates
 
 1. Every requirement for this repo is implemented; nothing extra.
-2. The repo's full lint and type check pass on the final code, and **no test was run**. Report the exact node IDs you wrote, each mapped to the source file it mirrors — that list is what [tester](tester.md) checks its diff-derived selection against.
+2. Every verification command the profile lists for your areas passes on the final code, and **no test was run**. Report the exact node IDs you wrote, each mapped to the source file it mirrors — that list is what [tester](tester.md) checks its diff-derived selection against.
 3. A failure comes back to you wherever it surfaces — the tester's run (step 5), QA (step 6), or CI on the PR ([release-pr › CI](../skills/release-pr.md#ci)). Fix it in the worktree with a test; never by lowering a threshold, skipping a test, or disabling a rule. When a test is the stale party and the production contract moved deliberately, **the test changes** — never widen production code to green it.
 4. New files are complete (`wc -l` plus an import check) — truncated files have shipped before.
 5. No secrets, no `.env`, no debug prints, no AI attribution.
-6. Pre-existing failures on `main` are not yours to fix — name them instead of hiding them.
+6. Pre-existing failures on the base branch are not yours to fix — name them instead of hiding them.
 
 ## Output
 
-Write the work log to `$WS/llm/scratchpad/plans/<TICKET>-backend-dev.md` ([handoff contract](README.md#handoff)) and return the same to the orchestrator: branch · worktree path · files changed · **the node IDs of every test written or changed**, each mapped to the source it mirrors · lint and type-check output (the decisive line on failure) · the API contract as actually implemented · anything the plan asked for that is not done. No test results — you ran none.
+Write the work log to `$WS/llm/scratchpad/plans/<TICKET>-backend-dev.md` ([handoff contract](README.md#handoff)) and return the same to the orchestrator: branch · worktree path · files changed (and whether you created or joined the worktree) · **the node IDs of every test written or changed**, each mapped to the source it mirrors · the verification commands run and their output (decisive line on failure) · the API contract as actually implemented · anything the plan asked for that is not done. No test results — you ran none.

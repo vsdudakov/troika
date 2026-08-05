@@ -14,15 +14,15 @@ The harness in `llm/` is organisation-neutral: roles and skills link into this f
 | `#ownership` | which role owns which repo or app | everyone |
 | `#workspace-paths` | the workspace root and the absolute-path rule | everyone |
 | `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
-| `#branches` | default branch, branch naming, worktree dependency setup, push quirks | dev roles, releaser |
+| `#branches` | **remote name and default branch (the base ref every diff and worktree uses)**, branch naming, worktree dependency setup, push quirks | dev roles, reviewer, tester, releaser |
 | `#dependency-order` | provider → consumer order across repos, and how shared libraries are released | architect, releaser |
-| `#commands` | per repo: narrowed tests, full lint, full suite, migrations, per-runner parallel flags | dev roles, reviewer, tester |
+| `#commands` | per repo or area: narrowed tests, **the exact verification commands a dev role must run as its gate** (lint, and a type check or build only if that is how this workspace runs it), full suite, migrations, per-runner parallel flags | dev roles, reviewer, tester |
 | `#style` | per-language style rules | dev roles, reviewer |
 | `#layering` | the architectural layers, if the codebase has them | backend-dev, reviewer |
 | `#tests` | test framework, naming, location, coverage gate, who runs them and when | dev roles, reviewer, tester |
 | `#stack` | how to run the product locally and point it at a worktree | qa |
 | `#stack-limits` | what the local stack cannot verify | qa, architect |
-| `#tracker` | tracker URL, project key, CLI, auth check, transition names | architect, releaser |
+| `#tracker` | tracker URL, project key, CLI or API, auth check, **which writes a role may make — transition names, or an explicit "there are none" plus the equivalent write** | architect, releaser |
 | `#pull-requests` | PR host, title format, CI watch, review-bot loop | releaser |
 | `#pr-template` | the PR body the team uses | releaser, commenter |
 | `#deploy` | the environments, what triggers each, how a deploy is dispatched and watched | releaser |
@@ -66,7 +66,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 
 <a id="branches"></a>
 ## Branches
-<default branch, naming, worktree dependency wiring, push quirks>
+<remote name + default branch = the base ref (e.g. origin/main); naming, worktree dependency wiring, push quirks>
 
 <a id="dependency-order"></a>
 ## Dependency order
@@ -74,7 +74,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 
 <a id="commands"></a>
 ## Commands
-<per-repo table: narrowed tests (tester's) | lint (the dev role's gate); plus full suite, migrations, formatter traps>
+<per-area table: narrowed tests (tester's) | the dev role's verification commands, named exactly; plus full suite, migrations, formatter traps>
 <a id="parallel-tests"></a>
 <one lane per area; the parallel flag each runner takes; suites that must stay sequential>
 
@@ -98,7 +98,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 
 <a id="tracker"></a>
 ## Tracker
-<URL, project key, CLI, auth verification, workflow transitions, attachments>
+<URL, project key, CLI or API, auth verification, allowed writes and workflow transitions — or "no transitions; state is the humans'" and what replaces them — attachments>
 
 <a id="pull-requests"></a>
 ## Pull requests
@@ -139,6 +139,7 @@ The project profile for the harness in llm/. Roles reference these sections by a
 ## Rules for writing it
 
 - **One home per fact.** If it is here, no role file repeats it — roles link.
+- **Say no explicitly.** "No transitions", "no review bot", "no build step", "one repo, one PR" are answers; `llm/` branches on them. Silence reads as the generic default and produces a role doing something this workspace forbids.
 - Commands are copy-pasteable, with the environment variables they need.
 - Name what a green result does *not* prove; that is the section roles get wrong most.
 - If the organisation has no equivalent of a section (no layering, no local stack), keep the anchor and say so in one line. A missing anchor breaks links; an honest "not applicable" does not.
