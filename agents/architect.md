@@ -29,7 +29,7 @@ A ticket link/key, an issue, or a plain description. With a ticket key, always s
 
 Follow the links in the ticket (design files, docs, related tickets, PRs). Read the code the change touches before planning — never plan from ticket text alone. Refresh each touched repo's index first and search with the workspace's code-search tool, not a bare grep ([AGENTS.md › Code search](../../AGENTS.md#code-search)) — a plan pinned to symbols that moved is wrong before dev starts.
 
-Read [`memory/`](../memory/README.md) too: an entry can change the plan outright — a repo mid-migration, an upstream PR blocking CI, a suite that fails on clean `main`.
+List and read [`memory/`](../memory/README.md) too — `ls $WS/llm/memory/*.md`, there is no index file. An entry can change the plan outright: a repo mid-migration, an upstream PR blocking CI, a suite that fails on clean `main`.
 
 ## Rules
 

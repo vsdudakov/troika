@@ -42,12 +42,7 @@ Migrations: generate with the repo's command ([AGENTS.md › Commands](../../AGE
 
 Running fewer tests locally raises the bar on *writing* them: CI runs the full coverage gate over the whole package, so any line of yours left uncovered fails the PR, not your laptop. Write for full coverage of everything you touched, first time.
 
-Framework, naming, location, and the coverage gate are in [AGENTS.md › Tests](../../AGENTS.md#tests). On top of them:
-
-- Every test gets a GIVEN / WHEN / THEN docstring or comment.
-- Assert real behaviour, not implementation detail.
-- **Every branch, not just the happy path** — each `if`/`else`, each `except`, each early return, each guard clause. Where branch coverage is off, a partially-covered branch reads as covered until CI says otherwise.
-- Read the missing-lines output of your targeted run (step 5) and close every line it lists before reporting done. That report is the same one CI will produce, narrowed to your files.
+Framework, naming, location, the coverage gate, and what may be mocked are in [AGENTS.md › Tests](../../AGENTS.md#tests) — that is the whole spec, and it is a gate. The one thing this skill adds is *when to stop*: read the missing-lines output of your targeted run (step 5) and close every line it lists before reporting done. That report is the same one CI will produce, narrowed to your files.
 
 <a id="verify"></a>
 ## 5. Verify — gate
@@ -87,7 +82,7 @@ Pre-existing failures on `main` are not yours to fix — name them in the report
 - Every changed source file has a test, and the targeted run's missing-lines list is empty for your files — CI gates over the whole package and it is not negotiable there.
 - Full suite run, or a deliberate skip you can justify against the shared-ground list above.
 - New files complete (`wc -l`, import check) — truncated files have shipped before.
-- No import inside a function or method in the diff (`git diff -U0 | grep -nE '^\+\s+(import |from .+ import )'`) — if one is there, the fix is the cycle, not the placement.
+- No import inside a function, method, or component in the diff — scan the added lines for your language's import form; if one is there, the fix is the cycle, not the placement.
 - No secrets, no `.env`, no debug prints, no AI attribution anywhere.
 
 ## Output

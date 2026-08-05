@@ -1,5 +1,8 @@
 # Per-workspace, never shared between organisations.
 # Each folder keeps its tracked README.md so it survives a fresh clone.
+#
+# WARNING: `git clean -xfd` here removes exactly these three directories —
+# uncommitted dev branches, plans, proofs, memory. Use explicit paths instead.
 
 worktrees/*
 !worktrees/README.md
@@ -11,3 +14,6 @@ memory/*
 !memory/README.md
 
 .DS_Store
+.idea/
+.vscode/
+*.log

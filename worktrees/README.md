@@ -22,4 +22,6 @@ A worktree's dependencies are symlinked from the primary clone, never reinstalle
 
 Created by [implement-change](../skills/implement-change.md) or [pr-review](../skills/pr-review.md), removed by [release-pr](../skills/release-pr.md) once everything is pushed and CI is green. Work stays uncommitted in here until release, so a stray `git worktree remove --force` destroys it — check [AGENTS.md › Gotchas](../../AGENTS.md#gotchas) for the workspace commands that do exactly that.
 
+**`git clean -xfd` from `llm/` is one of them.** This folder is ignored by `llm/`'s own `.gitignore`, and `-x` is precisely the flag that removes ignored files — one command takes every uncommitted branch here, plus `../scratchpad/` and `../memory/`. Clean `llm/` with explicit paths (`git clean -fd agents skills`) or not at all.
+
 A missing worktree means it was removed, not that the branch is gone: the branch survives; cut a fresh one from it.

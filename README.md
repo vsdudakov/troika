@@ -8,7 +8,7 @@ A tool-neutral agent harness: roles, procedures, templates. Plain markdown, so C
 <workspace>/
   AGENTS.md        the project profile — org-specific, lives with the org's workspace
   llm/             this repo — generic, shared across orgs
-  <repos…>         the product repos
+  <repos…>         the product repos, each an independent clone
 ```
 
 - [`agents/`](agents/README.md) — the roles: architect, backend-dev, frontend-dev, reviewer, qa, releaser, commenter. Who acts, what gates them, which model and effort each runs on.
@@ -23,7 +23,7 @@ A tool-neutral agent harness: roles, procedures, templates. Plain markdown, so C
 2. Copy [AGENTS.template.md](AGENTS.template.md) to `<workspace>/AGENTS.md` and fill every section. The **anchors are a contract** — roles and skills link to them by name, and a missing one is a role reading a dead link.
 3. Run the pipeline: `run llm/skills/develop-flow.md for <TICKET>`. Run one role: `read llm/agents/qa.md and verify <TICKET> on the local stack`.
 
-Everything under `memory/`, `scratchpad/`, and `worktrees/` is per-workspace and ignored; each keeps a tracked `README.md` so the folder itself survives a clone.
+Everything under `memory/`, `scratchpad/`, and `worktrees/` is per-workspace and ignored; each keeps a tracked `README.md` so the folder itself survives a clone. Because they are *ignored* rather than absent, `git clean -xfd` in this repo deletes all three — in-flight branches included. Clean with explicit paths or not at all.
 
 ## Conventions
 
