@@ -57,7 +57,7 @@ description: <one line — what it is; tools use it to pick the file>
 ---
 ```
 
-**Agents** then carry a three-item header list — `- **Owns**` / `- **Runs**` + `**Step**` / `- **Model**` — where `**Model**` nests one sub-bullet per line: `**Claude**` · `**Codex**` · `**Why**` · optional `**Raise it when**` / `**Drop it when**`. Then the same five sections, in this order: `Scope` · `Inputs` · `Rules` · `Gates` · `Output`. The list markers matter: three bare lines collapse into one paragraph in every markdown renderer.
+**Agents** then carry a three-item header list — `- **Owns**` / `- **Runs**` + `**Step**` / `- **Model**` — where `**Model**` nests one sub-bullet per line: `**Claude**` · `**Codex**` · `**Why**` · optional `**Raise it when**` / `**Drop it when**` / `**Also**`. Then the same five sections, in this order: `Scope` · `Inputs` · `Rules` · `Gates` · `Output`. The list markers matter: three bare lines collapse into one paragraph in every markdown renderer.
 
 **Skills** carry a one-line header with the same four fields — `**Kind**` · `**Used by**` · `**When**` · `**Ends with**` — and follow their kind's body shape:
 

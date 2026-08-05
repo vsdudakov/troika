@@ -1,0 +1,18 @@
+# reviewer › Rules check 7: "generated not hand-edited; no applied migration modified."
+# The profile's Commands section says the same in its own words, so the role has the fact
+# from two directions and does not need to infer it.
+#
+# A reviewer may also reach for check 1 here — the plan never asked for an index. Both
+# readings gate the flow and both cite the same file, so the case stays diagnosable; the
+# keywords stay migration-specific so a finding about the wrong thing does not count.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: [Blocker, Major]
+  file: migrations/0001_initial.py
+  keywords_any: [migration, applied, hand-edit, hand edit, generated, revision, make_migration]
+why: >
+  An applied revision gains an index by hand. The profile names the generator as the only
+  way to add schema, and the file's own docstring says it is history. reviewer.md pins no
+  severity on check 7, so either gating rating counts; a nit or a pass does not.

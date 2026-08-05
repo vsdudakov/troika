@@ -34,7 +34,7 @@ Profile ownership splits paths, not branches: one repo, worktree, branch, PR.
 
 Codex uses `gpt-5.6-sol`; effort varies. `→` means fallback. Fable leads where the work is judgment — planning, code design, review, written text. Sonnet carries the roles whose work is long, tool-heavy execution against a documented procedure. [backend-dev](backend-dev.md) sits on the judgment side despite being an execution role: layering, migrations, and a coverage gate it cannot verify by running punish shallow reasoning. Each role file states its own case.
 
-**The dials move independently.** [commenter](commenter.md) runs the strongest model at the lowest effort: voice comes from the model, not from more thinking. [releaser](releaser.md) runs a mid model at low effort: the numbered procedure is the safeguard. Raise **effort** when a role loses to depth on a task it understands; raise the **model** when it loses to capability. Each role file carries its own `Why` / `Raise it when` / `Drop it when`.
+**The dials move independently.** [commenter](commenter.md) runs the strongest model at the lowest effort: voice comes from the model, not from more thinking. [releaser](releaser.md) runs a mid model at low effort: the numbered procedure is the safeguard. Raise **effort** when a role loses to depth on a task it understands; raise the **model** when it loses to capability. Each role file carries its own `Why` / `Raise it when` / `Drop it when` / `Also`.
 
 Values are not automatic; pass them at launch/session.
 

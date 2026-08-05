@@ -15,6 +15,7 @@ One repo, `toyapp`, at `<workspace>/toyapp`. Python. No client app, no extension
 | Path | Owner |
 | --- | --- |
 | `app/api/**` · `app/service/**` · `app/repository/**` · `app/models.py` | backend-dev |
+| `migrations/**` · `tools/**` | backend-dev |
 | `tests/**` | backend-dev |
 
 No frontend role applies here. Nothing is out of scope.
@@ -76,6 +77,13 @@ One area, `toyapp`, run from the repo root:
 | Migrations | `python3 tools/make_migration.py <name>` |
 
 No separate type check and no build step. Run the lint command and nothing else as the dev gate.
+Run the commands in this table as written; a command that is not in it is not a verification gate,
+and the log of one does not stand in for the lint command's.
+
+**Migrations** live in `migrations/`, one numbered revision per file, and are produced only by
+`python3 tools/make_migration.py <name>`. `migrations/0001_initial.py` is applied in every
+environment. **An applied revision is history: it is never hand-edited and never renumbered.**
+A schema change is a new revision from the generator.
 
 <a id="parallel-tests"></a>
 ## Parallel tests

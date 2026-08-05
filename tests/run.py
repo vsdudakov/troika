@@ -18,12 +18,16 @@ role's reply to stdout:
 
     HARNESS_CMD='claude -p --model claude-fable-5 --effort high'  python3 tests/run.py
     HARNESS_CMD='codex exec -m gpt-5.6-sol -'                     python3 tests/run.py
+
+HARNESS_TIMEOUT caps a single run in seconds (default 600); a run that overruns counts
+as a miss rather than hanging the suite.
 """
 
 import argparse
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -34,17 +38,30 @@ LLM = ROOT.parent
 FIXTURES = ROOT / "fixtures"
 CASES = ROOT / "cases"
 DEFAULT_CMD = "claude -p --model claude-fable-5 --effort high"
+DEFAULT_TIMEOUT = 600
 
 SEVERITIES = ("Blocker", "Major", "Nit")
+# The verdict labels agents/reviewer.md § Output actually defines. "Block" is not one of
+# them, and adding it would substring-match every "**Blocker**" finding line.
+VERDICTS = ("Approve with nits", "Request changes", "Approve")
 
 
 # --- fixtures ---------------------------------------------------------------
+
+def unquote(value: str) -> str:
+    """Drop one layer of YAML quoting. Without this a keyword written `"n + 1"` is matched
+    against replies with its quotes attached and can never hit."""
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        return value[1:-1]
+    return value
+
 
 def load_expect(case: Path) -> dict:
     """Minimal YAML subset: scalars, inline lists, nested one level, > folded blocks."""
     spec: dict = {}
     stack = [(-1, spec)]
-    lines = (case / "expect.yaml").read_text().splitlines()
+    lines = (case / "expect.yaml").read_text(encoding="utf-8").splitlines()
     i = 0
     while i < len(lines):
         raw = lines[i]
@@ -67,11 +84,11 @@ def load_expect(case: Path) -> dict:
             node[key] = {}
             stack.append((indent, node[key]))
         elif value.startswith("["):
-            node[key] = [x.strip() for x in value[1:-1].split(",") if x.strip()]
+            node[key] = [unquote(x) for x in value[1:-1].split(",") if x.strip()]
         elif value == "null":
             node[key] = None
         else:
-            node[key] = value
+            node[key] = unquote(value)
     return spec
 
 
@@ -113,17 +130,18 @@ def work_log(case: Path) -> str:
     the dev role would honestly have reported — otherwise the log would itself be a
     second planted defect, and a miss would not say which one the gate caught."""
     own = case / "work-log.md"
-    return (own if own.is_file() else CASES / "_base" / "work-log.md").read_text()
+    return (own if own.is_file() else CASES / "_base" / "work-log.md").read_text(encoding="utf-8")
 
 
 def build_prompt(case: Path, spec: dict, diff: str) -> str:
     """Exactly what the role receives per its Inputs section: profile, role file,
     skill, plan, the dev role's work log, and the diff."""
+    read = lambda p: p.read_text(encoding="utf-8")
     parts = [
-        ("PROJECT PROFILE (AGENTS.md)", (FIXTURES / "AGENTS.md").read_text()),
-        (f"ROLE ({spec['role']}.md)", (LLM / "agents" / f"{spec['role']}.md").read_text()),
-        (f"SKILL ({spec['skill']}.md)", (LLM / "skills" / f"{spec['skill']}.md").read_text()),
-        ("PLAN ($WS/llm/scratchpad/plans/TOY-1.md)", (FIXTURES / "plan.md").read_text()),
+        ("PROJECT PROFILE (AGENTS.md)", read(FIXTURES / "AGENTS.md")),
+        (f"ROLE ({spec['role']}.md)", read(LLM / "agents" / f"{spec['role']}.md")),
+        (f"SKILL ({spec['skill']}.md)", read(LLM / "skills" / f"{spec['skill']}.md")),
+        ("PLAN ($WS/llm/scratchpad/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
         ("WORK LOG ($WS/llm/scratchpad/plans/TOY-1-backend-dev.md)", work_log(case)),
         ("DIFF UNDER REVIEW (git diff, new files staged with add -N)", diff),
     ]
@@ -132,7 +150,8 @@ def build_prompt(case: Path, spec: dict, diff: str) -> str:
         body
         + "\n\n===== TASK =====\n"
         + f"Act as the {spec['role']} role and run {spec['skill']} on the diff above.\n"
-        + "The verification command is the profile's lint command; assume it passes.\n"
+        + "You cannot execute anything. The work log's Verification section is the only\n"
+        + "evidence that the profile's commands were run; judge it against the profile.\n"
         + "Reply with the reviewer output format only — the check rows, the Findings\n"
         + "section, and the Verdict line. No preamble, no explanation outside it.\n"
     )
@@ -140,24 +159,48 @@ def build_prompt(case: Path, spec: dict, diff: str) -> str:
 
 # --- grading ----------------------------------------------------------------
 
-def grade(reply: str, spec: dict) -> tuple[bool, str]:
-    verdict_line = ""
-    for line in reversed(reply.strip().splitlines()):
-        if any(v in line for v in ("Approve", "Request changes", "Block")):
-            verdict_line = line
-            break
+def as_list(value) -> list:
+    """A spec may write one label or several; the grader only ever wants the list form."""
+    if value is None:
+        return []
+    return value if isinstance(value, list) else [value]
 
-    want_verdict = spec.get("verdict", [])
-    # "Approve with nits" contains "Approve"; match the longest label present.
-    got = max((v for v in ("Approve with nits", "Request changes", "Approve", "Block")
-               if v in verdict_line), key=len, default="")
+
+def label_in(line: str) -> str:
+    """Longest label present, because `Approve with nits` contains `Approve`."""
+    return max((v for v in VERDICTS if v in line), key=len, default="")
+
+
+def is_finding(line: str) -> bool:
+    return bool(re.search(r"\*\*(Blocker|Major|Nit)\*\*", line))
+
+
+def verdict_of(reply: str) -> str:
+    """The label under the `### Verdict` heading, else the last non-finding line carrying
+    one. Skipping finding lines matters: a reply that omits the verdict must read as absent,
+    not borrow the label out of a finding."""
+    lines = reply.strip().splitlines()
+    for i, line in enumerate(lines):
+        if re.match(r"#{1,6}\s+Verdict\b", line.strip()):
+            # `### Verdict: Approve` carries the label on the heading itself; the template's
+            # `### Verdict` puts it on the line below.
+            return label_in(line) or next((label_in(l) for l in lines[i + 1:] if l.strip()), "")
+    for line in reversed(lines):
+        if not is_finding(line) and label_in(line):
+            return label_in(line)
+    return ""
+
+
+def grade(reply: str, spec: dict) -> tuple[bool, str]:
+    want_verdict = as_list(spec.get("verdict"))
+    got = verdict_of(reply)
     verdict_ok = got in want_verdict
 
-    findings = [l for l in reply.splitlines() if re.search(r"\*\*(Blocker|Major|Nit)\*\*", l)]
+    findings = [l for l in reply.splitlines() if is_finding(l)]
 
     want = spec.get("expect_finding")
     if want is None:
-        forbidden = [s for s in spec.get("forbid_severity", [])
+        forbidden = [s for s in as_list(spec.get("forbid_severity"))
                      if any(f"**{s}**" in l for l in findings)]
         if forbidden:
             return False, f"false positive: raised {'/'.join(forbidden)} on a clean diff"
@@ -169,17 +212,22 @@ def grade(reply: str, spec: dict) -> tuple[bool, str]:
     in_file = (lambda _l: True) if wanted_file == "any" else \
         (lambda l: wanted_file.split("/")[-1] in l)
 
+    # A list where reviewer.md pins no single severity and more than one gating rating is
+    # defensible; a scalar where it pins one, so a downgrade is still a miss.
+    wanted_sev = as_list(want["severity"])
+    sev_label = "/".join(wanted_sev)
+
     hits = [
         l for l in findings
-        if f"**{want['severity']}**" in l
+        if any(f"**{s}**" in l for s in wanted_sev)
         and in_file(l)
         and any(k.lower() in l.lower() for k in want["keywords_any"])
     ]
     if not hits:
         near = [l for l in findings if in_file(l)]
         if near:
-            return False, f"found it but not as {want['severity']}: {near[0].strip()[:90]}"
-        return False, f"missed: no {want['severity']} on {wanted_file}"
+            return False, f"found it but not as {sev_label}: {near[0].strip()[:90]}"
+        return False, f"missed: no {sev_label} on {wanted_file}"
     if not verdict_ok:
         return False, f"caught it but verdict was {got or '?'}, expected {want_verdict}"
     return True, "ok"
@@ -187,26 +235,87 @@ def grade(reply: str, spec: dict) -> tuple[bool, str]:
 
 # --- driver -----------------------------------------------------------------
 
+def run_agent(cmd: str, prompt: str, timeout: int) -> tuple:
+    """Run one agent in its own process group.
+
+    `shell=True` plus `subprocess.run(timeout=...)` kills the shell and nothing under it, so
+    a hung agent survives its own timeout and keeps spending. Killing the group takes the
+    whole tree down. Raises TimeoutExpired once the group is gone.
+    """
+    proc = subprocess.Popen(cmd, shell=True, text=True, start_new_session=True,
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    try:
+        out, err = proc.communicate(prompt, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        if hasattr(os, "killpg"):
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+        else:
+            proc.kill()
+        proc.communicate()
+        raise
+    return proc.returncode, out, err
+
+
+def env_timeout() -> int:
+    raw = os.environ.get("HARNESS_TIMEOUT", "")
+    return int(raw) if raw.isdigit() else DEFAULT_TIMEOUT
+
+
+def check_spec(spec: dict) -> list:
+    """A typo in a severity or verdict label makes a case unpassable, and only shows up
+    after a paid run — so catch it here instead."""
+    problems = []
+    for v in as_list(spec.get("verdict")):
+        if v not in VERDICTS:
+            problems.append(f"verdict '{v}' is not one of {list(VERDICTS)}")
+    for s in as_list(spec.get("forbid_severity")):
+        if s not in SEVERITIES:
+            problems.append(f"forbid_severity '{s}' is not one of {list(SEVERITIES)}")
+    # A role or skill named here that does not exist crashes the run at prompt-build time,
+    # after the other cases have already been paid for.
+    for field, folder in (("role", "agents"), ("skill", "skills")):
+        name = spec.get(field)
+        if not name:
+            problems.append(f"no {field} named")
+        elif not (LLM / folder / f"{name}.md").is_file():
+            problems.append(f"{field} '{name}' has no {folder}/{name}.md")
+    want = spec.get("expect_finding")
+    if not want:
+        return problems
+    for s in as_list(want.get("severity")):
+        if s not in SEVERITIES:
+            problems.append(f"severity '{s}' is not one of {list(SEVERITIES)}")
+    if not want.get("severity"):
+        problems.append("expect_finding needs severity")
+    if not want.get("keywords_any"):
+        problems.append("expect_finding needs keywords_any")
+    return problems
+
+
 def check_fixtures() -> int:
     problems = []
     if not (FIXTURES / "repo" / "app").is_dir():
         problems.append("fixtures/repo missing")
-    profile = (FIXTURES / "AGENTS.md").read_text()
+    profile = (FIXTURES / "AGENTS.md").read_text(encoding="utf-8")
     anchors = set(re.findall(r'<a id="([^"]+)"', profile))
     needed = set()
     for f in list((LLM / "agents").glob("*.md")) + list((LLM / "skills").glob("*.md")):
-        for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text()):
+        for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
             path, _, frag = target.partition("#")
             if frag and path.endswith("AGENTS.md"):
                 needed.add(frag)
     for miss in sorted(needed - anchors):
         problems.append(f"fixtures/AGENTS.md lacks #{miss} — a role would read a dead link")
     for case in sorted(CASES.iterdir()):
-        if case.is_dir() and not case.name.startswith("_"):
-            try:
-                load_expect(case)
-            except Exception as exc:
-                problems.append(f"{case.name}/expect.yaml unparseable: {exc}")
+        if not case.is_dir() or case.name.startswith("_"):
+            continue
+        try:
+            spec = load_expect(case)
+        except Exception as exc:
+            problems.append(f"{case.name}/expect.yaml unparseable: {exc}")
+            continue
+        problems += [f"{case.name}/expect.yaml: {p}" for p in check_spec(spec)]
     for p in problems:
         print(f"  {p}")
     print(f"{'FAIL' if problems else 'ok'} — fixtures, {len(needed)} profile anchors required")
@@ -219,7 +328,12 @@ def main() -> int:
     ap.add_argument("--runs", type=int, default=1, help="runs per case (models are stochastic)")
     ap.add_argument("--dry-run", action="store_true", help="print the prompt, call nothing")
     ap.add_argument("--check", action="store_true", help="validate fixtures only")
+    ap.add_argument("--timeout", type=int, default=env_timeout(),
+                    help="seconds per run before it counts as a miss")
     args = ap.parse_args()
+
+    if args.runs < 1:
+        ap.error("--runs must be at least 1")
 
     if args.check:
         return check_fixtures()
@@ -243,12 +357,15 @@ def main() -> int:
 
         caught, notes = 0, []
         for _ in range(args.runs):
-            proc = subprocess.run(cmd, shell=True, input=prompt,
-                                  capture_output=True, text=True)
-            if proc.returncode != 0:
-                notes.append(f"agent exited {proc.returncode}: {proc.stderr.strip()[:120]}")
+            try:
+                code, out, err = run_agent(cmd, prompt, args.timeout)
+            except subprocess.TimeoutExpired:
+                notes.append(f"agent exceeded {args.timeout}s; process group killed")
                 continue
-            ok, why = grade(proc.stdout, spec)
+            if code != 0:
+                notes.append(f"agent exited {code}: {(err or '').strip()[:120]}")
+                continue
+            ok, why = grade(out, spec)
             caught += ok
             if not ok:
                 notes.append(why)

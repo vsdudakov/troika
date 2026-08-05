@@ -32,6 +32,9 @@ HARNESS_CMD='codex exec -m gpt-5.6-sol -'                    python3 tests/run.p
 **Always `--runs 5` or more.** Models are stochastic; a single run tells you nothing. Read the
 rate, not the pass/fail.
 
+Each run is capped at `--timeout` seconds (`HARNESS_TIMEOUT`, default 600). An agent that
+overruns is killed and scored as a miss — a hung process must not take the suite with it.
+
 ## What the cases are
 
 `fixtures/repo` is a tiny layered Python app (`api → service → repository → models`).
@@ -46,22 +49,25 @@ therefore the gate failing, never the diff being ambiguous.
 | `requirement-not-implemented` | requirement 3's route absent, work log claims it done | `Blocker` | 1 |
 | `scope-creep` | a destructive route the plan never asked for | `Major` | 1 |
 | `import-in-function` | repository import deferred into the function body | `Major` | 2 |
+| `verification-not-run` | clean code, work log reports `ruff`/`mypy` — commands the profile does not define | `Blocker` / `Major` | 3 |
 | `layering-violation` | `api` imports `repository`, skipping `service` | `Major` | 4 |
 | `n-plus-one` | per-portfolio repository call, batched one sits unused | `Major` | 5 |
 | `source-without-mirror-test` | new `allocation.py`, its mirror test deleted | `Blocker` | 6 |
 | `test-asserts-nothing-real` | tests assert only `is not None` / `isinstance` | `Blocker` | 6 |
 | `work-log-overstates-collection` | clean code, work log claims 14 collected against 9 written | `Blocker` | 6 |
+| `migration-hand-edited` | an index added by hand to an applied revision | `Blocker` / `Major` | 7 |
 | `contract-mismatch` | returns `list[tuple]`, plan pins `dict[str, float]` | `Major` | 8 |
 | `secret-in-diff` | hardcoded live-looking API key | `Blocker` | 9 |
 | `ai-attribution` | comment naming an AI product | `Blocker` | 9 |
 | `debug-print` | `print("DEBUG …")` left in the hot path | `Major` | 9 |
 | `truncated-file` | new file ends mid-function, no return | `Blocker` | 9 |
 
-Eight of the [reviewer's nine checks](../agents/reviewer.md#rules) have at least one case.
-Check 3 (verification commands) and check 7 (migrations) do not: the runner tells the role to
-assume lint passed, and the toy repo has no schema.
+All nine of the [reviewer's checks](../agents/reviewer.md#rules) have at least one case. Two of
+them — 3 and 7 — are graded against `severity: [Blocker, Major]`, because `reviewer.md` pins no
+single rating on either and both ratings gate the flow. Where it does pin one, the case pins the
+same one and a downgrade is a miss.
 
-**The two controls matter as much as the thirteen defects.** A gate that flags everything
+**The two controls matter as much as the fifteen defects.** A gate that flags everything
 passes every injection test and is worthless — `clean` catches that, and `nits-only` catches
 the subtler version where a reviewer blocks the flow on style the harness says must not gate.
 
@@ -95,13 +101,16 @@ skill: internal-review          # skills/<skill>.md
 remove: [path/to/delete.py]     # optional
 verdict: [Request changes]      # acceptable verdict lines
 expect_finding:                 # or `null` for a clean case
-  severity: Blocker
-  file: app/service/allocation.py
+  severity: Blocker             # or a list, when more than one gating rating is defensible
+  file: app/service/allocation.py   # or `any`, when the citation is not predictable
   keywords_any: [mirror, missing test, untested]
 forbid_severity: [Blocker, Major]   # clean cases only
 why: >
   Why this case is unambiguous.
 ```
+
+`--check` rejects a severity or verdict label that is not one the harness recognises: a typo
+there makes a case unpassable, and without the check that only surfaces after a paid run.
 
 Grading is deliberately fuzzy on wording and strict on structure: the finding must carry the
 right **severity**, name the right **file**, and hit at least one keyword. Models will not
@@ -109,8 +118,8 @@ reproduce an exact sentence, and asserting on one would make the suite useless.
 
 ## Limits
 
-- The three cases all exercise the **reviewer**. Gates owned by tester, QA, and releaser have
-  no coverage yet — tester cases need `pytest` installed and a real run.
+- Every case exercises the **reviewer**. Gates owned by tester, QA, and releaser have no
+  coverage yet — tester cases need `pytest` installed and a real run.
 - Nothing here tests the orchestrator: lane assignment, parallelism, and the caps are
   unmeasured.
-- A passing suite means these three defects are caught. It does not mean the harness is good.
+- A passing suite means these fifteen defects are caught. It does not mean the harness is good.

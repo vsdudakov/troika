@@ -59,9 +59,9 @@ Check all nine on the whole diff and required context.
 - Verification: <Pass | Fail> — <evidence>
 - Layering: <Pass | Fail | N/A> — <evidence>
 - Queries: <Pass | Fail | N/A> — <evidence>
+- Tests: <Pass | Fail> — <evidence>
 - Migrations: <Pass | Fail | N/A> — <evidence>
 - Contract match: <Pass | Fail | N/A> — <evidence>
-- Tests: <Pass | Fail> — <evidence>
 - Hygiene: <Pass | Fail> — <evidence>
 
 ### Findings

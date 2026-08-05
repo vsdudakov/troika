@@ -1,0 +1,15 @@
+# reviewer › Rules check 3: "Verification — profile commands only."
+# The code is _base, unchanged and correct. The only defect is the evidence: the work log
+# reports two commands the profile does not define and never runs the one it does. The
+# profile's Commands section spells out that a command outside the table is not a gate.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: [Blocker, Major]
+  file: any
+  keywords_any: [compileall, verification, profile command, lint command, ruff, mypy, not run, no evidence]
+why: >
+  Substituted commands, not a failed one — so the role cannot pass the check by reading a
+  green exit code. It has to compare what was run against the profile's table. `file: any`
+  because the finding cites the work log, the profile, or nothing at all.

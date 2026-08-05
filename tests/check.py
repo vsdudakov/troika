@@ -21,15 +21,30 @@ from pathlib import Path
 os.chdir(Path(__file__).resolve().parent.parent)
 
 FAIL = []
+# These files are read several times over; the tree is small enough to hold all of it.
+TEXT = {}
+# The one path outside this repo that a role is allowed to link to: the workspace profile,
+# a sibling of the repo root. Absent in CI, so it cannot be checked by existence.
+PROFILE = os.path.join(os.pardir, "AGENTS.md")
 
 
 def fail(where, msg):
     FAIL.append(f"{where}: {msg}")
 
 
+def text_of(path):
+    if path not in TEXT:
+        TEXT[path] = Path(path).read_text(encoding="utf-8")
+    return TEXT[path]
+
+
+def links_in(path):
+    return re.findall(r"\[([^\]]*)\]\(([^)]+)\)", text_of(path))
+
+
 def anchors_of(path):
     """Every fragment a markdown link can resolve to in `path`."""
-    text = open(path).read()
+    text = text_of(path)
     found = set(re.findall(r'<a\s+(?:id|name)="([^"]+)"', text))
     for heading in re.findall(r"^#{1,6}\s+(.+)$", text, re.M):
         found.add(re.sub(r"[^\w\s-]", "", heading).strip().lower().replace(" ", "-"))
@@ -49,14 +64,20 @@ def body_files():
 def check_links():
     cache = {}
     for f in role_and_skill_files():
-        for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", open(f).read()):
+        for _, target in links_in(f):
             if target.startswith(("http", "mailto")):
                 continue
             path, _, frag = target.partition("#")
             resolved = os.path.normpath(os.path.join(os.path.dirname(f), path)) if path else f
             if not os.path.exists(resolved):
-                # The workspace profile lives outside this repo and is absent in CI.
+                # The workspace profile lives outside this repo and is absent in CI, so it
+                # is exempt from the existence check — but only at the one depth that is
+                # correct. Matching on the basename alone would wave through `../AGENTS.md`
+                # from `skills/`, which is exactly the dead link this check exists to catch.
+                if resolved == PROFILE:
+                    continue
                 if os.path.basename(resolved) == "AGENTS.md":
+                    fail(f, f"{target} resolves to {resolved}, not the profile at {PROFILE}")
                     continue
                 fail(f, f"dead link {target}")
                 continue
@@ -77,7 +98,7 @@ def check_profile_anchors():
         return
     known = anchors_of(template)
     for f in role_and_skill_files():
-        for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", open(f).read()):
+        for _, target in links_in(f):
             path, _, frag = target.partition("#")
             if not frag or os.path.basename(path) != "AGENTS.md":
                 continue
@@ -87,13 +108,30 @@ def check_profile_anchors():
 
 # --- 3. the nine checks are duplicated by hand in three files ----------------
 
+def same_check(item, rule):
+    """The copies abbreviate — "tests present" for "Tests" — so compare by prefix."""
+    return item.startswith(rule) or rule.startswith(item)
+
+
+def check_sequence(where, items, rules, what):
+    """Order is part of the contract, not just membership: a reviewer works down its rule
+    list and fills the output rows in the order it reads them, and a copy that reorders
+    them silently pairs the wrong evidence with the wrong row."""
+    if len(items) != len(rules):
+        fail(where, f"{what} has {len(items)} entries; agents/reviewer.md defines {len(rules)}")
+        return
+    for i, (item, rule) in enumerate(zip(items, rules), 1):
+        if not same_check(item, rule):
+            fail(where, f"{what} entry {i} is '{item}'; agents/reviewer.md rule {i} is '{rule}'")
+
+
 def check_duplicated_enumerations():
-    rules = re.findall(r"^\d+\.\s+\*\*(.+?)\*\*", open("agents/reviewer.md").read(), re.M)
-    names = {r.lower() for r in rules}
+    reviewer = text_of("agents/reviewer.md")
+    rules = [r.lower() for r in re.findall(r"^\d+\.\s+\*\*(.+?)\*\*", reviewer, re.M)]
 
     inline = {}
     for f in ("skills/internal-review.md", "skills/pr-review.md"):
-        m = re.search(r"reviewer › Rules\]\([^)]+\):\s*(.+?)\.$", open(f).read(), re.M)
+        m = re.search(r"reviewer › Rules\]\([^)]+\):\s*(.+?)\.$", text_of(f), re.M)
         if not m:
             fail(f, "no inline copy of the reviewer check list found")
             continue
@@ -103,31 +141,25 @@ def check_duplicated_enumerations():
         fail("skills/", "internal-review.md and pr-review.md list the reviewer checks differently")
 
     for f, items in inline.items():
-        if len(items) != len(rules):
-            fail(f, f"lists {len(items)} reviewer checks; agents/reviewer.md defines {len(rules)}")
-        for item in items:
-            if not any(item.startswith(n) or n.startswith(item) for n in names):
-                fail(f, f"check '{item}' matches no rule name in agents/reviewer.md")
+        check_sequence(f, items, rules, "inline check list")
 
-    # the output template must carry one row per rule
-    rows = re.findall(r"^- ([A-Z][A-Za-z ]+): <Pass", open("agents/reviewer.md").read(), re.M)
-    if len(rows) != len(rules):
-        fail("agents/reviewer.md", f"output template has {len(rows)} rows for {len(rules)} rules")
-    for row in rows:
-        if row.lower() not in names:
-            fail("agents/reviewer.md", f"output row '{row}' matches no rule name")
+    # the output template must carry one row per rule, in the order the rules are stated
+    rows = [r.lower() for r in re.findall(r"^- ([A-Z][A-Za-z ]+): <Pass", reviewer, re.M)]
+    check_sequence("agents/reviewer.md", rows, rules, "output template")
 
 
 # --- 4. file shapes declared in the two READMEs -----------------------------
 
 AGENT_SECTIONS = ["Scope", "Inputs", "Rules", "Gates", "Output"]
+MODEL_SUBS = ["Claude", "Codex", "Why"]
+MODEL_SUBS_OPTIONAL = ["Raise it when", "Drop it when", "Also"]
 
 
 def check_agent_shape():
     for f in sorted(glob.glob("agents/*.md")):
         if f.endswith("README.md"):
             continue
-        text = open(f).read()
+        text = text_of(f)
         body = re.sub(r"```.*?```", "", text, flags=re.S)  # fenced examples are not sections
         sections = re.findall(r"^## (.+)$", body, re.M)
         if sections != AGENT_SECTIONS:
@@ -136,15 +168,18 @@ def check_agent_shape():
         if header != ["Owns", "Runs", "Model"]:
             fail(f, f"header list {header} != ['Owns', 'Runs', 'Model']")
         sub = re.findall(r"^  - \*\*([A-Za-z ]+)\*\*", text, re.M)
-        if sub[:3] != ["Claude", "Codex", "Why"]:
-            fail(f, f"Model sub-bullets start {sub[:3]} != ['Claude', 'Codex', 'Why']")
+        if sub[:3] != MODEL_SUBS:
+            fail(f, f"Model sub-bullets start {sub[:3]} != {MODEL_SUBS}")
+        # An undeclared sub-bullet is drift the README does not describe.
+        for extra in [s for s in sub[3:] if s not in MODEL_SUBS_OPTIONAL]:
+            fail(f, f"Model sub-bullet '{extra}' is not one of {MODEL_SUBS_OPTIONAL}")
 
 
 def check_skill_shape():
     for f in sorted(glob.glob("skills/*.md")):
         if f.endswith("README.md"):
             continue
-        text = open(f).read()
+        text = text_of(f)
         kind = re.search(r"\*\*Kind\*\* (\w+)", text)
         if not kind:
             fail(f, "no **Kind** declared")
@@ -157,7 +192,7 @@ def check_skill_shape():
 
 def check_frontmatter():
     for f in body_files():
-        m = re.match(r"---\nname: (\S+)\ndescription: (.+)\n", open(f).read())
+        m = re.match(r"---\nname: (\S+)\ndescription: (.+)\n", text_of(f))
         if not m:
             fail(f, "frontmatter must open with name: then description:")
             continue
@@ -169,7 +204,7 @@ def check_frontmatter():
 
 def check_style():
     for f in role_and_skill_files():
-        for i, line in enumerate(open(f), 1):
+        for i, line in enumerate(text_of(f).splitlines(), 1):
             if re.search(r"[^\s]—[^\s]", line):
                 fail(f, f"line {i}: em dash needs spaces around it")
 
