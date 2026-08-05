@@ -20,6 +20,11 @@ Each file declares its **Kind** in the header line, which fixes its body shape:
 | QA verify (local stack) | [qa-verify.md](qa-verify.md) | [qa](../agents/qa.md) |
 | Release PR (commit, PR, proofs, ticket) | [release-pr.md](release-pr.md) | [releaser](../agents/releaser.md) |
 | PR review (post-PR, posted to the PR host) | [pr-review.md](pr-review.md) | [reviewer](../agents/reviewer.md) |
+| Ticket intake (create or reshape a ticket) | [ticket-intake.md](ticket-intake.md) | [architect](../agents/architect.md) · [commenter](../agents/commenter.md) |
+| Incident triage (read-only, from observability) | [incident-triage.md](incident-triage.md) | [architect](../agents/architect.md) · [backend-dev](../agents/backend-dev.md) |
+| Demo prep (integration branch → deployed demo) | [demo-prep.md](demo-prep.md) | [releaser](../agents/releaser.md) |
+| Release cut (periodic release, end to end) | [release-cut.md](release-cut.md) | [releaser](../agents/releaser.md) |
+| Release notes (diff → customer-readable notes) | [release-notes.md](release-notes.md) | [releaser](../agents/releaser.md) |
 
 ## References
 
@@ -36,4 +41,4 @@ Each file declares its **Kind** in the header line, which fixes its body shape:
 | Plan | [plan-template.md](plan-template.md) | [architect](../agents/architect.md) |
 | PR body and title | [pr-template.md](pr-template.md) | [releaser](../agents/releaser.md) via [commenter](../agents/commenter.md) |
 
-Skills carry no repo names, commands, URLs, or tracker keys — those are read from the workspace's [AGENTS.md](../../AGENTS.md) by anchor ([why](../README.md)). Shell quoting and the absolute-path rule are in [llm/README.md › Conventions](../README.md#conventions).
+Skills carry no repo names, commands, URLs, or tracker keys — those are read from the workspace's [AGENTS.md](../../AGENTS.md) by anchor ([why](../README.md)). A skill whose anchor the workspace does not define simply does not apply there: no release cadence, no [release-cut](release-cut.md); no observability platform, no [incident-triage](incident-triage.md). Shell quoting and the absolute-path rule are in [llm/README.md › Conventions](../README.md#conventions).
