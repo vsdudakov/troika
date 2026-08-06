@@ -1,0 +1,3 @@
+# Documentation toolchain. `[imaging]` powers the social-card plugin, which is
+# enabled only when CI=true (see mkdocs.yml) because it needs system Cairo.
+mkdocs-material[imaging]>=9.7
