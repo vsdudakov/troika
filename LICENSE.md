@@ -19,3 +19,15 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Third-party content
+
+The licence above covers the code, the prompts and the documentation. It does not
+cover, and cannot cover, work this project did not author:
+
+- `docs/assets/troika.jpg` — Nikolai Sverchkov (1817–1898), *A Troika Ride Through The
+  Snow*. In the public domain: the artist died more than 70 years ago and the work was
+  published before 1930. Sourced from
+  [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Nikolai_Sverchkov_-_A_Troika_Ride_Through_The_Snow.jpg),
+  where it carries the `{{PD-Art}}` tag. Reuse it under the public domain, not under
+  the MIT licence above.

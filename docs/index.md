@@ -5,6 +5,11 @@ description: Troika is an AI coding-agent pipeline for full-stack developers. It
 
 # Troika
 
+![A troika — three horses harnessed abreast, pulling one sleigh](assets/troika.jpg)
+
+*Nikolai Sverchkov (1817–1898), A Troika Ride Through The Snow. Public domain, via
+[Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Nikolai_Sverchkov_-_A_Troika_Ride_Through_The_Snow.jpg).*
+
 **Troika turns a tracker ticket into a reviewed, QA-verified pull request.** An AI
 coding-agent pipeline for full-stack developers — plan, implement, review, test, verify,
 ship — with a gate at every step. Install it as a plugin for
