@@ -41,11 +41,15 @@ jobs:
           pip install -r docs/requirements.txt
       - name: Build with MkDocs
         run: mkdocs build --strict
-      # enablement: turns Pages on if it is not already, instead of failing. A fresh
-      # repository has no Pages site, and the deploy is the only thing that would say so.
+      # Pages has to exist before this runs, and this job cannot create it: creating a
+      # Pages site needs repo-admin, which GITHUB_TOKEN does not have, so `enablement:
+      # true` fails with "Resource not accessible by integration". Enable it once, by
+      # hand, from an account with admin on the repo:
+      #
+      #   gh api -X POST repos/vsdudakov/troika/pages -f build_type=workflow
+      #
+      # or Settings → Pages → Source: GitHub Actions.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

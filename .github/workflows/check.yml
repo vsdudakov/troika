@@ -1,15 +1,20 @@
-name: check
+name: CI
 
+# The no-spend gates. `workflow_dispatch` is here so the same job can be run by hand
+# from the Actions tab (or `gh workflow run CI`) against any branch — useful after a
+# settings change, or to re-run a gate without pushing an empty commit.
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   structure:
+    name: Structural gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
