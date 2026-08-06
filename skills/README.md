@@ -4,7 +4,7 @@ Tool-neutral procedures, references, templates. Run: `run troika/skills/develop-
 
 One directory per skill, holding one `SKILL.md`. That is the shape Claude Code, Codex, and
 Cursor all discover a skill in, so the procedure is the file they load — there is no wrapper
-and no second copy. The `/` commands are generated from this frontmatter, for the eight procedures a session
+and no second copy. The `/` commands are generated from this frontmatter, for the nine procedures a session
 starts on; every other skill is discovered by name instead. See [plugin/](../plugin/README.md).
 
 **Kind** fixes shape:
@@ -19,6 +19,7 @@ starts on; every other skill is discovered by name instead. See [plugin/](../plu
 
 | Skill | File | Run by |
 | --- | --- | --- |
+| Workspace setup (folder of repos → `.troika/` + profile) | [workspace-setup.md](workspace-setup/SKILL.md) | [architect](../agents/architect.md) |
 | Develop flow (ticket → merge-ready PR) | [develop-flow.md](develop-flow/SKILL.md) | orchestrator |
 | Spike (ticket → reviewed plan, no code) | [spike.md](spike/SKILL.md) | [architect](../agents/architect.md) |
 | Plan review (pre-code gate, replaces human approval) | [plan-review.md](plan-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
@@ -52,4 +53,4 @@ starts on; every other skill is discovered by name instead. See [plugin/](../plu
 | Plan | [plan-template.md](plan-template/SKILL.md) | [architect](../agents/architect.md) |
 | PR body and title | [pr-template.md](pr-template/SKILL.md) | [releaser](../agents/releaser.md) via [commenter](../agents/commenter.md) |
 
-Skills contain no organization facts; read them from workspace [AGENTS.md](../../AGENTS.md). Missing anchor means not applicable. See [conventions](../README.md#conventions).
+Skills contain no organization facts; read them from the workspace profile, `$TROIKA_PROFILE`. Missing anchor means not applicable. See [conventions](../README.md#conventions).

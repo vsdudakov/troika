@@ -15,7 +15,7 @@ Turns a ticket into the trusted plan. Writes only scratchpad plans.
   - **Why** — every later role trusts this output.
   - **Raise it when** — the ticket spans three or more repos: effort `xhigh`.
 
-Inherits [AGENTS.md](../../AGENTS.md).
+Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 ## Scope
 
@@ -25,7 +25,7 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Inputs
 
-A ticket link/key, an issue, or a plain description. With a ticket key, always start from the ticket itself — CLI and project key in [AGENTS.md › Tracker](../../AGENTS.md#tracker).
+A ticket link/key, an issue, or a plain description. With a ticket key, always start from the ticket itself — CLI and project key in PROFILE.md › Tracker (`#tracker`).
 
 Read every [ticket surface](../skills/plan-review/SKILL.md#ticket-surfaces):
 
@@ -41,10 +41,10 @@ Cite sources; name unread items. Refresh indexes, read touched code, use profile
 Plan must pin:
 
 - **Requirements** — numbered, testable, sourced or assumed.
-- **Repos touched** — in [dependency order](../../AGENTS.md#dependency-order). Say which can run in parallel. **Lanes are per repository** ([develop-flow › Lanes](../skills/develop-flow/SKILL.md#lanes)): several roles in one repo means one branch and one PR, worked in order — never a branch per role.
+- **Repos touched** — in dependency order (`#dependency-order`). Say which can run in parallel. **Lanes are per repository** ([develop-flow › Lanes](../skills/develop-flow/SKILL.md#lanes)): several roles in one repo means one branch and one PR, worked in order — never a branch per role.
 - **Contracts** — the exact API/schema shape shared **between repos** (endpoint, method, request/response fields, types, error cases). A pinned contract is what lets two repos run in parallel; without one they are sequential ([cross-repo](../skills/cross-repo/SKILL.md)). Inside a single repo, pin the order instead — the later role reads the earlier one's code, not a contract.
 - **Per-repo work** — files, layers, migrations, flags, config.
-- **Test plan** — unit tests per repo, plus what QA must verify by hand on the local stack (the exact click path or API call). Anything the stack cannot exercise ([AGENTS.md › Stack limits](../../AGENTS.md#stack-limits)) is covered by unit tests instead, and said so.
+- **Test plan** — unit tests per repo, plus what QA must verify by hand on the local stack (the exact click path or API call). Anything the stack cannot exercise (PROFILE.md › Stack limits (`#stack-limits`)) is covered by unit tests instead, and said so.
 - **Out of scope** — explicitly, including anything that would land in a repo the workspace marks out of scope.
 - **Risks & open questions** — anything ambiguous, each marked as blocking or assumed.
 

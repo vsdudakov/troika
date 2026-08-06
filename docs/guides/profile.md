@@ -1,15 +1,15 @@
 ---
 title: Writing the profile
-description: AGENTS.md is the only file that knows your organisation. What each section must answer, how the anchor contract works, and the sections that pay off first.
+description: .troika/PROFILE.md is the only file that knows your organisation. What each section must answer, how the anchor contract works, and the sections that pay off first.
 ---
 
 # Writing the profile
 
-`AGENTS.md` in your workspace is the single place Troika learns what your codebase is. Every
+`.troika/PROFILE.md` in your workspace is the single place Troika learns what your codebase is. Every
 role reads it; no role hardcodes anything it contains.
 
 Start from
-[`AGENTS.template.md`](https://github.com/vsdudakov/troika/blob/main/AGENTS.template.md) —
+[`PROFILE.template.md`](https://github.com/vsdudakov/troika/blob/main/PROFILE.template.md) —
 it carries the full anchor list with a one-line brief for each section.
 
 ## The anchor contract

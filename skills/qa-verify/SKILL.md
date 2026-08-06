@@ -96,7 +96,7 @@ Exercise adjacent paths and the applicable integration suite. A suite using defa
 
 ## 7. Stack limits
 
-List applicable [stack limits](../../../AGENTS.md#stack-limits) and alternate coverage.
+List applicable stack limits (`#stack-limits`) and alternate coverage.
 
 ## 8. Proofs for the PR
 

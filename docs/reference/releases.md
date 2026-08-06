@@ -172,7 +172,7 @@ Troika versions the **contract**, not an API:
 - **patch** — wording, clarifications, a new gotcha, a tightened rule that rejects the same
   work it always should have.
 - **minor** — a new skill, a new role, a new command, a new optional profile anchor.
-- **major** — a change that makes an existing workspace's `AGENTS.md` or `.troika.json`
+- **major** — a change that makes an existing workspace's `.troika/PROFILE.md` or `settings.json`
   wrong: a renamed anchor, a removed variable, a changed handoff filename.
 
 Anything that would break a written profile is a major, even if it is one word.

@@ -48,11 +48,11 @@ Release it as the last thing you do, after the work log is written: `rm -f "$LAN
 
 ## 3. Implement
 
-Follow profile [rules](../../../AGENTS.md#rules), [style](../../../AGENTS.md#style), [layering](../../../AGENTS.md#layering), and role.
+Follow profile rules (`#rules`), style (`#style`), layering (`#layering`), and role.
 
 Imports stay at top. Fix cycles by direction, lower layer, or split; never defer imports. Stop if scope cannot support the fix.
 
-Migrations: generate with the repo's command ([AGENTS.md › Commands](../../../AGENTS.md#commands)) — never hand-edit an applied migration.
+Migrations: generate with the repo's command (PROFILE.md › Commands (`#commands`)) — never hand-edit an applied migration.
 
 <a id="tests"></a>
 ## 4. Tests, with the code — written, not run
@@ -75,9 +75,9 @@ Run exactly the profile's verification commands for touched areas — none inven
 **No test executes here** — not a targeted run, not a single node ID "just to check".
 
 <a id="collect"></a>
-**Collect them, though.** Run the framework's collection-only mode over the test files you wrote — `pytest --collect-only <paths>` or the profile's equivalent ([AGENTS.md › Commands](../../../AGENTS.md#commands)). It runs no assertion and no fixture body, so the no-red-green-loop design holds and the tester still owns the first real execution. What it does catch is exactly what a blind writer produces: an unresolved import, a missing fixture, a parametrize list that collects nothing, a name outside the discovery pattern. Each of those costs a full step 4 + step 5 cycle if it reaches the tester instead. Confirm the collected count equals the number of tests you wrote, and put both in the work log.
+**Collect them, though.** Run the framework's collection-only mode over the test files you wrote — `pytest --collect-only <paths>` or the profile's equivalent (PROFILE.md › Commands (`#commands`)). It runs no assertion and no fixture body, so the no-red-green-loop design holds and the tester still owns the first real execution. What it does catch is exactly what a blind writer produces: an unresolved import, a missing fixture, a parametrize list that collects nothing, a name outside the discovery pattern. Each of those costs a full step 4 + step 5 cycle if it reaches the tester instead. Confirm the collected count equals the number of tests you wrote, and put both in the work log.
 
-**Never run a formatter or auto-fixing lint target in a worktree whose dependency directory is a symlink** — it walks the shared environment and rewrites it. Remove the symlink first, format from the primary clone, or use the profile's read-only variant ([AGENTS.md › Gotchas](../../../AGENTS.md#gotchas)).
+**Never run a formatter or auto-fixing lint target in a worktree whose dependency directory is a symlink** — it walks the shared environment and rewrites it. Remove the symlink first, format from the primary clone, or use the profile's read-only variant (PROFILE.md › Gotchas (`#gotchas`)).
 
 <a id="notests"></a>
 ### No-test exception

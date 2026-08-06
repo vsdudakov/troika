@@ -11,7 +11,7 @@ Model and effort are passed at spawn, never read from the file ([agents › Mode
 
 ```bash
 # architect — Claude, high effort
-claude --model claude-fable-5 --effort high -p "read $TROIKA_HOME/agents/architect.md and act as that role for <TICKET>"
+claude --model claude-fable-5 --effort high -p "read ${CLAUDE_PLUGIN_ROOT}/agents/architect.md and act as that role for <TICKET>"
 # reviewer — Codex, high effort, different family from whoever wrote the code
 codex -m gpt-5.6-sol -c model_reasoning_effort="high" ...
 ```
@@ -52,7 +52,7 @@ Tests run locally once: dev writes (3), reviewer reads (4), [tester](../../agent
 ## Lanes — one per repository
 
 - **Two repos:** two worktrees, branches, PRs; parallel only with a pinned contract.
-- **One repo, many roles:** one worktree, branch, PR. Roles take turns in [dependency order](../../../AGENTS.md#dependency-order), inside their [ownership](../../../AGENTS.md#ownership).
+- **One repo, many roles:** one worktree, branch, PR. Roles take turns in dependency order (`#dependency-order`), inside their ownership (`#ownership`).
 
 Never let two agents write one worktree. Split by repo, not role or feature.
 
@@ -83,22 +83,22 @@ Never let two agents write one worktree. Split by repo, not role or feature.
 | A fix → re-review → re-test | a fix is a diff, and no diff advances unreviewed |
 | All lanes → QA | one stack, one branch under test |
 | Provider PR → consumer PR | dependency order ([cross-repo](../cross-repo/SKILL.md)) |
-| A suite the profile marks sequential | correctness, not speed ([AGENTS.md › Gotchas](../../../AGENTS.md#gotchas)) |
+| A suite the profile marks sequential | correctness, not speed (PROFILE.md › Gotchas (`#gotchas`)) |
 | Migration work inside one repo | migration numbers collide silently |
 
-Report wall clock per lane. Resolve the paths once (`plugin/resolve.py`); all handoff paths are absolute ([workspace paths](../../../AGENTS.md#workspace-paths)).
+Report wall clock per lane. Resolve the paths once (`plugin/resolve.py`); all handoff paths are absolute (workspace paths (`#workspace-paths`)).
 
 ## 0. Fan out — index, ticket, memory, all at once
 
 Start together; join before planning:
 
-1. Refresh each repo index from its root ([code search](../../../AGENTS.md#code-search)); dev repeats this in its worktree.
+1. Refresh each repo index from its root (code search (`#code-search`)); dev repeats this in its worktree.
 2. Read every ticket surface ([plan-review](../plan-review/SKILL.md#ticket-surfaces)).
 3. Run `ls $TROIKA_MEMORY/*.md`; read every entry ([memory](../memory/SKILL.md)).
 
 ## 1. Collect requirements and plan
 
-Run [agents/architect.md](../../agents/architect.md) on the step 0 material — tracker access and auth check in [AGENTS.md › Tracker](../../../AGENTS.md#tracker).
+Run [agents/architect.md](../../agents/architect.md) on the step 0 material — tracker access and auth check in PROFILE.md › Tracker (`#tracker`).
 
 Fan out reading, not decisions: one read-only probe per area finds behavior, shape, and tests with `file:line` evidence. Architect decides. Ticket keys use profile casing; a false "missing" issue suggests stale auth.
 
@@ -116,13 +116,13 @@ Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md`.
 
 Ask the human only for scope/behavior with no safe assumption, unowned scope, undefined completion, or a hit cap ([human](../plan-review/SKILL.md#human)). `Approve` authorizes downstream commits and PRs.
 
-On `Approve`, **if the profile declares an in-progress transition** ([AGENTS.md › Tracker](../../../AGENTS.md#tracker) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — the flow's only chance, and step 7's transition is invalid from the initial state. Where the profile declares none, make **no** tracker write here.
+On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — the flow's only chance, and step 7's transition is invalid from the initial state. Where the profile declares none, make **no** tracker write here.
 
 ## 3. Development — one lane per repo, no barrier downstream
 
 Dev roles run [implement-change.md](../implement-change/SKILL.md). One worktree, branch, and PR per repo. Finished lanes advance immediately.
 
-- [agents/backend-dev.md](../../agents/backend-dev.md) — the plan's backend paths, in [dependency order](../../../AGENTS.md#dependency-order).
+- [agents/backend-dev.md](../../agents/backend-dev.md) — the plan's backend paths, in dependency order (`#dependency-order`).
 - [agents/frontend-dev.md](../../agents/frontend-dev.md) — only the client app(s) it owns. Work in an app no role owns → stop and report.
 - Both in the **same repo** → they share its worktree and branch, sequentially in dependency order; the second starts from the first's work log and does not re-cut a branch.
 
@@ -154,13 +154,13 @@ Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` plus one log p
 
 ## 6. QA on the local stack + fix loop
 
-Run [qa-verify.md](../qa-verify/SKILL.md) on the dev worktrees and [local stack](../../../AGENTS.md#stack).
+Run [qa-verify.md](../qa-verify/SKILL.md) on the dev worktrees and local stack (`#stack`).
 
 1. Verify every requirement and adjacent regression; parallelize independent flows. Save one proof per requirement under `$TROIKA_SCRATCHPAD/proofs/<TICKET>/`.
 2. Blocker/Major → owner fixes; repeat review, tests, QA.
 3. Cap at 3 cycles.
 
-Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything ([AGENTS.md › Stack limits](../../../AGENTS.md#stack-limits)), and what is listed ships on unit tests alone.
+Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything (PROFILE.md › Stack limits (`#stack-limits`)), and what is listed ships on unit tests alone.
 
 ## 7. Release
 
@@ -191,4 +191,4 @@ PR URLs in dependency order · ticket state · plan/code review verdicts · unit
 
 Stop for: unsafe scope/behavior decision · unowned repo · loop cap · refused missing test · CI infra/secrets · failed required commit mode · failed authorized tracker call · stack still down after one reset/restart · undefined product decision. Record safe assumptions; continue.
 
-Check [AGENTS.md › Gotchas](../../../AGENTS.md#gotchas) before any workspace-level maintenance command mid-flow — dev work stays uncommitted in worktrees until step 6, and some of those commands delete worktrees without a prompt.
+Check PROFILE.md › Gotchas (`#gotchas`) before any workspace-level maintenance command mid-flow — dev work stays uncommitted in worktrees until step 6, and some of those commands delete worktrees without a prompt.

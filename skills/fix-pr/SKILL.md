@@ -58,7 +58,7 @@ gh api graphql -f query='
 
 Pin, and state in the report: PR state (a merged or closed PR is a stop condition), head
 branch, head repository owner, base branch, changed files, and the ticket key from the branch
-name, PR title, or body ([AGENTS.md › Branches](../../../AGENTS.md#branches)).
+name, PR title, or body (PROFILE.md › Branches (`#branches`)).
 
 `<KEY>` below is that ticket key where the PR has one, and `pr-<N>` where it does not. Every
 handoff file in this run is named from it.
@@ -119,14 +119,14 @@ comments more often than through the plan.
 
 ## 4. Implement — the owning dev role, one per repo
 
-Route each item by [AGENTS.md › Ownership](../../../AGENTS.md#ownership), then run
+Route each item by PROFILE.md › Ownership (`#ownership`), then run
 [implement-change](../implement-change/SKILL.md) for the items that role owns:
 
 - [backend-dev](../../agents/backend-dev.md) — server-side paths.
 - [frontend-dev](../../agents/frontend-dev.md) — only the client app(s) it owns. An app no
   role owns is a stop, not a judgement call.
 - Both in one repo — they share the worktree and take turns in
-  [dependency order](../../../AGENTS.md#dependency-order); the second starts from the first's
+  dependency order (`#dependency-order`); the second starts from the first's
   work log.
 
 The dev roles keep every rule they have in the flow: tests written with the code and
@@ -185,7 +185,7 @@ EOF
 git push <remote> <headRefName>    # no -u, no --force, no rebase
 ```
 
-**No AI attribution** anywhere in the message ([AGENTS.md](../../../AGENTS.md#no-ai-attribution)).
+**No AI attribution** anywhere in the message (`#no-ai-attribution`).
 The PR already exists: `gh pr create` here opens a duplicate against the same branch. Update
 the PR body only if the fix changed what the PR does, and then only the sections that are now
 wrong ([pr-template](../pr-template/SKILL.md)).
@@ -205,12 +205,12 @@ EOF
 
 One summary comment for the cycle goes on the PR itself: what was fixed, what was rejected
 and why, and what is still open. Resolve only threads this cycle actually answered, and only
-where the profile allows it ([AGENTS.md › Pull requests](../../../AGENTS.md#pull-requests)).
+where the profile allows it (PROFILE.md › Pull requests (`#pull-requests`)).
 
 ## 10. CI — green before this is done
 
 A push restarts CI and, where configured, the review bot. Watch every check with the command
-in [AGENTS.md › Pull requests](../../../AGENTS.md#pull-requests) — background it, suites run
+in PROFILE.md › Pull requests (`#pull-requests`) — background it, suites run
 tens of minutes — and handle failures exactly as the release flow does
 ([release-pr › CI](../release-pr/SKILL.md#ci)): code failures to the owning role, one re-run
 for a flake, infra and secrets to the human.

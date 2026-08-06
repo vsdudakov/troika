@@ -47,9 +47,9 @@ own context and hands off through files — never shared memory — so nothing d
 inherits an earlier role's assumptions.
 
 **Nothing in this repository names your organisation.** No repo, command, branch, tracker,
-URL, or person. Every such fact comes from one file you write once — `AGENTS.md` in your
-workspace — and every path comes from `.troika.json` beside it. Drop Troika into another
-workspace, write those two files, and the same pipeline runs unchanged.
+URL, or person. Every such fact comes from one directory in your workspace — `.troika/`,
+written by `/troika:setup` — holding the profile and the paths. Run setup in another folder of
+repos and the same pipeline runs there unchanged.
 
 ---
 
@@ -64,20 +64,19 @@ workspace, write those two files, and the same pipeline runs unchanged.
 - 🔌 **One tree, three hosts.** The same skills are `/troika:*` commands in Claude Code and
   Cursor, and model-invoked skills in Codex. Or skip the plugin and point any agent at the
   files by path.
-- 🏢 **Organisation-neutral by construction.** Org facts live in your `AGENTS.md` profile and
-  are linked **by anchor**; a procedure that hardcodes one is a bug, and CI fails it.
-- 📂 **Per-workspace paths.** `.troika.json` says where plans, worktrees and memory live —
-  one file per folder-of-repos, so a single installed plugin serves every client and org you
+- 🏢 **Organisation-neutral by construction.** Org facts live in your `.troika/PROFILE.md` and
+  are cited **by anchor**; a procedure that hardcodes one is a bug, and CI fails it.
+- 🧭 **Setup reads before it asks.** `/troika:setup` investigates your repos — manifests, CI,
+  linters, remotes — drafts every profile section it can prove, and only then asks about the
+  handful no file records.
+- 📂 **Per-workspace paths.** `.troika/settings.json` says where plans, worktrees and memory
+  live — one per folder-of-repos, so a single installed plugin serves every client and org you
   work in.
 - 🧪 **It is tested on itself.** A structural gate checks every link, anchor, and file shape;
   a behavioural gate plants seventeen known defects in a toy repo and asserts the role that
   claims to catch each one does.
 
 ## Install
-
-Troika works two ways, and they compose: **clone** it into a workspace (the roles read it by
-path — works in any agent, including ones with no plugin system), and optionally **install**
-it as a plugin for the `/` commands.
 
 **Claude Code**
 
@@ -89,7 +88,7 @@ claude plugin install troika@troika          # add --scope project to pin it to 
 **Codex**
 
 ```bash
-codex plugin marketplace add <path to a local clone>
+codex plugin marketplace add vsdudakov/troika
 codex plugin add troika@troika
 ```
 
@@ -99,67 +98,105 @@ codex plugin add troika@troika
 cursor-agent plugin marketplace add https://github.com/vsdudakov/troika
 ```
 
-**No plugin at all** — clone it and ask your agent to read a file:
-
-```bash
-git clone https://github.com/vsdudakov/troika
-```
+Restart the host, then set up the folder that holds your repos — once per workspace:
 
 ```
-read troika/skills/develop-flow/SKILL.md and run it for SCRUM-123
+/troika:setup
 ```
 
 ## Set up a workspace
 
-A *workspace* is the folder holding your repos. It needs two files.
-
-**1. `AGENTS.md`** — the project profile. Copy [`AGENTS.template.md`](AGENTS.template.md) and
-fill every section: which repos exist, who owns what, the exact verification commands, the
-base branch, the tracker, the local stack, the PR template, the release scheme. The
-**anchors are a contract** — roles link to them by name (`#commands`, `#branches`,
-`#tracker`, …) and a missing one is a role reading a dead link. `python3 tests/check.py`
-verifies every anchor the tree needs exists in the template.
-
-Where the profile declares a *limit* — no ticket transitions, one repo and one PR, no build
-step, a base branch that is not `origin/main` — the roles follow the profile, not the generic
-wording.
-
-**2. `.troika.json`** — where this workspace keeps its files. Every key is optional, relative
-paths resolve against the file, and absolute ones are taken as-is:
-
-```json
-{
-  "profile": "AGENTS.md",
-  "home": "troika",
-  "scratchpad": "troika/scratchpad",
-  "worktrees": "/Volumes/fast/acme/worktrees",
-  "memory": "troika/memory"
-}
-```
+A *workspace* is the folder holding your repos, and `/troika:setup` is what makes it one. It
+reads your repos, drafts the profile from what they prove, asks about what they cannot, and
+writes:
 
 ```
 <workspace>/
-  AGENTS.md      the project profile — yours, org-specific
-  .troika.json   where this workspace keeps its files
-  troika/        this repo — generic, shared across workspaces
-  <repos…>       your product repos, each an independent clone
+├── .troika/
+│   ├── settings.json   where this workspace keeps its files — committed
+│   ├── PROFILE.md      the project profile: what your codebase is — committed
+│   ├── .gitignore      keeps the three below out of your history
+│   ├── scratchpad/     plans, reviews, work logs, QA proofs
+│   ├── worktrees/      one checkout per branch
+│   └── memory/         dated observations about this workspace
+├── backend/            your repos, each an independent clone
+└── frontend/
 ```
 
-Roles run with their cwd deep inside a worktree, so they never guess a path — they resolve
-one:
+```mermaid
+flowchart LR
+  A[folder of repos] --> B{already set up?}
+  B -- yes --> Z([ask: leave · update · rewrite])
+  B -- no --> C[--init: settings.json,<br/>.gitignore, state dirs]
+  C --> D[probe every repo<br/>read-only]
+  D --> E[draft the anchors<br/>evidence can prove]
+  E --> F[ask what no repo records:<br/>tracker · ownership · voice · gotchas]
+  F --> G[confirm the whole draft, once]
+  G --> H([.troika/PROFILE.md])
+```
+
+Most of the profile is already in your repos — manifests, `Makefile`s, CI workflows, linter
+configs, git remotes, PR templates — so setup drafts the stack, the verification commands, the
+test framework, the base branch, the deploy triggers and the release scheme, and shows them for
+confirmation. It asks you only about what no file records: the tracker and **which writes a
+role may make**, ownership, voice, gotchas, and what a green local run does not prove.
+
+Run it again and it changes nothing without asking — leave it as it is, update it against what
+the repos now say, or rewrite the profile from the template.
+
+The profile's **anchors are a contract**. Roles cite them by id — `` `#commands` ``,
+`` `#branches` ``, `` `#tracker` `` — and a missing one is a role reading a reference that
+answers nothing. `python3 tests/check.py` verifies every anchor the tree cites exists in
+[`PROFILE.template.md`](PROFILE.template.md). Where the profile declares a *limit* — no ticket
+transitions, one repo and one PR, no build step, a base branch that is not `origin/main` — the
+roles follow the profile, not the generic wording.
+
+Paths come from `.troika/settings.json`. Every key is optional, relative values resolve against
+the workspace, and absolute ones are taken as-is — so worktrees can live on a faster disk:
+
+```json
+{
+  "profile": ".troika/PROFILE.md",
+  "scratchpad": ".troika/scratchpad",
+  "worktrees": "/Volumes/fast/acme/worktrees",
+  "memory": ".troika/memory"
+}
+```
+
+Roles run with their cwd deep inside a worktree, so they never guess a path — they resolve one:
 
 ```bash
-eval "$(python3 troika/plugin/resolve.py)"
-# exports TROIKA_WORKSPACE, TROIKA_PROFILE, TROIKA_HOME, TROIKA_WORKTREES, TROIKA_SCRATCHPAD, TROIKA_MEMORY
+eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py")"
+# exports TROIKA_WORKSPACE, TROIKA_PROFILE, TROIKA_WORKTREES, TROIKA_SCRATCHPAD, TROIKA_MEMORY
 ```
 
-The resolver walks up from wherever the role is standing to the workspace that owns it, so
-one installed plugin serves every workspace on the machine. See
+The resolver walks up from wherever the role is standing to the workspace that owns it, so one
+installed plugin serves every workspace on the machine. `.troika/settings.json` is the only
+marker and nothing falls back: no workspace above you is a stop, not a default. See
 [plugin/README.md](plugin/README.md#configuring-a-workspace).
 
 ## The pipeline
 
-[`develop-flow`](skills/develop-flow/SKILL.md) is the whole thing. Nine steps, each a gate:
+[`develop-flow`](skills/develop-flow/SKILL.md) is the whole thing. Nine steps, each a gate —
+and every failed gate goes back to the dev lanes rather than forward:
+
+```mermaid
+flowchart TD
+  T[ticket] --> P[1 · plan<br/>architect]
+  P --> PR{2 · plan review<br/>reviewer, other model family}
+  PR -- request changes --> P
+  PR -- approved --> D[3 · dev lanes, one per repo<br/>backend-dev · frontend-dev]
+  D --> IR{4 · internal review<br/>lint only, never runs tests}
+  IR -- blocker/major --> D
+  IR -- pass --> U{5 · unit tests<br/>tester, parallel lanes}
+  U -- fail --> D
+  U -- green --> Q{6 · QA on the local stack}
+  Q -- fail --> D
+  Q -- pass --> R[7 · release<br/>commit · PR · proofs · ticket]
+  R --> C{8 · CI + review watch}
+  C -- red --> D
+  C -- quiet --> M([merge-ready PR])
+```
 
 | Step | What happens | Who |
 | --- | --- | --- |
@@ -188,32 +225,133 @@ Or start somewhere else:
 /troika:release 2026.8.0             /troika:demo
 ```
 
-Eight commands, and every other procedure — plan-review, implement-change, internal-review,
+<details>
+<summary><b>What each of the other commands does, drawn</b></summary>
+
+**`/troika:spike`** — plan it, build nothing.
+
+```mermaid
+flowchart LR
+  T[ticket] --> F[fan out:<br/>index · ticket · memory]
+  F --> I[read-only probe per repo]
+  I --> P[plan + cost + alternatives]
+  P --> R{plan review<br/>cap 3 cycles}
+  R -- request changes --> P
+  R -- approved --> O([plan file — no branch, no code])
+```
+
+**`/troika:review`** — read-only PR review, one comment posted.
+
+```mermaid
+flowchart LR
+  A[PR] --> B[requirements:<br/>plan file, else the PR body]
+  B --> C[isolated worktree<br/>on the head branch]
+  C --> D[nine checks · lint only<br/>never runs tests, never edits]
+  D --> E[one comment:<br/>Blocker · Major · Nit]
+  E --> F([worktree removed])
+```
+
+**`/troika:fix`** — fix an open PR in place; never a second PR.
+
+```mermaid
+flowchart TD
+  A[PR, with or without a description] --> B[read the PR<br/>+ unresolved threads]
+  B --> C[worktree on the head branch]
+  C --> D[fix list, written before any edit]
+  D --> E[owning dev role per repo]
+  E --> F{internal review}
+  F -- blocker/major --> E
+  F -- pass --> G{unit tests}
+  G -- fail --> E
+  G -- green --> H{QA — only if user-visible}
+  H -- fail --> E
+  H -- pass --> I[commit + push, same branch]
+  I --> J[answer every thread]
+  J --> K{CI}
+  K -- red --> E
+  K -- green --> L([the same PR, updated])
+```
+
+**`/troika:qa`** — verify on the real local stack.
+
+```mermaid
+flowchart TD
+  A[PR, or the flow's lanes] --> B[point the stack at the branch]
+  B --> C[bring the stack up]
+  C --> D{split the change}
+  D -- frontend --> E[browser E2E<br/>before/after GIF]
+  D -- backend --> F[API calls + datastore checks]
+  E --> G[regression + integration suite]
+  F --> G
+  G --> H[stack limits:<br/>what a green run does not prove]
+  H --> I([proofs per requirement · Pass/Fail])
+```
+
+**`/troika:triage`** — production symptom to cause, changing nothing.
+
+```mermaid
+flowchart LR
+  A[symptom] --> B[pin the question]
+  B --> C[aggregate to the hot service]
+  C --> D[read raw events]
+  D --> E[follow traces into the code]
+  E --> F[blast radius + first occurrence]
+  F --> G([cause with evidence])
+```
+
+**`/troika:release`** — cut a periodic release.
+
+```mermaid
+flowchart LR
+  A[version] --> B[promote the previous pre-release]
+  B --> C[cut the branch<br/>+ pre-release]
+  C --> D[notes from the diff]
+  D --> E[QA plan]
+  E --> F[deploy to pre-production]
+  F --> G([announcement prepared, not posted])
+```
+
+**`/troika:demo`** — build the demo integration branch.
+
+```mermaid
+flowchart LR
+  A[label] --> B[collect the labelled PRs]
+  B --> C[reset the integration branch<br/>from the default branch]
+  C --> D[merge in conflict-minimising order]
+  D --> E{conflict}
+  E -- semantic --> S([stop and report])
+  E -- none --> F[deploy]
+  F --> G([team notification prepared])
+```
+
+</details>
+
+Nine commands, and every other procedure — plan-review, implement-change, internal-review,
 run-unit-tests, release-pr, release-notes, ticket-intake — is still a skill all three hosts
-discover, invocable by name when you want just that step.
+discover, invocable by name when you want just that step. Each command's flow, drawn:
+[Commands reference](https://vsdudakov.github.io/troika/reference/commands/).
 
 ## What is in the box
 
 | | |
 | --- | --- |
 | [`agents/`](ROLES.md) | the eight roles — scope, inputs, rules, gates, output, and the model and effort each runs on |
-| [`skills/`](skills/README.md) | 15 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside |
+| [`skills/`](skills/README.md) | 16 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside |
 | [`plugin/`](plugin/README.md) | the three host manifests, the generated commands, and [`resolve.py`](plugin/resolve.py) |
 | [`tests/`](tests/README.md) | the two gates on this tree |
-| [`AGENTS.template.md`](AGENTS.template.md) | the profile you fill in, and the anchor contract |
+| [`PROFILE.template.md`](PROFILE.template.md) | the profile setup fills in, and the anchor contract |
 
 Procedures: `develop-flow` · `spike` · `plan-review` · `implement-change` ·
 `internal-review` · `run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` · `fix-pr` ·
-`ticket-intake` · `incident-triage` · `demo-prep` · `release-cut` · `release-notes` — eight
-of them carry a `/` command, the rest are skills you name. References: `worktree` ·
+`ticket-intake` · `incident-triage` · `demo-prep` · `release-cut` · `release-notes` ·
+`workspace-setup` — nine of them carry a `/` command, the rest are skills you name. References: `worktree` ·
 `scratchpad` · `memory` · `cross-repo` · `tracker`. Templates: `plan-template` ·
 `pr-template`.
 
 Plans, proofs, worktrees and memory are **not in this repository at all** — they are
-per-workspace, ignored whole, and created wherever your `.troika.json` puts them by
-`python3 plugin/resolve.py --ensure`. Because they are *ignored* rather than absent,
-`git clean -xfd` here deletes all three, in-flight branches included. Clean with explicit
-paths or not at all.
+per-workspace, live under your `.troika/`, and are created wherever `settings.json` puts them.
+Because they are *ignored* rather than absent, `git clean -xfd` in a workspace deletes all
+three, in-flight branches included. Clean with explicit paths or not at all.
 
 ## How it stays honest
 

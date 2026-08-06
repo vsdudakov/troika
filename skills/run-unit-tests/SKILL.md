@@ -19,7 +19,7 @@ Read `ls $TROIKA_MEMORY/*.md` first — there is no index file ([memory](../memo
 Per worktree, use profile `<BASE>`. Intent-to-add exposes untracked files:
 
 ```bash
-BASE=<remote>/<default-branch>        # AGENTS.md › Branches
+BASE=<remote>/<default-branch>        # PROFILE.md › Branches
 cd "$TROIKA_WORKTREES/<worktree>"
 git fetch "${BASE%%/*}"
 git add -N -- .
@@ -30,8 +30,8 @@ git --no-pager diff --name-only
 Run only:
 
 1. **Test files in the diff** — every test file added or modified. Always run.
-2. **The mirror test of every changed source file** — the profile fixes where a source file's test lives ([AGENTS.md › Tests](../../../AGENTS.md#tests)); resolve each changed source to that path and run it if it exists. A changed source with no mirror test is a review defect, not a selection problem: report it and hand it back.
-3. **Tests directly tied to a changed symbol** — an existing test that imports the changed module or exercises a function, class, endpoint, or migration the diff changed. Resolve by symbol search over the test tree ([AGENTS.md › Code search](../../../AGENTS.md#code-search)), not by guessing.
+2. **The mirror test of every changed source file** — the profile fixes where a source file's test lives (PROFILE.md › Tests (`#tests`)); resolve each changed source to that path and run it if it exists. A changed source with no mirror test is a review defect, not a selection problem: report it and hand it back.
+3. **Tests directly tied to a changed symbol** — an existing test that imports the changed module or exercises a function, class, endpoint, or migration the diff changed. Resolve by symbol search over the test tree (PROFILE.md › Code search (`#code-search`)), not by guessing.
 
 Direct means the test names/imports the symbol. CI owns indirect regression. Record node IDs before running.
 
@@ -40,7 +40,7 @@ Direct means the test names/imports the symbol. CI owns indirect regression. Rec
 
 One lane per profile command area. Run ready lanes concurrently in their worktrees, narrowed to node IDs, full coverage flags.
 
-Inside a lane, use the runner's parallel flag where the profile documents one — except where the profile marks a suite sequential, which is correctness, not a speed trade ([AGENTS.md › Gotchas](../../../AGENTS.md#gotchas)).
+Inside a lane, use the runner's parallel flag where the profile documents one — except where the profile marks a suite sequential, which is correctness, not a speed trade (PROFILE.md › Gotchas (`#gotchas`)).
 
 Use parallel workers or joined background shells. Log each lane to `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>-<area>.log` — a failing lane is read from its log, never re-run to see what happened.
 
@@ -54,7 +54,7 @@ Per lane, confirm all four before calling it green:
 - The run collected the tests you selected — a typo in a node ID collects zero and still exits 0 on some runners.
 - The count run matches the count selected.
 - The coverage summary was reached where the profile's command produces one, and the missing-lines list is empty for the changed files.
-- No wrapper swallowed a crash ([AGENTS.md › Gotchas](../../../AGENTS.md#gotchas)).
+- No wrapper swallowed a crash (PROFILE.md › Gotchas (`#gotchas`)).
 
 Quote the shortest decisive line per failure — the assertion or error line, not the whole traceback.
 

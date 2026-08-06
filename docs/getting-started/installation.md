@@ -5,13 +5,14 @@ description: Install Troika as a plugin in Claude Code, Codex or Cursor, pin it 
 
 # Installation
 
-Troika works two ways, and they compose:
+Install it as a plugin — for `/troika:*` commands, subagents, and model-invoked skills — then
+run `/troika:setup` once in the folder that holds your repos. That is the whole install.
 
-1. **Clone it** into a workspace — the roles are markdown, so any agent reads them by path.
-2. **Install it as a plugin** — for `/troika:*` commands, subagents, and model-invoked skills.
+There is nothing to compile. The only executable surface is two Python scripts on the standard
+library, so any Python 3.9+ works and no virtualenv is needed.
 
-There is nothing to compile. The only executable surface is two Python scripts on the
-standard library, so any Python 3.9+ works and no virtualenv is needed.
+Troika is markdown underneath, so a clone plus "read this file" also works in a host with no
+plugin system at all — see [Running without a plugin](../guides/no-plugin.md).
 
 ## Claude Code
 
@@ -27,8 +28,8 @@ Verify what registered:
 
 ```bash
 claude plugin details troika
-#   Skills (21)  cross-repo, demo-prep, develop-flow, …
-#   Commands (7)  demo, dev, qa, release, review, spike, triage
+#   Skills (23)  cross-repo, demo-prep, develop-flow, …
+#   Commands (9)  demo, dev, fix, qa, release, review, setup, spike, triage
 #   Agents (8)   architect, backend-dev, …
 ```
 
@@ -86,7 +87,13 @@ plugin layer. See [Running without a plugin](../guides/no-plugin.md).
 
 ## Next
 
-The install is half of it. Troika does nothing useful until the workspace tells it what your
-codebase is:
+The install is half of it. Every command exits immediately until a workspace exists, because
+none of them will guess where your repos, plans and worktrees go:
+
+```
+/troika:setup
+```
+
+It reads your repos, drafts the profile from what they prove, and asks about the rest.
 
 [Set up a workspace :material-arrow-right:](workspace.md){ .md-button .md-button--primary }

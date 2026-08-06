@@ -13,7 +13,7 @@ With a profile written and paths resolved, one command runs everything:
 
 Start with a **small, well-specified ticket** in a repo whose profile section you trust. The
 pipeline is only as sharp as the facts you gave it, and the first run is as much a test of
-`AGENTS.md` as of the change.
+the profile as of the change.
 
 ## What you will see
 
@@ -42,7 +42,7 @@ It is supposed to stop. A gate that fails is the product working:
 - **QA fails** — a proof could not be captured, or behaviour did not match the requirement.
   Fix, re-verify.
 - **The resolver exits non-zero** — nothing ran. You are standing outside any workspace, or
-  `.troika.json` is missing; see [Paths](../concepts/paths.md).
+  `.troika/settings.json` is missing — run `/troika:setup`; see [Paths](../concepts/paths.md).
 
 ## Start somewhere else instead
 

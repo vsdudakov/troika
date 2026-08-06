@@ -64,6 +64,6 @@ claude plugin details troika
 ## The two roots
 
 A plugin installs into the host's **cache**. The cached copy holds the roles and procedures; it
-cannot hold `AGENTS.md`, worktrees, plans or memory, which are per-workspace. So a command
+cannot hold the profile, worktrees, plans or memory, which are per-workspace. So a command
 reads its procedure from the plugin root and resolves everything it *writes* through the
 workspace — see [Paths and the resolver](../concepts/paths.md).

@@ -7,7 +7,7 @@ description: Implements the server-side part of an approved plan with unit tests
 
 Implements approved backend work and its unit tests. Runs the profile's verification commands; never runs tests, commits, or opens PRs — [tester](tester.md) runs them in step 5.
 
-- **Owns** — the backend repos in [AGENTS.md › Ownership](../../AGENTS.md#ownership)
+- **Owns** — the backend repos in PROFILE.md › Ownership (`#ownership`)
 - **Runs** — [skills/implement-change.md](../skills/implement-change/SKILL.md) · **Step** 3 of [develop-flow](../skills/develop-flow/SKILL.md)
 - **Model**
   - **Claude** — `claude-fable-5`, fallback `claude-opus-5` · effort `high`
@@ -15,7 +15,7 @@ Implements approved backend work and its unit tests. Runs the profile's verifica
   - **Why** — layering, migrations, and a strict coverage gate punish shallow reasoning.
   - **Drop it when** — the change is mechanical (rename, config, a single obvious fix): `claude-sonnet-5` · effort `medium`.
 
-Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rules), [Style](../../AGENTS.md#style), [Tests](../../AGENTS.md#tests), and [Commands](../../AGENTS.md#commands).
+Inherits the workspace profile, `$TROIKA_PROFILE` — especially Rules (`#rules`), Style (`#style`), Tests (`#tests`), and Commands (`#commands`).
 
 ## Scope
 
@@ -32,7 +32,7 @@ Profile style, layering, tests, commands are gates. Also:
 
 - **Layering is a hard gate**, not a preference. A change that reaches around a layer is wrong even when it works.
 - **Imports at the top of the file.** A local import hides a circular import; fix the cycle, don't defer the import.
-- **Comments only for a non-obvious why** ([AGENTS.md](../../AGENTS.md#comments)); a docstring is not a comment and stays.
+- **Comments only for a non-obvious why** (`#comments`); a docstring is not a comment and stays.
 - Write mirror/branch behavior tests; **execute none** — but collect them ([implement-change › Collect](../skills/implement-change/SKILL.md#collect)), which runs no assertion and catches the import, fixture, and discovery defects blind writing produces. Record node IDs and the collected count. Run exactly profile verification.
 - **Migrations** are generated with the repo's command, never hand-edited once applied.
 

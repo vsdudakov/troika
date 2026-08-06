@@ -34,7 +34,7 @@ Every PR after the first declares its upstream PR(s) in the body ([pr-template](
 
 ## Verify per repo, then together
 
-After per-repo gates, run the applicable integration suite — then read what its result means ([AGENTS.md › Stack limits](../../../AGENTS.md#stack-limits)): a suite building from its own default-branch checkouts is a regression check, never evidence for the branch.
+After per-repo gates, run the applicable integration suite — then read what its result means (PROFILE.md › Stack limits (`#stack-limits`)): a suite building from its own default-branch checkouts is a regression check, never evidence for the branch.
 
 ## Gotchas
 

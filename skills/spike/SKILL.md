@@ -11,14 +11,14 @@ A ticket link in, an approved plan out. Nothing is implemented, branched, or com
 
 This is [develop-flow](../develop-flow/SKILL.md) steps 0 – 2 and nothing after them. Run it when the answer wanted is *what would this take* rather than *ship it*; when the plan is approved and the work is wanted, [develop-flow](../develop-flow/SKILL.md) picks up the same plan file at its step 3.
 
-Read-only over every repo. Set `TROIKA_WORKSPACE` first ([workspace paths](../../../AGENTS.md#workspace-paths)).
+Read-only over every repo. Set `TROIKA_WORKSPACE` first (workspace paths (`#workspace-paths`)).
 
 ## 1. Fan out — index, ticket, memory, all at once
 
 Start together; join before investigating:
 
-1. Refresh each repo index from its root ([code search](../../../AGENTS.md#code-search)).
-2. Read every ticket surface — description, comments, attachments, links, fields ([ticket surfaces](../plan-review/SKILL.md#ticket-surfaces)). The argument is a ticket key or link; auth and access per [AGENTS.md › Tracker](../../../AGENTS.md#tracker) and [tracker](../tracker/SKILL.md). A ticket key uses the profile's casing — a false "missing" issue usually means stale auth, not a missing ticket.
+1. Refresh each repo index from its root (code search (`#code-search`)).
+2. Read every ticket surface — description, comments, attachments, links, fields ([ticket surfaces](../plan-review/SKILL.md#ticket-surfaces)). The argument is a ticket key or link; auth and access per PROFILE.md › Tracker (`#tracker`) and [tracker](../tracker/SKILL.md). A ticket key uses the profile's casing — a false "missing" issue usually means stale auth, not a missing ticket.
 3. Run `ls $TROIKA_MEMORY/*.md`; read every entry ([memory](../memory/SKILL.md)).
 
 If the request arrives as prose with no ticket behind it, run [ticket-intake](../ticket-intake/SKILL.md) first and spike the ticket it produces.
@@ -30,10 +30,10 @@ Fan out reading, not decisions: one read-only probe per repo or area, each answe
 | The probe reports | Why the plan needs it |
 | --- | --- |
 | Where the behavior lives today | a plan pinned to a symbol that moved is wrong before dev starts |
-| The shape it is built in — layers, ownership, migrations | it decides the repo split and the [dependency order](../../../AGENTS.md#dependency-order) |
+| The shape it is built in — layers, ownership, migrations | it decides the repo split and the dependency order (`#dependency-order`) |
 | What already covers it in tests | it decides which requirements need new tests and which need QA proof |
 
-Probes read; they never edit, branch, or run the [local stack](../../../AGENTS.md#stack). The [architect](../../agents/architect.md) synthesizes them — a probe that proposes a design has exceeded its scope.
+Probes read; they never edit, branch, or run the local stack (`#stack`). The [architect](../../agents/architect.md) synthesizes them — a probe that proposes a design has exceeded its scope.
 
 Name every repo the change touches, including ones no role owns. An unowned repo is a finding, not a blocker to hide.
 

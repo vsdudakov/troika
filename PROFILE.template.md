@@ -1,8 +1,8 @@
-# AGENTS.template.md
+# PROFILE.template.md
 
-The project profile every workspace must provide. Copy to `<workspace>/AGENTS.md`, fill it in, delete the guidance in angle brackets.
+The project profile every workspace must provide. `/troika:setup` writes it for you: it reads your repos, drafts every section it can prove, asks about the rest, and saves the result as `<workspace>/.troika/PROFILE.md`. Filling it in by hand is the same job — copy this skeleton there, and delete the guidance in angle brackets.
 
-Troika ships as a plugin, so its roles and skills live in the host's plugin cache, not in your workspace — `${CLAUDE_PLUGIN_ROOT}` is where a running command finds them. Nothing in them names your organisation: they link into **this** file **by anchor**. Keep the anchor ids below exactly as written — the headings above them are yours to reword. An anchor with no content is a role reading a dead link.
+Troika ships as a plugin, so its roles and skills live in the host's plugin cache, not in your workspace — `${CLAUDE_PLUGIN_ROOT}` is where a running command finds them. Nothing in them names your organisation: they cite **this** file **by anchor**, as `` `#tracker` ``. Keep the anchor ids below exactly as written — the headings above them are yours to reword. An anchor with no content is a role reading a dead reference.
 
 Write no path to the plugin's own tree here. A role reads its procedure from `${CLAUDE_PLUGIN_ROOT}`, and everything it *writes* from the resolver's `$TROIKA_*` variables ([`#workspace-paths`](#workspace-paths)); a literal `troika/...` in this file is a path that is right in one install and wrong in every other.
 
@@ -37,7 +37,7 @@ Write no path to the plugin's own tree here. A role reads its procedure from `${
 ## Skeleton
 
 ```markdown
-# AGENTS.md — <Org>
+# PROFILE.md — <Org>
 
 The project profile for Troika. Roles reference these sections by anchor; Troika itself is installed as a plugin and is not part of this workspace.
 
@@ -61,12 +61,11 @@ The project profile for Troika. Roles reference these sections by anchor; Troika
 <a id="workspace-paths"></a>
 ## Workspace paths
 <the workspace root, and the rule that every path below it is used absolute>
-<the six variables the plugin's resolver exports, and what each holds here:>
-<`$TROIKA_WORKSPACE` · `$TROIKA_PROFILE` · `$TROIKA_HOME` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
+<the five variables the plugin's resolver exports, and what each holds here:>
+<`$TROIKA_WORKSPACE` · `$TROIKA_PROFILE` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
 <resolve them once per session: eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)">
 <the `/troika:*` commands already run that as their first step; spell it out here for a role or script started outside one>
-<no plugin installed — a plain clone instead: eval "$(python3 <clone>/plugin/resolve.py --ensure)", and `$TROIKA_HOME` is that clone>
-<their values come from `<workspace>/.troika.json` — the one place a path is declared; absent, the resolver falls back to the troika/ layout>
+<their values come from `<workspace>/.troika/settings.json`, written by /troika:setup — the one place a path is declared>
 <and: a non-zero exit from the resolver means stop, not guess>
 
 <a id="code-search"></a>

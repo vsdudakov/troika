@@ -1,15 +1,14 @@
-# Per-workspace, never shared between organisations. Ignored whole — nothing in
-# them is tracked, and `python3 plugin/resolve.py --ensure` creates them where the
-# workspace's .troika.json says they go, which may be outside this tree entirely.
+# A workspace keeps its own state in its `.troika/` directory, which is not here — this
+# repo is the tree, not a workspace. The entry covers the one case where they coincide:
+# running /troika:setup in this clone to dogfood it.
 #
-# WARNING: `git clean -xfd` here removes exactly these three directories —
-# uncommitted dev branches, plans, proofs, memory. Use explicit paths instead.
-
-# Anchored with a leading slash: unanchored, `memory/` also matches
-# skills/memory/, and the skill is silently never committed.
-/worktrees/
-/scratchpad/
-/memory/
+# Anchored with a leading slash so it cannot match anything nested. Inside a real
+# workspace the resolver writes `.troika/.gitignore` instead, which keeps the three state
+# directories out of that workspace's history while committing settings and profile.
+#
+# WARNING: `git clean -xfd` removes it whole — uncommitted dev branches, plans, proofs,
+# memory. Use explicit paths instead.
+/.troika/
 
 __pycache__/
 *.pyc

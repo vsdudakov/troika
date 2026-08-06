@@ -71,4 +71,4 @@ weaker step and reports success.
 A skill says *"run the profile's verification commands"*, never `pytest -q`. It says *"the
 base ref from the profile"*, never `origin/main`. That is what lets the same procedure run in
 a workspace with one repo and no tracker, and in a workspace with six repos and a strict
-transition policy. Facts come from [`AGENTS.md`](../guides/profile.md) by anchor.
+transition policy. Facts come from [the profile](../guides/profile.md), cited by anchor.

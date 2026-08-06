@@ -1,13 +1,24 @@
 ---
-title: AGENTS.md anchors
-description: The twenty-five anchors roles link into, what each must answer, and which roles read it.
+title: PROFILE.md anchors
+description: The twenty-five anchors roles cite in .troika/PROFILE.md, what each must answer, and which roles read it.
 ---
 
-# `AGENTS.md` anchors
+# `PROFILE.md` anchors
 
-The profile is linked **by anchor**. Keep these ids exactly as written; the headings above them
-are yours. `python3 tests/check.py` verifies that every anchor the tree needs exists in
-`AGENTS.template.md`, so a fresh workspace never inherits a dead link.
+Roles never link the profile — it lives in your workspace and the tree is an installed plugin,
+so no path from one reaches the other. They **cite an anchor id**, in backticks:
+
+```markdown
+CLI and project key in PROFILE.md › Tracker (`#tracker`).
+```
+
+Keep the ids exactly as written; the headings above them are yours. `python3 tests/check.py`
+verifies that every anchor the tree cites exists in `PROFILE.template.md`, and fails a file
+that links the profile instead of citing it — so a fresh workspace never inherits a reference
+that answers nothing.
+
+[`/troika:setup`](commands.md) writes all twenty-five for you, drafting what your repos prove
+and asking about the rest.
 
 | Anchor | Must answer | Read by |
 | --- | --- | --- |

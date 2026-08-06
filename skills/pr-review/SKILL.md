@@ -39,8 +39,8 @@ Run all nine from [reviewer › Rules](../../agents/reviewer.md#rules): requirem
 
 PR-pass specifics:
 
-- **Verification** — run the verification commands the profile lists for the touched areas ([AGENTS.md › Commands](../../../AGENTS.md#commands)) in the review worktree; report failures verbatim.
-- **Tests present** — verify from the diff that each changed or created file has a corresponding test and that it covers the change. Do not run it; the coverage gate is [AGENTS.md › Tests](../../../AGENTS.md#tests).
+- **Verification** — run the verification commands the profile lists for the touched areas (PROFILE.md › Commands (`#commands`)) in the review worktree; report failures verbatim.
+- **Tests present** — verify from the diff that each changed or created file has a corresponding test and that it covers the change. Do not run it; the coverage gate is PROFILE.md › Tests (`#tests`).
 
 ## 4. Post
 

@@ -1,7 +1,7 @@
 {
   "name": "troika",
   "displayName": "troika",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
   "author": {
     "name": "vsdudakov",

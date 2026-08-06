@@ -60,7 +60,7 @@ jobs:
             -o "$name.tar.gz" HEAD \
             .claude-plugin .codex-plugin .cursor-plugin .agents \
             agents skills plugin \
-            AGENTS.template.md ROLES.md README.md LICENSE.md VERSION
+            PROFILE.template.md ROLES.md README.md LICENSE.md VERSION
           sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
           echo "name=$name" >> "$GITHUB_OUTPUT"
 

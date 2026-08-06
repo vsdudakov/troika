@@ -21,7 +21,7 @@ Read plan and dev work log; they define scope.
 From the dev role's worktree. `<BASE>` is the profile's base ref, resolved once ([worktree › The base ref](../worktree/SKILL.md#base-ref)) — never hardcoded:
 
 ```bash
-BASE=<remote>/<default-branch>                   # AGENTS.md › Branches
+BASE=<remote>/<default-branch>                   # PROFILE.md › Branches
 git fetch "${BASE%%/*}"
 git status --short                               # untracked files show as ??
 git add -N -- .                                  # intent-to-add, so new files enter the diff
@@ -40,8 +40,8 @@ Preferred for independent review. `--uncommitted` covers staged, unstaged, and u
 ```bash
 cd "$TROIKA_WORKTREES/<repo>-<TICKET>"
 cat "$TROIKA_PROFILE" \
-    "$TROIKA_HOME/agents/reviewer.md" \
-    "$TROIKA_HOME/skills/internal-review.md" \
+    "${CLAUDE_PLUGIN_ROOT}/agents/reviewer.md" \
+    "${CLAUDE_PLUGIN_ROOT}/skills/internal-review/SKILL.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md" \
   | codex exec review --uncommitted -

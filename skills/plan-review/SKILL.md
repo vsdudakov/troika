@@ -14,14 +14,14 @@ Read-only. Architect rewrites. Set `TROIKA_WORKSPACE` first.
 ## 1. Inputs
 
 - `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the plan, written to [plan-template.md](../plan-template/SKILL.md).
-- **The whole ticket, every surface** ([AGENTS.md › Tracker](../../../AGENTS.md#tracker)) — the plan is checked against the ticket, never against the plan's own summary of it.
-- The code the plan touches — a plan pinned to a symbol that moved is wrong before dev starts ([AGENTS.md › Code search](../../../AGENTS.md#code-search)).
+- **The whole ticket, every surface** (PROFILE.md › Tracker (`#tracker`)) — the plan is checked against the ticket, never against the plan's own summary of it.
+- The code the plan touches — a plan pinned to a symbol that moved is wrong before dev starts (PROFILE.md › Code search (`#code-search`)).
 - `ls $TROIKA_MEMORY/*.md` — an entry can invalidate a plan outright ([memory](../memory/SKILL.md)).
 
 <a id="ticket-surfaces"></a>
 ### Every ticket surface
 
-Collect all before review ([tracker](../../../AGENTS.md#tracker)):
+Collect all before review (tracker (`#tracker`)):
 
 | Surface | What it carries |
 | --- | --- |
@@ -40,8 +40,8 @@ Preferred, because the plan is normally written by Claude:
 
 ```bash
 cat "$TROIKA_PROFILE" \
-    "$TROIKA_HOME/agents/reviewer.md" \
-    "$TROIKA_HOME/skills/plan-review.md" \
+    "${CLAUDE_PLUGIN_ROOT}/agents/reviewer.md" \
+    "${CLAUDE_PLUGIN_ROOT}/skills/plan-review/SKILL.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>.md" \
   | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -
 ```
@@ -90,7 +90,7 @@ Stop and ask for:
 
 Decide everything else here. Do not seek ceremonial approval.
 
-On `Approve`, **if the profile declares an in-progress transition** ([AGENTS.md › Tracker](../../../AGENTS.md#tracker) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — this is the flow's only chance, and release's transition is invalid from the initial state. Where the profile declares no transitions, this gate writes nothing to the tracker.
+On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — this is the flow's only chance, and release's transition is invalid from the initial state. Where the profile declares no transitions, this gate writes nothing to the tracker.
 
 <a id="output"></a>
 ## Output

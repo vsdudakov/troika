@@ -9,7 +9,7 @@ Verified worktree to reviewed PR.
 
 **Kind** procedure · **Used by** [releaser](../../agents/releaser.md) · **When** internal review is `Approve`/`Approve with nits`, the tester's verdict is `Pass`, and QA is `Pass` (develop-flow step 7) · **Ends with** a PR URL, **CI green**, proofs on the ticket, the ticket updated as the profile allows, worktrees removed
 
-Run once per repo: one PR regardless of contributing roles. Commit/push repos concurrently; open PRs in [dependency order](../../../AGENTS.md#dependency-order). Set `TROIKA_WORKSPACE` first.
+Run once per repo: one PR regardless of contributing roles. Commit/push repos concurrently; open PRs in dependency order (`#dependency-order`). Set `TROIKA_WORKSPACE` first.
 
 ## 1. Gates
 
@@ -39,7 +39,7 @@ git commit <profile-required-signing-option, if any> -F - <<'EOF'
 EOF
 ```
 
-The heredoc preserves shell-sensitive text. **No AI attribution** — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji; strip anything the tooling appends ([AGENTS.md](../../../AGENTS.md#no-ai-attribution)). Required signing failure follows profile recovery; forbidden signing retries with the profile's no-sign option.
+The heredoc preserves shell-sensitive text. **No AI attribution** — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji; strip anything the tooling appends (`#no-ai-attribution`). Required signing failure follows profile recovery; forbidden signing retries with the profile's no-sign option.
 
 ## 3. Push and open the PR
 
@@ -64,7 +64,7 @@ Comment PR URL + summary. Run only a profile-declared "PR opened" transition, af
 <a id="ci"></a>
 ## 6. CI — watch until green, fix what it reds
 
-**CI is the only place the full suite runs** — dev roles ran no tests and the tester ran only the change's own. Watch every check to completion with the command in [AGENTS.md › Pull requests](../../../AGENTS.md#pull-requests) — **background it, suites run tens of minutes** — watching every PR concurrently and running [step 7](#7-pr-review) meanwhile. On failure, read only failing logs. Never clean or claim shipped before green.
+**CI is the only place the full suite runs** — dev roles ran no tests and the tester ran only the change's own. Watch every check to completion with the command in PROFILE.md › Pull requests (`#pull-requests`) — **background it, suites run tens of minutes** — watching every PR concurrently and running [step 7](#7-pr-review) meanwhile. On failure, read only failing logs. Never clean or claim shipped before green.
 
 Then, per failure:
 

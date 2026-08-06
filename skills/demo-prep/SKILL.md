@@ -9,7 +9,7 @@ Throwaway branch of demo PRs, deployed pre-production.
 
 **Kind** procedure · **Used by** [releaser](../../agents/releaser.md) · **When** a demo is scheduled and the human asks for the build · **Ends with** a reset integration branch with the demo PRs merged, deployed, and a notification waiting for the human's go-ahead
 
-The integration branch's name, the label that selects the demo PRs, and the deploy dispatch are in [AGENTS.md › Demo prep](../../../AGENTS.md#demo) and [› Deploy](../../../AGENTS.md#deploy).
+The integration branch's name, the label that selects the demo PRs, and the deploy dispatch are in PROFILE.md › Demo prep (`#demo`) and PROFILE.md › Deploy (`#deploy`).
 
 This skill may reset only the demo branch. Never merge it back, use it as PR base, push protected/demo-PR branches, or deploy production. Demo PRs land separately.
 

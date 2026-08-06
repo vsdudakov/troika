@@ -1,6 +1,6 @@
 # Toy workspace profile
 
-A filled [project profile](../../AGENTS.template.md) for the fault-injection fixtures. Small on purpose,
+A filled [project profile](../../PROFILE.template.md) for the fault-injection fixtures. Small on purpose,
 but it carries **every anchor** the `agents/` and `skills/` trees link to — a role reading a dead
 link here would fail the test for the wrong reason. `tests/run.py --check` verifies that.
 
@@ -114,7 +114,7 @@ The toy stack has an in-memory store, so it proves nothing about migrations or a
 <a id="tracker"></a>
 ## Tracker
 
-**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in `troika/` means: do nothing. The ticket is the plan file at `$TROIKA_SCRATCHPAD/plans/<TICKET>.md`.
+**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in a procedure means: do nothing. The ticket is the plan file at `$TROIKA_SCRATCHPAD/plans/<TICKET>.md`.
 
 <a id="pull-requests"></a>
 ## Pull requests
@@ -164,4 +164,4 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 <a id="workspace-paths"></a>
 ## Workspace paths
 
-`TROIKA_WORKSPACE` is the workspace root — the directory holding `AGENTS.md`, `troika/`, and `toyapp/`. Every scratchpad path is absolute.
+`TROIKA_WORKSPACE` is the workspace root — the directory holding `.troika/` and `toyapp/`. Every scratchpad path is absolute.

@@ -57,9 +57,9 @@ local stack with before/after proofs, and the releaser opens the PR and watches 
   Claude Code and Cursor, and model-invoked skills in Codex — or no plugin at all, just files
   read by path. [Running without a plugin :material-arrow-right:](guides/no-plugin.md)
 - :office: **Organisation-neutral by construction.** Nothing in the repository names a repo,
-  command, branch, tracker, URL or person. Those live in your `AGENTS.md` profile and are
+  command, branch, tracker, URL or person. Those live in your `.troika/PROFILE.md` and are
   linked **by anchor**. [Writing the profile :material-arrow-right:](guides/profile.md)
-- :file_folder: **Per-workspace paths.** `.troika.json` says where plans, worktrees and
+- :file_folder: **Per-workspace paths.** `.troika/settings.json` says where plans, worktrees and
   memory live — one file per folder-of-repos, so a single installed plugin serves every
   client and org you work in. [Paths :material-arrow-right:](concepts/paths.md)
 - :test_tube: **It is tested on itself.** A structural gate checks every link, anchor and
@@ -93,7 +93,7 @@ scheduler and no lock-in: the executable surface is two Python scripts on the st
 library, and everything else is markdown you can fork, trim, or run by hand.
 
 It also makes no claim to work well on a codebase whose profile is not written. A vague
-`AGENTS.md` produces vague gates — the roles are only as sharp as the facts you give them.
+A vague profile produces vague gates — the roles are only as sharp as the facts you give them.
 
 ## Licence
 

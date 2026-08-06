@@ -51,7 +51,7 @@ plants exactly that defect — see [Adding a role](guides/adding-a-role.md) and
 
 ## Adding a profile anchor
 
-If a role needs a fact no anchor covers, add the anchor to `AGENTS.template.md` **in the same
+If a role needs a fact no anchor covers, add the anchor to `PROFILE.template.md` **in the same
 change** as the role or skill that reads it. The template is the contract every workspace
 writes against, and `check.py` fails a link into an anchor the template does not have.
 

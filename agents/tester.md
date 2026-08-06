@@ -15,7 +15,7 @@ Runs change tests once, in parallel lanes; routes failures.
   - **Why** — procedural selection and result validation.
   - **Raise it when** — a failure's cause is not obvious from its output and the routing decision (test wrong vs code wrong) is genuinely unclear: effort `high`.
 
-Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tests), [Commands](../../AGENTS.md#commands), and [Gotchas](../../AGENTS.md#gotchas).
+Inherits the workspace profile, `$TROIKA_PROFILE` — especially Tests (`#tests`), Commands (`#commands`), and Gotchas (`#gotchas`).
 
 ## Scope
 

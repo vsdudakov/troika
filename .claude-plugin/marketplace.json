@@ -10,7 +10,7 @@
     {
       "name": "troika",
       "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
-      "version": "0.3.0",
+      "version": "1.0.0",
       "category": "development",
       "homepage": "https://github.com/vsdudakov/troika",
       "source": "./"

@@ -13,7 +13,7 @@ Trusted plan; no downstream product decisions required.
 
 - Delete sections that don't apply; never leave a placeholder in.
 - Requirements are numbered and testable — every later role cites them by number, so the numbers stay stable across rewrites.
-- Repo order follows [AGENTS.md › Dependency order](../../../AGENTS.md#dependency-order).
+- Repo order follows PROFILE.md › Dependency order (`#dependency-order`).
 - Pin cross-repo contracts or mark sequential.
 - Map every requirement to unit/QA proof.
 - Name stack limits and alternate coverage.

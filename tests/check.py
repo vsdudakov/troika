@@ -27,9 +27,10 @@ os.chdir(Path(__file__).resolve().parent.parent)
 FAIL = []
 # These files are read several times over; the tree is small enough to hold all of it.
 TEXT = {}
-# The one path outside this repo that a role is allowed to link to: the workspace profile,
-# a sibling of the repo root. Absent in CI, so it cannot be checked by existence.
-PROFILE = os.path.join(os.pardir, "AGENTS.md")
+# The contract every role reads the workspace by. The profile lives in the workspace, not
+# in this tree and not at any fixed depth from it, so roles cite it by anchor rather than
+# link to it — and this file is where those anchors are declared.
+TEMPLATE = "PROFILE.template.md"
 
 
 def fail(where, msg):
@@ -91,15 +92,6 @@ def check_links():
             path, _, frag = target.partition("#")
             resolved = os.path.normpath(os.path.join(os.path.dirname(f), path)) if path else f
             if not os.path.exists(resolved):
-                # The workspace profile lives outside this repo and is absent in CI, so it
-                # is exempt from the existence check — but only at the one depth that is
-                # correct. Matching on the basename alone would wave through `../AGENTS.md`
-                # from `skills/`, which is exactly the dead link this check exists to catch.
-                if resolved == PROFILE:
-                    continue
-                if os.path.basename(resolved) == "AGENTS.md":
-                    fail(f, f"{target} resolves to {resolved}, not the profile at {PROFILE}")
-                    continue
                 fail(f, f"dead link {target}")
                 continue
             if not frag:
@@ -112,19 +104,29 @@ def check_links():
 
 # --- 2. profile anchors exist in the template, not just this workspace --------
 
+# How a role cites the profile: an anchor id alone, in backticks — `#tracker`. Not a link.
+# The profile is `<workspace>/.troika/PROFILE.md`, and this tree is usually an installed
+# plugin in a host's cache, so no relative link from here can ever reach it; one written
+# anyway resolves for nobody and reports nothing when the anchor is wrong.
+CITATION = re.compile(r"`(#[a-z][a-z0-9-]*)`")
+
+
 def check_profile_anchors():
-    template = "AGENTS.template.md"
-    if not os.path.exists(template):
-        fail(template, "missing — the profile contract cannot be verified")
+    if not os.path.exists(TEMPLATE):
+        fail(TEMPLATE, "missing — the profile contract cannot be verified")
         return
-    known = anchors_of(template)
-    for f in role_and_skill_files():
+    known = anchors_of(TEMPLATE)
+    for f in role_and_skill_files() + plugin_files():
+        text = re.sub(r"```.*?```", "", text_of(f), flags=re.S)  # fenced examples are not citations
+        for cited in set(CITATION.findall(text)):
+            if cited.lstrip("#") not in known:
+                fail(f, f"cites {cited}, which is not an anchor in {TEMPLATE}; "
+                        "a fresh workspace has nothing under it")
+        # A link to the profile cannot resolve from a plugin cache, so the citation form is
+        # the only one allowed. This catches the old `../../AGENTS.md#x` shape coming back.
         for _, target in links_in(f):
-            path, _, frag = target.partition("#")
-            if not frag or os.path.basename(path) != "AGENTS.md":
-                continue
-            if frag not in known:
-                fail(f, f"#{frag} is not an anchor in {template}; a fresh workspace reads a dead link")
+            if os.path.basename(target.partition("#")[0]) in ("AGENTS.md", "PROFILE.md"):
+                fail(f, f"links the profile ({target}); cite the anchor as `#{target.partition('#')[2]}` instead")
 
 
 # --- 3. the nine checks are duplicated by hand in three files ----------------
@@ -274,12 +276,12 @@ def check_tracked():
 
 
 def check_resolved_paths():
-    """No role may spell a workspace path out. `$TROIKA_WORKSPACE/troika/scratchpad` is a path the
-    workspace is now allowed to move, so a literal one silently ignores where it moved to."""
+    """No role may spell a workspace path out. `$TROIKA_WORKSPACE/.troika/scratchpad` is a path
+    the workspace is allowed to move, so a literal one silently ignores where it moved to."""
     for f in role_and_skill_files() + plugin_files():
         for i, line in enumerate(text_of(f).splitlines(), 1):
-            if "$TROIKA_WORKSPACE/troika" in line or "$TROIKA_WORKSPACE/AGENTS.md" in line:
-                fail(f, f"line {i}: hardcoded path — use $TROIKA_HOME, $TROIKA_SCRATCHPAD, "
+            if re.search(r"\$TROIKA_WORKSPACE/(\.troika|SETUP\.md|AGENTS\.md|troika\b)", line):
+                fail(f, f"line {i}: hardcoded path — use $TROIKA_SCRATCHPAD, "
                         "$TROIKA_WORKTREES, $TROIKA_MEMORY, or $TROIKA_PROFILE")
 
 
@@ -294,11 +296,18 @@ def check_resolver():
         # resolver reports real paths — comparing against the symlinked one fails for a
         # reason that has nothing to do with the code under test.
         root = Path(tmp).resolve()
-        (root / "AGENTS.md").write_text("profile", encoding="utf-8")
+        # --init is how every workspace is created, so it is what the rest is tested on.
+        resolve.init(str(root))
+        for path in (".troika/settings.json", ".troika/.gitignore", ".troika/scratchpad",
+                     ".troika/worktrees", ".troika/memory"):
+            if not (root / path).exists():
+                fail("plugin/resolve.py", f"--init did not create {path}")
         elsewhere = root / "elsewhere" / "sp"
-        (root / ".troika.json").write_text(
-            json.dumps({"scratchpad": str(elsewhere)}), encoding="utf-8"
-        )
+        config = root / resolve.CONFIG
+        payload = json.loads(config.read_text(encoding="utf-8"))
+        payload["scratchpad"] = str(elsewhere)
+        del payload["worktrees"]
+        config.write_text(json.dumps(payload), encoding="utf-8")
         deep = root / "repo" / "pkg" / "sub"
         deep.mkdir(parents=True)
         try:
@@ -311,17 +320,24 @@ def check_resolver():
         # An absolute override must survive verbatim; a declared path silently re-anchored
         # under the workspace is the failure this whole mechanism exists to prevent.
         if out.get("TROIKA_SCRATCHPAD") != str(elsewhere):
-            fail("plugin/resolve.py", "an absolute scratchpad in .troika.json was not honoured")
-        # Unset keys fall back, so an old workspace with no file behaves as it always did.
-        if out.get("TROIKA_WORKTREES") != str(root / "troika" / "worktrees"):
-            fail("plugin/resolve.py", "an undeclared path did not fall back to the troika/ layout")
-        # A repo carries its own AGENTS.md; stopping there would scatter handoff files
-        # through a worktree, so the fallback demands a troika/ beside it.
-        stray = root / "stray"
-        (stray / "repo").mkdir(parents=True)
-        (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
-        if resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE") != str(root):
-            fail("plugin/resolve.py", "a bare AGENTS.md with no troika/ beside it was taken for a workspace")
+            fail("plugin/resolve.py", "an absolute scratchpad in settings.json was not honoured")
+        # A key deleted by hand falls back rather than failing the run.
+        if out.get("TROIKA_WORKTREES") != str(root / ".troika" / "worktrees"):
+            fail("plugin/resolve.py", "an undeclared path did not fall back to the .troika/ layout")
+        if out.get("TROIKA_PROFILE") != str(root / ".troika" / "PROFILE.md"):
+            fail("plugin/resolve.py", "the profile did not resolve to .troika/PROFILE.md")
+        # settings.json is the only marker. A repo's own AGENTS.md must not be taken for a
+        # workspace: stopping there would scatter handoff files through a worktree.
+        with tempfile.TemporaryDirectory() as other:
+            stray = Path(other).resolve()
+            (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
+            (stray / "repo").mkdir()
+            try:
+                found = resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE")
+                fail("plugin/resolve.py", f"resolved {found!r} with no settings.json anywhere above it")
+            except SystemExit as e:
+                if "troika:setup" not in str(e):
+                    fail("plugin/resolve.py", f"the no-workspace error does not point at setup: {e}")
 
 
 def check_plugin_wrappers():

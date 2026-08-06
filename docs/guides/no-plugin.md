@@ -19,11 +19,22 @@ read troika/skills/develop-flow/SKILL.md and run it for SCRUM-123
 
 ## Do the resolver step yourself
 
-The commands normally run the resolver first. Without them, do it once per session:
+The commands normally run the resolver first. Without them, create the workspace once:
+
+```bash
+python3 troika/plugin/resolve.py --init <workspace>
+```
+
+and export the paths once per session:
 
 ```bash
 eval "$(python3 troika/plugin/resolve.py --ensure)"
 ```
+
+`--init` writes `.troika/settings.json`, its `.gitignore` and the state directories. The
+profile is the part that needs reading and asking, so either run `/troika:setup` in a host that
+has commands, or copy `troika/PROFILE.template.md` to `<workspace>/.troika/PROFILE.md` and fill
+every anchor by hand.
 
 Then the procedures' `$TROIKA_SCRATCHPAD`, `$TROIKA_WORKTREES` and `$TROIKA_MEMORY` references
 resolve, and handoff files land where the next role will look.

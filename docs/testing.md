@@ -26,7 +26,7 @@ money and they are stochastic.
 `check.py` validates the things that break silently:
 
 - every markdown link and anchor resolves, in-tree and into the profile
-- every profile anchor a role uses exists in `AGENTS.template.md`, so a *fresh* workspace does
+- every profile anchor a role cites exists in `PROFILE.template.md`, so a *fresh* workspace does
   not inherit a dead link
 - role and skill file shapes match what `ROLES.md` and `skills/README.md` declare
 - the reviewer's nine checks match the copies of that list in the review skills, **in order**
@@ -34,7 +34,8 @@ money and they are stochastic.
 - no file hardcodes a path the workspace is allowed to move
 - the version agrees across all four manifests
 - the resolver resolves — run against a purpose-built temporary workspace, including the case
-  where a repo's own `AGENTS.md` must *not* be mistaken for a workspace
+  where a repo's own `AGENTS.md` must *not* be mistaken for a workspace, and `--init` creates
+  the `.troika/` it later resolves
 
 ## The behavioural gate
 

@@ -12,7 +12,7 @@ Fill profile PR title/body.
 ## Which template wins
 
 1. The repo's own `.github/PULL_REQUEST_TEMPLATE.md`, if it has one and it differs.
-2. Otherwise the workspace template in [AGENTS.md › PR body](../../../AGENTS.md#pr-template).
+2. Otherwise the workspace template in PROFILE.md › PR body (`#pr-template`).
 
 Strip AI product names, including HTML comments.
 

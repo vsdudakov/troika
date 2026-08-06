@@ -119,8 +119,8 @@ nav:
       - Running without a plugin: guides/no-plugin.md
   - Reference:
       - Commands: reference/commands.md
-      - .troika.json: reference/troika-json.md
-      - AGENTS.md anchors: reference/agents-md.md
+      - .troika/settings.json: reference/settings-json.md
+      - PROFILE.md anchors: reference/profile-anchors.md
       - Plugin manifests: reference/manifests.md
       - Releases and versioning: reference/releases.md
   - Testing: testing.md

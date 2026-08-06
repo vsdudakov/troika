@@ -15,7 +15,7 @@ Verifies on the local stack; captures proofs; reports defects.
   - **Why** — long execution/observation session.
   - **Raise it when** — a hard "why is this flaky" investigation: `claude-opus-5` · effort `high`.
 
-Inherits [AGENTS.md](../../AGENTS.md).
+Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 ## Scope
 

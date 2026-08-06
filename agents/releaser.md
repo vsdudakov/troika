@@ -14,7 +14,7 @@ Ships approved work. Last role.
   - **Codex** — `gpt-5.6-sol` · effort `medium`
   - **Why** — mechanical; the numbered procedure guards skipped steps.
 
-Inherits [AGENTS.md](../../AGENTS.md).
+Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 ## Scope
 
@@ -35,7 +35,7 @@ Read verdict files directly.
 ## Rules
 
 - **Ask before committing** unless the user asked for a commit or PR; an approved plan is that ask and covers commit, push, and PR. Told not to commit → stop and report.
-- Follow profile signing and ticket-key rules exactly. Author and committer are the human engineer's git identity, never an AI account. **No AI attribution** — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji; strip anything the tooling appends ([details](../../AGENTS.md#no-ai-attribution)).
+- Follow profile signing and ticket-key rules exactly. Author and committer are the human engineer's git identity, never an AI account. **No AI attribution** — no `Co-Authored-By:` naming an AI, no "Generated with …", no agent marker or emoji; strip anything the tooling appends (`#no-ai-attribution`).
 - Inspect before staging. Never commit secrets, `.env`, scratchpad, or proofs.
 - Use absolute `$TROIKA_WORKSPACE` paths.
 - Follow [release-pr](../skills/release-pr/SKILL.md) for CI, review waves, tracker writes, and caps. **Never green a check by weakening it** — no lowered coverage threshold, no `skip`/`xfail`, no disabled lint rule. A red check is routed, never patched here.

@@ -46,6 +46,7 @@ KIND = "procedure"
 # thing the procedure's first step resolves — the accepted forms of that thing belong in
 # the procedure, not in a menu line. `<>` is required, `[]` optional.
 COMMANDS = {
+    "workspace-setup": ("setup", "[PATH]"),
     "demo-prep": ("demo", "[LABEL]"),
     "develop-flow": ("dev", "<TICKET>"),
     "fix-pr": ("fix", "<PR>"),
@@ -92,15 +93,13 @@ BODY = """Run Troika's **{name}** procedure.
    eval "$(python3 "${{CLAUDE_PLUGIN_ROOT}}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
-   `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
-   workspace declares them, and creating the three it writes into. It exits non-zero when
-   there is no workspace above the current directory — **stop there and say so**; a guessed
-   path writes handoff files nobody reads.
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_SCRATCHPAD`,
+   `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika/settings.json`
+   where the workspace declares them, and creating the three it writes into. It exits
+   non-zero when no ancestor of the current directory holds that file — **stop there and
+   say so**, and point at `/troika:setup`; a guessed path writes handoff files nobody reads.
 
-2. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`. If that variable is
-   unset — a plain clone rather than an installed plugin — read
-   `$TROIKA_HOME/skills/{name}/SKILL.md` instead.
+2. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`.
 3. Read `$TROIKA_PROFILE` — the workspace profile. Every repo, command, branch, base ref,
    tracker, and URL comes from there; the procedure names none of them, and where the
    profile declares a limit the profile wins.
@@ -111,17 +110,47 @@ Roles run with their cwd inside a worktree, so every path from step 1 is used ve
 absolute. A relative one writes a file no later role finds.
 """
 
+# The one command that runs *before* there is a workspace, so it cannot open by resolving
+# one: step 1 of the shared body would exit non-zero every single time it is used for the
+# thing it exists for. It reads its procedure first and creates the workspace from there.
+SETUP_BODY = """Run Troika's **{name}** procedure — create a workspace.
+
+**Argument** — `{hint}`: $ARGUMENTS
+
+With no argument, use the current directory, and confirm it with the caller before writing.
+
+This is the one command that runs before a workspace exists, so it does **not** resolve one
+first. It creates it.
+
+1. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`.
+2. Follow it in order. It fixes the workspace root, scaffolds `.troika/`, investigates the
+   repos, asks only what they cannot answer, and writes the profile.
+3. Every step is a gate: never advance past a failed one, and stop on any of its stop
+   conditions rather than working around it.
+
+Where a workspace already exists — `.troika/settings.json` or the profile is present — **say so
+and ask** what to do: leave it, update it against what the repos now say, or rewrite the
+profile from the template. Default to leaving it, and never overwrite what a human wrote
+without being asked to in words.
+
+Every other `/troika:*` command resolves that workspace instead of creating one.
+"""
+
 # What to do with no argument. Optional for exactly one command, so the two lines are not
 # interchangeable: asking for a demo label the profile already declares is a needless
 # question, and guessing a ticket key is worse than asking for one.
 MISSING_REQUIRED = "\nWith no argument, ask for one and stop — do not guess."
 MISSING_OPTIONAL = "\nWith no argument, use the profile's default and say which you used."
 
+# Procedures that must not open by resolving a workspace, keyed by skill.
+BODIES = {"workspace-setup": SETUP_BODY}
+
 
 def command_text(name, alias, hint, desc):
+    body = BODIES.get(name, BODY)
     return (
         f"---\nname: {alias}\ndescription: {desc}\nargument-hint: {hint}\n---\n\n"
-        + BODY.format(
+        + body.format(
             name=name,
             hint=hint,
             missing=MISSING_OPTIONAL if hint.startswith("[") else MISSING_REQUIRED,

@@ -1,6 +1,6 @@
 # Roles
 
-Tool-neutral roles. Frontmatter enables discovery. Every role inherits workspace [AGENTS.md](../AGENTS.md); role files add organization-neutral craft only.
+Tool-neutral roles. Frontmatter enables discovery. Every role inherits the workspace profile (`$TROIKA_PROFILE`); role files add organization-neutral craft only.
 
 ## Who does what
 
@@ -8,12 +8,12 @@ Tool-neutral roles. Frontmatter enables discovery. Every role inherits workspace
 | --- | --- |
 | [architect](agents/architect.md) | requirements, plan, repo split, contracts; writes no product code |
 | [backend-dev](agents/backend-dev.md) | server-side repos + their unit tests (written, never run) |
-| [frontend-dev](agents/frontend-dev.md) | the client app(s) named in [AGENTS.md › Ownership](../AGENTS.md#ownership) + their unit tests (written, never run) |
+| [frontend-dev](agents/frontend-dev.md) | the client app(s) named in PROFILE.md › Ownership (`#ownership`) + their unit tests (written, never run) |
 | [reviewer](agents/reviewer.md) | plan review, internal (pre-PR) review, and PR review; read-only, never runs tests |
 | [tester](agents/tester.md) | the local unit-test run — the change's own tests only, in parallel lanes; writes nothing |
 | [qa](agents/qa.md) | the local stack, manual + integration verification, proofs |
 | [releaser](agents/releaser.md) | commits (the only ones in the flow), PR, proofs, tracker |
-| [commenter](agents/commenter.md) | every outward-facing text, in the workspace's [voice](../AGENTS.md#voice) |
+| [commenter](agents/commenter.md) | every outward-facing text, in the workspace's voice (`#voice`) |
 
 Profile ownership splits paths, not branches: one repo, worktree, branch, PR.
 
@@ -56,7 +56,7 @@ Shape: frontmatter · purpose · **Owns/Runs/Model** · five sections below, in 
 | --- | --- |
 | `Scope` | what it may touch, what it must never touch, where it stops and hands back |
 | `Inputs` | what it receives and from which file |
-| `Rules` | the rules this role owns, on top of AGENTS.md |
+| `Rules` | the rules this role owns, on top of the profile |
 | `Gates` | numbered conditions that must hold before it reports done |
 | `Output` | exact shape of what it returns, and the handoff file it writes |
 

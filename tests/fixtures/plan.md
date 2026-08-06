@@ -1,6 +1,6 @@
 # TOY-1 — per-symbol allocation for an owner
 
-Ticket: none — the toy workspace has no tracker ([AGENTS.md › Tracker](AGENTS.md#tracker)).
+Ticket: none — the toy workspace has no tracker (PROFILE.md › Tracker (`#tracker`)).
 Status: approved 2026-08-06
 
 ## Problem
@@ -26,7 +26,7 @@ that total or how concentrated an owner is in any one of them.
 ## Contracts
 
 None — single repo, no cross-repo boundary. Layer order is
-`api → service → repository → models` ([AGENTS.md › Layering](AGENTS.md#layering)).
+`api → service → repository → models` (PROFILE.md › Layering (`#layering`)).
 
 ## Per-repo work
 
@@ -41,7 +41,7 @@ None — single repo, no cross-repo boundary. Layer order is
 - `tests/service/test_allocation.py` — percentages sum to 100 for an owner with holdings;
   empty dict for an owner with none; rounding to one decimal.
 - No QA step: the toy stack proves nothing these unit tests do not
-  ([AGENTS.md › Stack limits](AGENTS.md#stack-limits)).
+  (PROFILE.md › Stack limits (`#stack-limits`)).
 
 ## Out of scope
 

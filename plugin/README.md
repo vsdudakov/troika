@@ -12,11 +12,11 @@ generated command per entry-point procedure, and the resolver every role runs fi
 - [`../.cursor-plugin/plugin.json`](../.cursor-plugin/plugin.json) — Cursor: commands as a
   glob, plus the same skills.
 - `commands/<alias>.md` — **generated** by [`generate.py`](generate.py) from its `COMMANDS`
-  map: `dev`, `spike`, `review`, `qa`, `triage`, `release`, `demo`. `/troika:<alias>` in
-  Claude Code and Cursor. A procedure absent from that map has no command and stays a skill —
-  the steps the flow runs for you are wrong to start on their own.
+  map: `setup`, `dev`, `spike`, `fix`, `review`, `qa`, `triage`, `release`, `demo`.
+  `/troika:<alias>` in Claude Code and Cursor. A procedure absent from that map has no command
+  and stays a skill — the steps the flow runs for you are wrong to start on their own.
 - [`resolve.py`](resolve.py) — where this workspace keeps its files. Every command runs it
-  first.
+  first, except `setup`, which is the command that creates the workspace it would resolve.
 
 The skills themselves are not here. `../skills/<name>/SKILL.md` is the procedure *and* the
 skill: all three hosts discover a skill as a directory holding that file, so there is no
@@ -37,8 +37,8 @@ file that may be gone.
 ## The two roots
 
 A plugin installs into the host's **cache**, not into the workspace. The cached copy holds
-the roles and the procedures; it cannot hold `AGENTS.md`, `worktrees/`, `scratchpad/`, or
-`memory/`, which are per-workspace and differ for every organisation the tree is dropped
+the roles and the procedures; it cannot hold the profile, the worktrees, the scratchpad or
+the memory, which are per-workspace and differ for every organisation the tree is dropped
 into. So a command reads its procedure from the plugin root, and resolves everything it
 writes through the workspace:
 
@@ -46,58 +46,80 @@ writes through the workspace:
 eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py")"
 ```
 
-That prints — and `eval` exports — six paths:
+That prints — and `eval` exports — five paths:
 
 | Variable | Default | Holds |
 | --- | --- | --- |
 | `TROIKA_WORKSPACE` | the directory found | the workspace root; repos are `$TROIKA_WORKSPACE/<repo>` |
-| `TROIKA_PROFILE` | `$TROIKA_WORKSPACE/AGENTS.md` | the project profile |
-| `TROIKA_HOME` | `$TROIKA_WORKSPACE/troika` | this tree, when it is cloned rather than installed |
-| `TROIKA_WORKTREES` | `$TROIKA_WORKSPACE/troika/worktrees` | one checkout per branch |
-| `TROIKA_SCRATCHPAD` | `$TROIKA_WORKSPACE/troika/scratchpad` | plans, reviews, work logs, proofs |
-| `TROIKA_MEMORY` | `$TROIKA_WORKSPACE/troika/memory` | dated observations about this workspace |
+| `TROIKA_PROFILE` | `.troika/PROFILE.md` | the project profile |
+| `TROIKA_WORKTREES` | `.troika/worktrees` | one checkout per branch |
+| `TROIKA_SCRATCHPAD` | `.troika/scratchpad` | plans, reviews, work logs, proofs |
+| `TROIKA_MEMORY` | `.troika/memory` | dated observations about this workspace |
 
 No role spells any of these out — `check.py` fails a file that hardcodes one — because the
 workspace is allowed to move them.
 
 ## Configuring a workspace
 
-`.troika.json` at the workspace root is the one place a path is declared. Every key is
-optional and relative to the file, and an absolute value is taken as-is, so state can live
-anywhere:
+`/troika:setup` creates the workspace. It writes `.troika/settings.json`, the one place a
+path is declared, plus a `.gitignore` and the three state directories, and then fills in the
+profile from what the repos say:
+
+```
+<workspace>/
+├── .troika/
+│   ├── settings.json   the paths — committed
+│   ├── PROFILE.md      the profile every role reads — committed
+│   ├── .gitignore      keeps the three below out of the workspace's history
+│   ├── scratchpad/     plans, reviews, work logs, proofs
+│   ├── worktrees/      one checkout per branch
+│   └── memory/         dated observations
+├── repo-a/
+└── repo-b/
+```
+
+Every settings key is optional and relative to the workspace, and an absolute value is taken
+as-is, so state can live anywhere:
 
 ```json
 {
-  "profile": "AGENTS.md",
-  "home": "troika",
+  "profile": ".troika/PROFILE.md",
   "scratchpad": "/Volumes/fast/acme/scratchpad",
   "worktrees": "/Volumes/fast/acme/worktrees",
-  "memory": "troika/memory"
+  "memory": ".troika/memory"
 }
 ```
 
-Put one in each folder that holds a set of repos — one per organisation, per client, per
+Run setup in each folder that holds a set of repos — one per organisation, per client, per
 checkout — and the same installed plugin serves all of them. The resolver walks up from
 wherever the role is standing, so a role deep inside a worktree finds the workspace that
 owns it, not the one you happened to install from.
 
-With no `.troika.json` anywhere, the resolver falls back to the nearest ancestor holding
-both `AGENTS.md` and a `troika/` directory, with the default layout above — a plain clone
-keeps working. It requires *both*, because repos carry their own `AGENTS.md` and stopping at
-the first one found would resolve a worktree as the workspace and scatter handoff files
-through it.
+`.troika/settings.json` is the **only** marker. Nothing falls back: a folder without one is a
+folder nobody has run setup in, and the resolver exits non-zero saying so. That is a stop,
+not a default — a guessed path writes proofs nobody reads, and a walk that accepted a repo's
+own `AGENTS.md` would resolve a worktree as the workspace.
 
-A non-zero exit means no workspace was found. That is a stop, not a default: a guessed path
-writes proofs nobody reads.
+Scaffold without a model, if you prefer — `<plugin root>` is where the host installed it:
+
+```bash
+python3 <plugin root>/plugin/resolve.py --init <workspace>   # settings, .gitignore, state dirs
+```
+
+That leaves the profile to write by hand from [`PROFILE.template.md`](../PROFILE.template.md);
+`/troika:setup` is the same job with the repos read for you.
 
 ## Install
 
 **Claude Code**
 
 ```bash
-claude plugin marketplace add vsdudakov/troika      # or an absolute path to a local clone
+claude plugin marketplace add vsdudakov/troika
 claude plugin install troika@troika                 # --scope project to pin it to one workspace
 ```
+
+Then restart the host and run `/troika:setup` in the folder that holds your repos. Nothing
+else works until that has been done once.
 
 Committed per workspace instead, in `<workspace>/.claude/settings.json`:
 
@@ -113,14 +135,14 @@ Committed per workspace instead, in `<workspace>/.claude/settings.json`:
 **Codex**
 
 ```bash
-codex plugin marketplace add <absolute path to this clone>
+codex plugin marketplace add vsdudakov/troika
 codex plugin add troika
 ```
 
 Codex installs are global — there is no per-project enable, and no `commands` concept
 either, so its surface is the skills.
 
-**Cursor** reads `.cursor-plugin/plugin.json` from the same clone.
+**Cursor** reads `.cursor-plugin/plugin.json` from the same marketplace.
 
 Validate a change to any manifest against Codex's own checker before pushing:
 

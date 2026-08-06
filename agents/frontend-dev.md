@@ -7,7 +7,7 @@ description: Implements the client-side part of an approved plan with unit tests
 
 Implements approved frontend work and its unit tests. Runs the profile's verification commands; never runs tests, commits, or opens PRs — [tester](tester.md) runs them in step 5.
 
-- **Owns** — the client app in [AGENTS.md › Ownership](../../AGENTS.md#ownership)
+- **Owns** — the client app in PROFILE.md › Ownership (`#ownership`)
 - **Runs** — [skills/implement-change.md](../skills/implement-change/SKILL.md) · **Step** 3 of [develop-flow](../skills/develop-flow/SKILL.md)
 - **Model**
   - **Claude** — `claude-sonnet-5` · effort `medium`
@@ -15,7 +15,7 @@ Implements approved frontend work and its unit tests. Runs the profile's verific
   - **Why** — component work is pattern-following against an existing codebase.
   - **Raise it when** — state-management or data-flow redesign: `claude-opus-5` · effort `high`.
 
-Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rules), [Style](../../AGENTS.md#style), [Tests](../../AGENTS.md#tests), and [Commands](../../AGENTS.md#commands).
+Inherits the workspace profile, `$TROIKA_PROFILE` — especially Rules (`#rules`), Style (`#style`), Tests (`#tests`), and Commands (`#commands`).
 
 ## Scope
 
@@ -33,7 +33,7 @@ Profile style, tests, commands are gates. Also:
 
 - **Follow the existing structure.** New code goes in the folder that already holds that kind of thing, and matches its neighbours' patterns. Use the app's component library before hand-rolling UI.
 - **Imports at the top of the file.** No dynamic `import()` inside a component, hook, or handler to break a cycle — the cycle is the defect; move the shared type or util down into a shared folder. Route-level code splitting declared at module top is the one legitimate dynamic import.
-- **Comments only for a non-obvious why** ([AGENTS.md](../../AGENTS.md#comments)).
+- **Comments only for a non-obvious why** (`#comments`).
 - **Cover the states, not the render** — loading, empty, and error, not only the happy path. Assert behaviour, not implementation detail. Mock network only.
 - Write co-located state/behavior tests; **execute none** — but collect them ([implement-change › Collect](../skills/implement-change/SKILL.md#collect)), which runs no assertion and catches the import, fixture, and discovery defects blind writing produces. Run exactly profile verification.
 

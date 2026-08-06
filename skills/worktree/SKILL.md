@@ -17,7 +17,7 @@ Run git inside target repo. Set `TROIKA_WORKSPACE`.
 Resolve profile `<BASE>` once:
 
 ```bash
-BASE=<remote>/<default-branch>      # from AGENTS.md › Branches, e.g. origin/main
+BASE=<remote>/<default-branch>      # from PROFILE.md › Branches, e.g. origin/main
 git fetch "${BASE%%/*}"             # the remote half; a stale ref makes every diff below wrong
 ```
 
@@ -30,7 +30,7 @@ QA/release depend on exact directory names:
 
 | Work | Directory | Branch |
 | --- | --- | --- |
-| Ticket work | `$TROIKA_WORKTREES/<repo>-<TICKET>` | per [AGENTS.md › Branches](../../../AGENTS.md#branches) |
+| Ticket work | `$TROIKA_WORKTREES/<repo>-<TICKET>` | per PROFILE.md › Branches (`#branches`) |
 | No ticket | `$TROIKA_WORKTREES/<repo>-<fix-description>` | per the profile |
 | Reviewing a PR | `$TROIKA_WORKTREES/review-<repo>-<N>` | detached at `<remote>/<headRefName>` |
 | Fixing a PR | the ticket lane if it exists, else `$TROIKA_WORKTREES/fix-<repo>-<N>` | `<headRefName>`, tracking `<remote>/<headRefName>` |
@@ -102,7 +102,7 @@ this tree, and a host loading it never recurses into the directory.
   uncommitted worktree, plus the [scratchpad](../scratchpad/SKILL.md) and
   [memory](../memory/SKILL.md). Clean with explicit paths (`git clean -fd agents skills`) or
   not at all.
-- **Work stays uncommitted in worktrees until release.** Any workspace command that force-removes worktrees discards it with no prompt — check [AGENTS.md › Gotchas](../../../AGENTS.md#gotchas) for which ones do, and never run them mid-flow.
+- **Work stays uncommitted in worktrees until release.** Any workspace command that force-removes worktrees discards it with no prompt — check PROFILE.md › Gotchas (`#gotchas`) for which ones do, and never run them mid-flow.
 - **Never run a formatter in a worktree with a symlinked dependency directory** — it rewrites the shared environment. Remove the symlink first, or format from the primary clone.
 - **Never switch branches in place** inside a primary clone, and never scatter worktrees as loose siblings of the repos.
 - `ln -s` into a path that already exists as a real directory creates the link *inside* it (`.venv/.venv`). Check with `ls -l` after linking; the formatter guard depends on the path being a symlink.

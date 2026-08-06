@@ -56,12 +56,12 @@ Say *"the profile's verification commands"*, not `pytest -q`. Say *"the base ref
 `origin/main`. Link the fact by anchor:
 
 ```markdown
-Run the verification commands ([AGENTS.md › Commands](../../../AGENTS.md#commands)).
+Run the verification commands (PROFILE.md › Commands (`#commands`)).
 ```
 
 The link depth is three levels up from inside a skill directory, and `check.py` will tell you
 if you get it wrong. If you need an anchor the template does not have, add it to
-`AGENTS.template.md` in the same change — that is the contract every workspace writes against.
+`PROFILE.template.md` in the same change — that is the contract every workspace writes against.
 
 ## Regenerate and check
 

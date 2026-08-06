@@ -185,7 +185,7 @@ def build_prompt(case: Path, spec: dict, diff: str, context: str) -> str:
     would be able to open for itself."""
     read = lambda p: p.read_text(encoding="utf-8")
     parts = [
-        ("PROJECT PROFILE (AGENTS.md)", read(FIXTURES / "AGENTS.md")),
+        ("PROJECT PROFILE (PROFILE.md)", read(FIXTURES / "PROFILE.md")),
         (f"ROLE ({spec['role']}.md)", read(TROIKA / "agents" / f"{spec['role']}.md")),
         (f"SKILL ({spec['skill']}/SKILL.md)", read(TROIKA / "skills" / spec["skill"] / "SKILL.md")),
         ("PLAN ($TROIKA_SCRATCHPAD/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
@@ -392,11 +392,11 @@ def check_fixtures() -> int:
         problems.append("fixtures/repo missing")
     # A missing profile or plan is a fixture problem like any other; reading them
     # unguarded turned it into a traceback, which is not a check result.
-    missing = [f for f in ("AGENTS.md", "plan.md") if not (FIXTURES / f).is_file()]
+    missing = [f for f in ("PROFILE.md", "plan.md") if not (FIXTURES / f).is_file()]
     if missing:
         problems += [f"fixtures/{f} missing — nothing downstream can be checked" for f in missing]
         return report(problems, 0)
-    profile = (FIXTURES / "AGENTS.md").read_text(encoding="utf-8")
+    profile = (FIXTURES / "PROFILE.md").read_text(encoding="utf-8")
     plan = (FIXTURES / "plan.md").read_text(encoding="utf-8")
     declared = ANCHOR.findall(profile)
     anchors = set(declared)
@@ -404,28 +404,28 @@ def check_fixtures() -> int:
     # Last one wins when an id is pasted twice, which hides the first section from the
     # empty-section check below.
     for dup in sorted(a for a in anchors if declared.count(a) > 1):
-        problems.append(f"fixtures/AGENTS.md declares #{dup} more than once")
+        problems.append(f"fixtures/PROFILE.md declares #{dup} more than once")
     needed = set()
+    # Roles cite the profile by anchor id in backticks — `#tracker` — never by link, so
+    # the fixture must answer every id they cite.
     for f in list((TROIKA / "agents").glob("*.md")) + list((TROIKA / "skills").glob("*/SKILL.md")):
-        for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
-            path, _, frag = target.partition("#")
-            if frag and path.endswith("AGENTS.md"):
-                needed.add(frag)
+        body = re.sub(r"```.*?```", "", f.read_text(encoding="utf-8"), flags=re.S)
+        needed.update(re.findall(r"`#([a-z][a-z0-9-]*)`", body))
     # An id that is present but not as a well-formed tag is a different defect from one that
     # is absent, and saying "dead link" about a link that resolves sends the reader nowhere.
     loose = set(re.findall(r'<a\s+[^>]*id="([^"]+)"', profile))
     for miss in sorted(needed - anchors):
         if miss in loose:
-            problems.append(f'fixtures/AGENTS.md #{miss} is not a well-formed <a id="…"></a> tag')
+            problems.append(f'fixtures/PROFILE.md #{miss} is not a well-formed <a id="…"></a> tag')
         else:
-            problems.append(f"fixtures/AGENTS.md lacks #{miss} — a role would read a dead link")
+            problems.append(f"fixtures/PROFILE.md lacks #{miss} — a role would read a dead link")
     # An anchor that resolves to a bare heading is a dead link that happens to render: the
     # role follows it and learns nothing, and no existing check notices.
     for anchor in sorted(needed & anchors):
         prose = "\n".join(l for l in sections.get(anchor, "").splitlines()
                           if not l.startswith("#")).strip()
         if not prose:
-            problems.append(f"fixtures/AGENTS.md #{anchor} is a heading with no content")
+            problems.append(f"fixtures/PROFILE.md #{anchor} is a heading with no content")
     for case in sorted(CASES.iterdir()):
         if not case.is_dir() or case.name.startswith("_"):
             continue
@@ -438,7 +438,7 @@ def check_fixtures() -> int:
         # A case grades against wording in the fixtures — a rule in the profile, a contract
         # or a requirement in the plan. Reword the fixture and the case silently stops
         # testing what it claims to; this makes that a fixture failure instead.
-        for key, where, text in (("profile_requires", "fixtures/AGENTS.md", profile),
+        for key, where, text in (("profile_requires", "fixtures/PROFILE.md", profile),
                                  ("plan_requires", "fixtures/plan.md", plan)):
             for phrase in as_list(spec.get(key)):
                 if phrase.lower() not in text.lower():

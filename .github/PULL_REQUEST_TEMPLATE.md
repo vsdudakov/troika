@@ -22,4 +22,4 @@
 - [ ] Nothing in `agents/` or `skills/` names a repo, command, tracker, URL or person
 - [ ] No hardcoded paths — the resolved `$TROIKA_*` variables only
 - [ ] Generated files regenerated (`python3 plugin/generate.py`), not hand-edited
-- [ ] New profile anchor? Added to `AGENTS.template.md` in this same change
+- [ ] New profile anchor? Added to `PROFILE.template.md` in this same change

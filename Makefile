@@ -92,7 +92,7 @@ dist: check ## Build the release archive locally, exactly as CI does
 	@v=$$(cat VERSION); \
 	git archive --format=tar.gz --prefix="troika-$$v/" -o "troika-$$v.tar.gz" HEAD \
 	  .claude-plugin .codex-plugin .cursor-plugin .agents agents skills plugin \
-	  AGENTS.template.md ROLES.md README.md LICENSE.md VERSION; \
+	  PROFILE.template.md ROLES.md README.md LICENSE.md VERSION; \
 	shasum -a 256 "troika-$$v.tar.gz" | tee "troika-$$v.tar.gz.sha256"
 
 # Tag and push; .github/workflows/release.yml re-runs the gates on the tag,
@@ -106,12 +106,12 @@ release: check test-check ## Tag the current VERSION and push it (triggers the r
 
 install-release: ## Install a published release (make install-release V=0.2.0)
 	@[ -n "$(V)" ] || { echo "usage: make install-release V=0.2.0"; exit 1; }
-	mkdir -p $(HOME)/.troika
+	mkdir -p $(HOME)/.troika-dist
 	curl -fsSL "https://github.com/vsdudakov/troika/releases/download/v$(V)/troika-$(V).tar.gz" \
-	  | tar xz -C $(HOME)/.troika
-	claude plugin marketplace add $(HOME)/.troika/troika-$(V) || true
+	  | tar xz -C $(HOME)/.troika-dist
+	claude plugin marketplace add $(HOME)/.troika-dist/troika-$(V) || true
 	claude plugin install troika@troika
-	codex plugin marketplace add $(HOME)/.troika/troika-$(V) || true
+	codex plugin marketplace add $(HOME)/.troika-dist/troika-$(V) || true
 	codex plugin add troika@troika
 
 # --- Documentation (MkDocs Material) -----------------------------------------
@@ -126,6 +126,6 @@ docs: ## Build the static site into ./site (social cards on, like CI)
 docs-serve: ## Live-preview the docs at http://127.0.0.1:8000
 	$(PY) -m mkdocs serve
 
-clean: ## Remove build artefacts (never touches scratchpad/ or worktrees/)
+clean: ## Remove build artefacts (never touches a workspace's .troika/)
 	rm -rf site .cache
 	find . -name __pycache__ -type d -prune -exec rm -rf {} +

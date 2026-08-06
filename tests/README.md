@@ -128,7 +128,7 @@ quoted item cannot contain its own quote character, since there is no escape syn
 there makes a case unpassable, and without the check that only surfaces after a paid run.
 
 **`profile_requires` and `plan_requires` are what keep a case honest.** A case does not test
-the reviewer against some universal standard — it tests it against a rule `fixtures/AGENTS.md`
+the reviewer against some universal standard — it tests it against a rule `fixtures/PROFILE.md`
 states, or a contract `fixtures/plan.md` pins. Reword or drop that wording and the case keeps
 running, keeps passing or failing, and no longer measures what it claims to. Declaring the
 wording makes that a fixture failure instead of a silent one.

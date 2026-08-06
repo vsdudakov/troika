@@ -16,7 +16,7 @@ Reviews plan, local diff, open PR. Findings only.
   - **Raise it when** — the diff touches auth, money, or migrations: effort `xhigh`.
   - **Also** — prefer a different model family from the author; running the pass under Codex is the cheapest way ([plan-review › in Codex](../skills/plan-review/SKILL.md#runner) · [internal-review › in Codex](../skills/internal-review/SKILL.md#runner)).
 
-Inherits [AGENTS.md](../../AGENTS.md).
+Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 ## Scope
 
@@ -35,14 +35,14 @@ Inherits [AGENTS.md](../../AGENTS.md).
 Check all nine on the whole diff and required context.
 
 1. **Requirements** — all and only planned work.
-2. **Code style** — [AGENTS.md › Style](../../AGENTS.md#style), per language. Cite `file:line`. **An import inside a function or method is a Major**, not a nit: it hides a circular import, so report the cycle and the layering fix, not just the import placement. Comments that restate the code are a nit, every time ([AGENTS.md › Rules](../../AGENTS.md#comments)).
+2. **Code style** — PROFILE.md › Style (`#style`), per language. Cite `file:line`. **An import inside a function or method is a Major**, not a nit: it hides a circular import, so report the cycle and the layering fix, not just the import placement. Comments that restate the code are a nit, every time (PROFILE.md › Rules (`#comments`)).
 3. **Verification** — profile commands only; quote decisive failure.
-4. **Layering** — [AGENTS.md › Layering](../../AGENTS.md#layering): no layer skipped, no cross-layer reach-around.
+4. **Layering** — PROFILE.md › Layering (`#layering`): no layer skipped, no cross-layer reach-around.
 5. **Queries** — N+1, missing prefetch/eager loading, unindexed or unbounded queries.
-6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included ([AGENTS.md › Tests](../../AGENTS.md#tests)); a collected count in the work log matching the tests written ([collect](../skills/implement-change/SKILL.md#collect)) — a count that is missing, short, or overstated is a Blocker, and an overstated one is the worse case because it reads as coverage that was never written. Never run.
+6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included (PROFILE.md › Tests (`#tests`)); a collected count in the work log matching the tests written ([collect](../skills/implement-change/SKILL.md#collect)) — a count that is missing, short, or overstated is a Blocker, and an overstated one is the worse case because it reads as coverage that was never written. Never run.
 7. **Migrations** — generated not hand-edited; no applied migration modified.
 8. **Contract match** — the implemented API shape equals the plan's pinned contract, and the consumer uses exactly that.
-9. **Hygiene** — no secrets, no `.env`, no debug prints, no commented-out code, no AI attribution ([no-ai-attribution](../../AGENTS.md#no-ai-attribution)), no truncated or empty new files.
+9. **Hygiene** — no secrets, no `.env`, no debug prints, no commented-out code, no AI attribution (`#no-ai-attribution`), no truncated or empty new files.
 
 ## Gates
 

@@ -52,7 +52,7 @@ file makes "one role writes a worktree at a time" enforceable rather than aspira
 
 ```mermaid
 flowchart LR
-    P[AGENTS.md<br/>your facts] --> R[role file<br/>craft, gates, refusals]
+    P[PROFILE.md<br/>your facts] --> R[role file<br/>craft, gates, refusals]
     S[skill<br/>ordered steps] --> R
     R --> O[handoff file]
 ```

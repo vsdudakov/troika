@@ -9,7 +9,7 @@ description: The handoff files roles write to each other during one ticket — p
 
 The handoff files roles write to each other during one ticket: plans, work logs, review and
 QA reports, and the proof artifacts the PR and the ticket carry. The directory is
-`$TROIKA_SCRATCHPAD` ([workspace paths](../../../AGENTS.md#workspace-paths)); `python3
+`$TROIKA_SCRATCHPAD` (workspace paths (`#workspace-paths`)); `python3
 plugin/resolve.py --ensure` creates it.
 
 **Untracked, and never committed.** These files belong to one ticket in one workspace. Every
@@ -85,6 +85,6 @@ already live on the ticket and the reasoning on the PR.
   parallelise ([develop-flow › Parallelism](../develop-flow/SKILL.md#parallelism)). Two roles
   never append to one handoff file.
 - **A fact worth keeping past the ticket is not a scratchpad file.** Write it to
-  [memory](../memory/SKILL.md), or promote it into the workspace `AGENTS.md`, or into
+  [memory](../memory/SKILL.md), or promote it into the workspace profile, or into
   `agents/` / `skills/` if it is true in any organisation.
 - **`git clean -xfd` deletes all of it** ([worktree › Gotchas](../worktree/SKILL.md)).
