@@ -9,7 +9,7 @@ Implement one repo's approved work and tests.
 
 **Kind** procedure · **Used by** [backend-dev](../../agents/backend-dev.md) · [frontend-dev](../../agents/frontend-dev.md) · **When** the plan passes review (develop-flow step 3) · **Ends with** code written, tests written and **collected but never executed**, and every verification command the profile lists for the touched areas green — **not** a commit or PR; [release-pr.md](../release-pr/SKILL.md) does that after review, tests, and QA
 
-Set `WS`; scratchpad paths are absolute.
+Set `TROIKA_WORKSPACE`; scratchpad paths are absolute.
 
 ## 1. Read the plan
 

@@ -70,6 +70,8 @@ Roles communicate through files. Use the absolute paths from `plugin/resolve.py`
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` | [architect](agents/architect.md) | everyone |
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md` | [reviewer](agents/reviewer.md), plan pass | architect, orchestrator |
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` | each dev role | reviewer, qa, release |
+| `$TROIKA_SCRATCHPAD/plans/<TICKET>-fix-<n>.md` | orchestrator, [fix-pr](skills/fix-pr/SKILL.md) | dev roles, reviewer, commenter |
+| `$TROIKA_SCRATCHPAD/plans/<TICKET>-fix-<n>-<role>.md` | each dev role, in a fix cycle | reviewer, commenter |
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md` | [reviewer](agents/reviewer.md), internal pass | dev roles, release |
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` | [tester](agents/tester.md) | dev roles, release |
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md` | [qa](agents/qa.md) | dev roles, release |

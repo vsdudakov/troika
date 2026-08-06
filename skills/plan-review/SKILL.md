@@ -9,7 +9,7 @@ Pre-code gate. Use a **different model family** from the architect.
 
 **Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** the architect has written the plan (develop-flow step 2) · **Ends with** an `Approve` verdict on the plan file, or a loop back to the architect
 
-Read-only. Architect rewrites. Set `WS` first.
+Read-only. Architect rewrites. Set `TROIKA_WORKSPACE` first.
 
 ## 1. Inputs
 

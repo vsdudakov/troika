@@ -1,12 +1,12 @@
 ---
 name: demo
 description: Builds the demo integration branch — reset it from the default branch, merge the demo-labeled PRs in a conflict-minimising order, deploy, and prepare the team notification.
-argument-hint: [demo label]
+argument-hint: [LABEL]
 ---
 
 Run Troika's **demo-prep** procedure.
 
-**Argument** — `[demo label]`: $ARGUMENTS
+**Argument** — `[LABEL]`: $ARGUMENTS
 
 With no argument, use the profile's default and say which you used.
 
@@ -16,7 +16,7 @@ With no argument, use the profile's default and say which you used.
    eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
    workspace declares them, and creating the three it writes into. It exits non-zero when
    there is no workspace above the current directory — **stop there and say so**; a guessed

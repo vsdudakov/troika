@@ -9,7 +9,7 @@ Review open PR and post one comment. Local diff uses [internal-review](../intern
 
 **Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** the PR is open (release-pr step 7, or on request) · **Ends with** one review comment on the PR and a verdict
 
-Read-only: no test, edit, merge. Set `WS`.
+Read-only: no test, edit, merge. Set `TROIKA_WORKSPACE`.
 
 ## 1. Requirements
 
@@ -65,4 +65,4 @@ Post [reviewer format](../../agents/reviewer.md#output) headed `## Review of PR 
 
 ## Stop conditions
 
-Blocker/Major → author fixes/pushes; re-review. Cheap nits fix; others do not gate. **Cap at 3 cycles** — then stop, leave the latest review on the PR, and report the unresolved findings to the human.
+Blocker/Major → author fixes/pushes ([fix-pr](../fix-pr/SKILL.md), when the fix is Troika's to make); re-review. Cheap nits fix; others do not gate. **Cap at 3 cycles** — then stop, leave the latest review on the PR, and report the unresolved findings to the human.

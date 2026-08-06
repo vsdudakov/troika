@@ -9,7 +9,7 @@ One checkout per branch under `$TROIKA_WORKTREES/`; share primary dependencies.
 
 **Kind** reference · **Used by** [implement-change](../implement-change/SKILL.md) · [internal-review](../internal-review/SKILL.md) · [run-unit-tests](../run-unit-tests/SKILL.md) · [pr-review](../pr-review/SKILL.md) · [qa-verify](../qa-verify/SKILL.md) · [release-pr](../release-pr/SKILL.md) · **When** a branch is created, diffed, reviewed, run by the stack, or cleaned up · **Ends with** a correctly named worktree with shared dependencies, or a removed one
 
-Run git inside target repo. Set `WS`.
+Run git inside target repo. Set `TROIKA_WORKSPACE`.
 
 <a id="base-ref"></a>
 ## The base ref — resolved from the profile, never hardcoded
@@ -33,6 +33,7 @@ QA/release depend on exact directory names:
 | Ticket work | `$TROIKA_WORKTREES/<repo>-<TICKET>` | per [AGENTS.md › Branches](../../../AGENTS.md#branches) |
 | No ticket | `$TROIKA_WORKTREES/<repo>-<fix-description>` | per the profile |
 | Reviewing a PR | `$TROIKA_WORKTREES/review-<repo>-<N>` | detached at `<remote>/<headRefName>` |
+| Fixing a PR | the ticket lane if it exists, else `$TROIKA_WORKTREES/fix-<repo>-<N>` | `<headRefName>`, tracking `<remote>/<headRefName>` |
 
 **One worktree per repo per ticket**, not per role: several roles working the same repo share it ([develop-flow › Lanes](../develop-flow/SKILL.md#lanes)).
 
@@ -59,12 +60,20 @@ git fetch <remote>   # or the ref is stale
 git worktree add "$TROIKA_WORKTREES/review-<repo>-<N>" <remote>/<headRefName>
 ```
 
+**Fixing a PR** — the same checkout cannot be used: it is detached, so nothing committed in
+it can be pushed. Track the branch instead ([fix-pr](../fix-pr/SKILL.md)):
+
+```bash
+git fetch <remote>
+git worktree add --track -b <headRefName> "$TROIKA_WORKTREES/fix-<repo>-<N>" <remote>/<headRefName>
+```
+
 <a id="setup"></a>
 ## Set up dependencies
 
 Fresh worktrees lack ignored dependencies/env. Symlink/copy per profile; do not reinstall.
 
-- Prefer the absolute form (`ln -s "$WS/<repo>/<dir>" <dir>`). Relative targets are counted from the worktree, three or four levels deep.
+- Prefer the absolute form (`ln -s "$TROIKA_WORKSPACE/<repo>/<dir>" <dir>`). Relative targets are counted from the worktree, three or four levels deep.
 - Only run install inside the worktree if the branch itself changes a dependency manifest or lockfile — remove the symlink first so the shared environment isn't mutated.
 - Set signing per the profile's rules, once per worktree.
 

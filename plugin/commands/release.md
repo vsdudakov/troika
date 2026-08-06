@@ -1,12 +1,12 @@
 ---
 name: release
 description: Cuts a periodic release end-to-end — promote the previous pre-release, branch, pre-release, notes, QA plan, deploy to the pre-production environment, prepare the announcement.
-argument-hint: <version>
+argument-hint: <VERSION>
 ---
 
 Run Troika's **release-cut** procedure.
 
-**Argument** — `<version>`: $ARGUMENTS
+**Argument** — `<VERSION>`: $ARGUMENTS
 
 With no argument, ask for one and stop — do not guess.
 
@@ -16,7 +16,7 @@ With no argument, ask for one and stop — do not guess.
    eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
    workspace declares them, and creating the three it writes into. It exits non-zero when
    there is no workspace above the current directory — **stop there and say so**; a guessed

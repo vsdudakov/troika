@@ -9,7 +9,7 @@ First test execution: change-related tests only, parallel by area.
 
 **Kind** procedure · **Used by** [tester](../../agents/tester.md) · **When** internal review is `Approve` / `Approve with nits`, before QA (develop-flow step 5) · **Ends with** a test report file, a `Pass`/`Fail` verdict, and failures routed to the owning dev role
 
-Read-only. Owner fixes failures. Set `WS`.
+Read-only. Owner fixes failures. Set `TROIKA_WORKSPACE`.
 
 <a id="selection"></a>
 ## 1. Select the tests — from the diff, not from the tree

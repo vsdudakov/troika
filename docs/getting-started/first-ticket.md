@@ -46,11 +46,12 @@ It is supposed to stop. A gate that fails is the product working:
 
 ## Start somewhere else instead
 
-Nothing requires the full pipeline. The other six commands each start a session of their own:
+Nothing requires the full pipeline. The other seven commands each start a session of their own:
 
 ```
 /troika:spike   SCRUM-123     # investigate and plan it, and stop — nothing gets built
 /troika:review  412           # review an open PR
+/troika:fix     412           # fix that review's comments — or say what to fix instead
 /troika:qa      412           # verify an open PR on your local stack, with proofs
 /troika:triage  <paste a stack trace or an issue link>
 /troika:release 2026.8.0

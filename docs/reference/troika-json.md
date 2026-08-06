@@ -27,7 +27,7 @@ One file at the root of each folder-of-repos. It is the only place a path is dec
 | `worktrees` | `TROIKA_WORKTREES` | `troika/worktrees` | one checkout per branch |
 | `memory` | `TROIKA_MEMORY` | `troika/memory` | dated observations |
 
-The workspace root itself is exported as `WS`; it is the directory holding the file, never
+The workspace root itself is exported as `TROIKA_WORKSPACE`; it is the directory holding the file, never
 declared inside it.
 
 Every key is optional. An unknown key is an error rather than a silent no-op — a typo in a

@@ -164,4 +164,4 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 <a id="workspace-paths"></a>
 ## Workspace paths
 
-`WS` is the workspace root — the directory holding `AGENTS.md`, `troika/`, and `toyapp/`. Every scratchpad path is absolute.
+`TROIKA_WORKSPACE` is the workspace root — the directory holding `AGENTS.md`, `troika/`, and `toyapp/`. Every scratchpad path is absolute.

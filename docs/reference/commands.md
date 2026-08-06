@@ -5,7 +5,7 @@ description: Every /troika command, what it takes as an argument, which role run
 
 # Commands
 
-Seven commands, one per procedure you **start** a session with. In Claude Code and Cursor
+Eight commands, one per procedure you **start** a session with. In Claude Code and Cursor
 they appear as `/troika:<name>`; in Codex the same procedures are model-invoked skills with
 no `/` prefix.
 
@@ -18,11 +18,16 @@ the state directories), reads the procedure, and reads your `AGENTS.md` profile.
 | --- | --- | --- | --- |
 | `/troika:dev` | `develop-flow` | `<TICKET>` | the whole pipeline, ticket to merge-ready PR |
 | `/troika:spike` | `spike` | `<TICKET>` | investigates the ticket and produces a reviewed plan — and stops there, nothing is built |
-| `/troika:review` | `pr-review` | `<PR number \| PR link>` | reviews an open PR in an isolated worktree and posts one comment |
-| `/troika:qa` | `qa-verify` | `<PR number \| PR link \| TICKET>` | verifies a PR on the local stack and captures a proof per requirement |
-| `/troika:triage` | `incident-triage` | `<issue link \| stack trace \| event>` | investigates a production symptom read-only, lands on a cause with evidence |
-| `/troika:release` | `release-cut` | `<version>` | cuts a periodic release end to end |
-| `/troika:demo` | `demo-prep` | `[demo label]` | builds the demo integration branch, deploys, prepares the notification |
+| `/troika:review` | `pr-review` | `<PR>` | reviews an open PR in an isolated worktree and posts one comment |
+| `/troika:fix` | `fix-pr` | `<PR>` | fixes an open PR — what you describe, or its unresolved review comments |
+| `/troika:qa` | `qa-verify` | `<PR>` | verifies a PR on the local stack and captures a proof per requirement |
+| `/troika:triage` | `incident-triage` | `<ISSUE>` | investigates a production symptom read-only, lands on a cause with evidence |
+| `/troika:release` | `release-cut` | `<VERSION>` | cuts a periodic release end to end |
+| `/troika:demo` | `demo-prep` | `[LABEL]` | builds the demo integration branch, deploys, prepares the notification |
+
+The hint is one upper-case word naming what the first step resolves; the forms it accepts
+(a number, a link, a ticket key, a pasted stack trace) are the procedure's business, not the
+menu's. `<>` is required, `[]` optional.
 
 ## Procedures without a command
 
@@ -44,6 +49,13 @@ or `release-pr` with nothing reviewed to ship. All three hosts still discover ev
 them as a skill, so you can ask for one by name ("run internal-review on this branch", "run
 ticket-intake for the Q3 export work") and the model pulls it in. The `/` menu is the short
 list of ways to *start*, not the list of what Troika can do.
+
+`/troika:fix` is the other half of `/troika:review`: the reviewer posts findings and stops,
+and `fix-pr` picks an open PR up from there. With no description it works through the
+unresolved review comments, fixing or rejecting each one with a reason; with a description it
+does exactly that instead, and still reports the comments it left alone. Either way the work
+goes through the owning dev roles, gets re-reviewed and re-tested, and is pushed to the same
+branch — it never opens a second PR.
 
 `qa-verify` is the one procedure with both roles: the flow runs it at step 6 against the
 lanes it just built, and `/troika:qa` runs it against a PR that already exists — checking

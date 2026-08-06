@@ -18,12 +18,12 @@ eval "$(python3 plugin/resolve.py --ensure)"
 
 | Variable | Default | Holds |
 | --- | --- | --- |
-| `WS` | the directory found | the workspace root; repos are `$WS/<repo>` |
-| `TROIKA_PROFILE` | `$WS/AGENTS.md` | the project profile |
-| `TROIKA_HOME` | `$WS/troika` | the tree, when it is a clone rather than an install |
-| `TROIKA_WORKTREES` | `$WS/troika/worktrees` | one checkout per branch |
-| `TROIKA_SCRATCHPAD` | `$WS/troika/scratchpad` | plans, reviews, work logs, proofs |
-| `TROIKA_MEMORY` | `$WS/troika/memory` | dated observations about this workspace |
+| `TROIKA_WORKSPACE` | the directory found | the workspace root; repos are `$TROIKA_WORKSPACE/<repo>` |
+| `TROIKA_PROFILE` | `$TROIKA_WORKSPACE/AGENTS.md` | the project profile |
+| `TROIKA_HOME` | `$TROIKA_WORKSPACE/troika` | the tree, when it is a clone rather than an install |
+| `TROIKA_WORKTREES` | `$TROIKA_WORKSPACE/troika/worktrees` | one checkout per branch |
+| `TROIKA_SCRATCHPAD` | `$TROIKA_WORKSPACE/troika/scratchpad` | plans, reviews, work logs, proofs |
+| `TROIKA_MEMORY` | `$TROIKA_WORKSPACE/troika/memory` | dated observations about this workspace |
 
 `--ensure` creates the three the roles write into. They are ignored whole and never tracked,
 so a fresh clone does not contain them.
@@ -44,7 +44,7 @@ default.** A guessed path writes proofs nobody reads.
 ## Why no procedure spells a path out
 
 A workspace is allowed to move its state — onto a faster disk, outside the clone, into a
-shared location. If a procedure said `$WS/troika/scratchpad`, `.troika.json` would be a lie
+shared location. If a procedure said `$TROIKA_WORKSPACE/troika/scratchpad`, `.troika.json` would be a lie
 the moment anyone used it. So the structural gate fails any file that hardcodes one:
 
 ```

@@ -1,10 +1,10 @@
 ---
-name: qa
-description: Verifies a change on the real local stack — browser E2E with before/after GIFs for frontend work, API calls plus datastore checks for backend work — and returns proofs and a Pass/Fail verdict.
+name: fix
+description: Fixes an open PR — either what you asked for in words, or every unresolved review comment on it — through the owning dev roles, then re-reviews, re-tests, pushes to the same branch and answers every thread.
 argument-hint: <PR>
 ---
 
-Run Troika's **qa-verify** procedure.
+Run Troika's **fix-pr** procedure.
 
 **Argument** — `<PR>`: $ARGUMENTS
 
@@ -22,9 +22,9 @@ With no argument, ask for one and stop — do not guess.
    there is no workspace above the current directory — **stop there and say so**; a guessed
    path writes handoff files nobody reads.
 
-2. Read the procedure: `${CLAUDE_PLUGIN_ROOT}/skills/qa-verify/SKILL.md`. If that variable is
+2. Read the procedure: `${CLAUDE_PLUGIN_ROOT}/skills/fix-pr/SKILL.md`. If that variable is
    unset — a plain clone rather than an installed plugin — read
-   `$TROIKA_HOME/skills/qa-verify/SKILL.md` instead.
+   `$TROIKA_HOME/skills/fix-pr/SKILL.md` instead.
 3. Read `$TROIKA_PROFILE` — the workspace profile. Every repo, command, branch, base ref,
    tracker, and URL comes from there; the procedure names none of them, and where the
    profile declares a limit the profile wins.

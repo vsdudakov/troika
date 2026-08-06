@@ -4,7 +4,7 @@ Tool-neutral procedures, references, templates. Run: `run troika/skills/develop-
 
 One directory per skill, holding one `SKILL.md`. That is the shape Claude Code, Codex, and
 Cursor all discover a skill in, so the procedure is the file they load — there is no wrapper
-and no second copy. The `/` commands are generated from this frontmatter, for the seven procedures a session
+and no second copy. The `/` commands are generated from this frontmatter, for the eight procedures a session
 starts on; every other skill is discovered by name instead. See [plugin/](../plugin/README.md).
 
 **Kind** fixes shape:
@@ -28,6 +28,7 @@ starts on; every other skill is discovered by name instead. See [plugin/](../plu
 | QA verify (local stack) | [qa-verify.md](qa-verify/SKILL.md) | [qa](../agents/qa.md) |
 | Release PR (commit, PR, proofs, ticket) | [release-pr.md](release-pr/SKILL.md) | [releaser](../agents/releaser.md) |
 | PR review (post-PR, posted to the PR host) | [pr-review.md](pr-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
+| Fix PR (an instruction, or the review comments) | [fix-pr.md](fix-pr/SKILL.md) | orchestrator |
 | Ticket intake (create or reshape a ticket) | [ticket-intake.md](ticket-intake/SKILL.md) | [architect](../agents/architect.md) · [commenter](../agents/commenter.md) |
 | Incident triage (read-only, from observability) | [incident-triage.md](incident-triage/SKILL.md) | [architect](../agents/architect.md) · [backend-dev](../agents/backend-dev.md) |
 | Demo prep (integration branch → deployed demo) | [demo-prep.md](demo-prep/SKILL.md) | [releaser](../agents/releaser.md) |

@@ -9,7 +9,7 @@ Verified worktree to reviewed PR.
 
 **Kind** procedure · **Used by** [releaser](../../agents/releaser.md) · **When** internal review is `Approve`/`Approve with nits`, the tester's verdict is `Pass`, and QA is `Pass` (develop-flow step 7) · **Ends with** a PR URL, **CI green**, proofs on the ticket, the ticket updated as the profile allows, worktrees removed
 
-Run once per repo: one PR regardless of contributing roles. Commit/push repos concurrently; open PRs in [dependency order](../../../AGENTS.md#dependency-order). Set `WS` first.
+Run once per repo: one PR regardless of contributing roles. Commit/push repos concurrently; open PRs in [dependency order](../../../AGENTS.md#dependency-order). Set `TROIKA_WORKSPACE` first.
 
 ## 1. Gates
 

@@ -274,11 +274,11 @@ def check_tracked():
 
 
 def check_resolved_paths():
-    """No role may spell a workspace path out. `$WS/troika/scratchpad` is a path the
+    """No role may spell a workspace path out. `$TROIKA_WORKSPACE/troika/scratchpad` is a path the
     workspace is now allowed to move, so a literal one silently ignores where it moved to."""
     for f in role_and_skill_files() + plugin_files():
         for i, line in enumerate(text_of(f).splitlines(), 1):
-            if "$WS/troika" in line or "$WS/AGENTS.md" in line:
+            if "$TROIKA_WORKSPACE/troika" in line or "$TROIKA_WORKSPACE/AGENTS.md" in line:
                 fail(f, f"line {i}: hardcoded path — use $TROIKA_HOME, $TROIKA_SCRATCHPAD, "
                         "$TROIKA_WORKTREES, $TROIKA_MEMORY, or $TROIKA_PROFILE")
 
@@ -306,8 +306,8 @@ def check_resolver():
         except SystemExit as e:
             fail("plugin/resolve.py", f"failed on a valid workspace: {e}")
             return
-        if out.get("WS") != str(root):
-            fail("plugin/resolve.py", f"resolved WS {out.get('WS')!r} from a subdirectory, not the root")
+        if out.get("TROIKA_WORKSPACE") != str(root):
+            fail("plugin/resolve.py", f"resolved TROIKA_WORKSPACE {out.get('TROIKA_WORKSPACE')!r} from a subdirectory, not the root")
         # An absolute override must survive verbatim; a declared path silently re-anchored
         # under the workspace is the failure this whole mechanism exists to prevent.
         if out.get("TROIKA_SCRATCHPAD") != str(elsewhere):
@@ -320,7 +320,7 @@ def check_resolver():
         stray = root / "stray"
         (stray / "repo").mkdir(parents=True)
         (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
-        if resolve.resolve(str(stray / "repo")).get("WS") != str(root):
+        if resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE") != str(root):
             fail("plugin/resolve.py", "a bare AGENTS.md with no troika/ beside it was taken for a workspace")
 
 
@@ -373,7 +373,7 @@ def check_manifests():
     # stray note or index in there fails there first.
 
     # `commands` takes command *files*; a directory there is read as a skill directory, which
-    # silently registers all 13 procedures a second time.
+    # silently registers every procedure a second time.
     for path in claude.get("commands", []):
         if os.path.isdir(path.lstrip("./")):
             fail(CLAUDE_MANIFEST, f"commands lists the directory {path}; list the files in it")

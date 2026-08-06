@@ -11,7 +11,7 @@ A ticket link in, an approved plan out. Nothing is implemented, branched, or com
 
 This is [develop-flow](../develop-flow/SKILL.md) steps 0 – 2 and nothing after them. Run it when the answer wanted is *what would this take* rather than *ship it*; when the plan is approved and the work is wanted, [develop-flow](../develop-flow/SKILL.md) picks up the same plan file at its step 3.
 
-Read-only over every repo. Set `WS` first ([workspace paths](../../../AGENTS.md#workspace-paths)).
+Read-only over every repo. Set `TROIKA_WORKSPACE` first ([workspace paths](../../../AGENTS.md#workspace-paths)).
 
 ## 1. Fan out — index, ticket, memory, all at once
 

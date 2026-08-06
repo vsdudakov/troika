@@ -1,12 +1,12 @@
 ---
 name: triage
 description: Investigates a production symptom from the observability platform — aggregate to the hot service, read raw events, follow traces, and land on a cause with evidence, changing nothing.
-argument-hint: <issue link | stack trace | event>
+argument-hint: <ISSUE>
 ---
 
 Run Troika's **incident-triage** procedure.
 
-**Argument** — `<issue link | stack trace | event>`: $ARGUMENTS
+**Argument** — `<ISSUE>`: $ARGUMENTS
 
 With no argument, ask for one and stop — do not guess.
 
@@ -16,7 +16,7 @@ With no argument, ask for one and stop — do not guess.
    eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
    workspace declares them, and creating the three it writes into. It exits non-zero when
    there is no workspace above the current directory — **stop there and say so**; a guessed

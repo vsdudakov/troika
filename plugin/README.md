@@ -50,12 +50,12 @@ That prints — and `eval` exports — six paths:
 
 | Variable | Default | Holds |
 | --- | --- | --- |
-| `WS` | the directory found | the workspace root; repos are `$WS/<repo>` |
-| `TROIKA_PROFILE` | `$WS/AGENTS.md` | the project profile |
-| `TROIKA_HOME` | `$WS/troika` | this tree, when it is cloned rather than installed |
-| `TROIKA_WORKTREES` | `$WS/troika/worktrees` | one checkout per branch |
-| `TROIKA_SCRATCHPAD` | `$WS/troika/scratchpad` | plans, reviews, work logs, proofs |
-| `TROIKA_MEMORY` | `$WS/troika/memory` | dated observations about this workspace |
+| `TROIKA_WORKSPACE` | the directory found | the workspace root; repos are `$TROIKA_WORKSPACE/<repo>` |
+| `TROIKA_PROFILE` | `$TROIKA_WORKSPACE/AGENTS.md` | the project profile |
+| `TROIKA_HOME` | `$TROIKA_WORKSPACE/troika` | this tree, when it is cloned rather than installed |
+| `TROIKA_WORKTREES` | `$TROIKA_WORKSPACE/troika/worktrees` | one checkout per branch |
+| `TROIKA_SCRATCHPAD` | `$TROIKA_WORKSPACE/troika/scratchpad` | plans, reviews, work logs, proofs |
+| `TROIKA_MEMORY` | `$TROIKA_WORKSPACE/troika/memory` | dated observations about this workspace |
 
 No role spells any of these out — `check.py` fails a file that hardcodes one — because the
 workspace is allowed to move them.

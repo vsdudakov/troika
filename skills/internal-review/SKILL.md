@@ -9,7 +9,7 @@ Pre-push local diff review.
 
 **Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** dev roles report done, before the tests run and before any push (develop-flow step 4) · **Ends with** a verdict file and a loop back to the dev role, nothing posted outside the workspace
 
-Read-only: no edit, push, or test. Set `WS`.
+Read-only: no edit, push, or test. Set `TROIKA_WORKSPACE`.
 
 ## 1. Requirements
 

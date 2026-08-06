@@ -62,7 +62,7 @@ The project profile for Troika. Roles reference these sections by anchor; Troika
 ## Workspace paths
 <the workspace root, and the rule that every path below it is used absolute>
 <the six variables the plugin's resolver exports, and what each holds here:>
-<`$WS` · `$TROIKA_PROFILE` · `$TROIKA_HOME` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
+<`$TROIKA_WORKSPACE` · `$TROIKA_PROFILE` · `$TROIKA_HOME` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
 <resolve them once per session: eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)">
 <the `/troika:*` commands already run that as their first step; spell it out here for a role or script started outside one>
 <no plugin installed — a plain clone instead: eval "$(python3 <clone>/plugin/resolve.py --ensure)", and `$TROIKA_HOME` is that clone>

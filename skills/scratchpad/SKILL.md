@@ -39,6 +39,8 @@ nothing to the ticket.
 plans/<TICKET>.md                    the plan — requirements, repo split, pinned contracts
 plans/<TICKET>-plan-review-<n>.md    plan review (the pre-code gate), cycle <n>
 plans/<TICKET>-<role>.md             one dev role's work log
+plans/<TICKET>-fix-<n>.md            one fix cycle on an already-open PR, cycle <n>
+plans/<TICKET>-fix-<n>-<role>.md     one dev role's work log inside that fix cycle
 plans/<TICKET>-review-<n>.md         internal review, cycle <n>
 plans/<TICKET>-tests-<n>.md          unit-test run, cycle <n>
 plans/<TICKET>-tests-<n>-<area>.log  one test lane's raw output
@@ -53,6 +55,11 @@ number, from 1 — a new cycle adds a file, it never overwrites the previous one
 of what was rejected stays readable. [releaser](../../agents/releaser.md) gates on the
 **highest-numbered** `-review-<n>.md`, `-tests-<n>.md`, and `-qa-<n>.md`; all three must exist
 and must read `Approve` / `Approve with nits`, `Pass`, and `Pass`.
+
+The `-fix-<n>` pair is written by [fix-pr](../fix-pr/SKILL.md) and uses `pr-<N>` in place of
+`<TICKET>` where the PR carries no ticket key. It never overwrites the flow's own
+`<TICKET>-<role>.md`: the record of what the PR looked like before the fix is what a reviewer
+reads to judge the fix.
 
 Plan files follow [plan-template](../plan-template/SKILL.md). Proofs are named after the
 requirement they prove (`req-2-portfolio-filter.gif`) — see

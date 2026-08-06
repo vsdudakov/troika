@@ -1,12 +1,12 @@
 ---
 name: review
 description: Reviews an open PR in an isolated worktree and posts one review comment. Read-only and lint-only — never runs tests, edits code, or merges.
-argument-hint: <PR number | PR link>
+argument-hint: <PR>
 ---
 
 Run Troika's **pr-review** procedure.
 
-**Argument** — `<PR number | PR link>`: $ARGUMENTS
+**Argument** — `<PR>`: $ARGUMENTS
 
 With no argument, ask for one and stop — do not guess.
 
@@ -16,7 +16,7 @@ With no argument, ask for one and stop — do not guess.
    eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
    workspace declares them, and creating the three it writes into. It exits non-zero when
    there is no workspace above the current directory — **stop there and say so**; a guessed

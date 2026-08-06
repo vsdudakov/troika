@@ -6,7 +6,7 @@ troika itself may be a plugin in a host's cache rather than a folder beside them
 neither end of a path can be assumed: this walks up from cwd to the workspace that owns
 the run, and prints the four paths every role uses.
 
-    eval "$(python3 plugin/resolve.py)"     # exports WS and the TROIKA_* paths
+    eval "$(python3 plugin/resolve.py)"     # exports TROIKA_WORKSPACE and the TROIKA_* paths
     python3 plugin/resolve.py --json        # same, machine-readable
     python3 plugin/resolve.py --ensure      # also create the state directories
 
@@ -70,7 +70,7 @@ def load(config):
 def resolve(start=None):
     root, config = find_workspace(Path(start or os.getcwd()).resolve())
     payload = load(config)
-    out = {"WS": str(root)}
+    out = {"TROIKA_WORKSPACE": str(root)}
     for key, default in DEFAULTS.items():
         value = payload.get(key, default)
         if not isinstance(value, str) or not value:

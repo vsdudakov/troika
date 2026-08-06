@@ -42,16 +42,17 @@ KIND = "procedure"
 #
 # The **hint** is what the `/` menu shows next to it, and it is spelled out per command
 # rather than defaulted: a hint inherited from a default is how `/troika:review` came to
-# advertise `<TICKET>` for a procedure that reads a PR. `<>` is required, `[]` optional, `|`
-# separates the forms the procedure genuinely accepts — each one has to be a thing its first
-# step knows how to resolve.
+# advertise `<TICKET>` for a procedure that reads a PR. One upper-case word, naming the
+# thing the procedure's first step resolves — the accepted forms of that thing belong in
+# the procedure, not in a menu line. `<>` is required, `[]` optional.
 COMMANDS = {
-    "demo-prep": ("demo", "[demo label]"),
+    "demo-prep": ("demo", "[LABEL]"),
     "develop-flow": ("dev", "<TICKET>"),
-    "incident-triage": ("triage", "<issue link | stack trace | event>"),
-    "pr-review": ("review", "<PR number | PR link>"),
-    "qa-verify": ("qa", "<PR number | PR link | TICKET>"),
-    "release-cut": ("release", "<version>"),
+    "fix-pr": ("fix", "<PR>"),
+    "incident-triage": ("triage", "<ISSUE>"),
+    "pr-review": ("review", "<PR>"),
+    "qa-verify": ("qa", "<PR>"),
+    "release-cut": ("release", "<VERSION>"),
     "spike": ("spike", "<TICKET>"),
 }
 
@@ -91,7 +92,7 @@ BODY = """Run Troika's **{name}** procedure.
    eval "$(python3 "${{CLAUDE_PLUGIN_ROOT}}/plugin/resolve.py" --ensure)"
    ```
 
-   That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
+   That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
    workspace declares them, and creating the three it writes into. It exits non-zero when
    there is no workspace above the current directory — **stop there and say so**; a guessed
