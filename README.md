@@ -225,7 +225,7 @@ Or start somewhere else:
 /troika:release 2026.8.0             /troika:demo
 ```
 
-<details>
+<details open>
 <summary><b>What each of the other commands does, drawn</b></summary>
 
 **`/troika:spike`** — plan it, build nothing.
