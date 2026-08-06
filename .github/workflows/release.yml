@@ -1,0 +1,73 @@
+name: Release
+
+# Tag-driven. `make release` bumps VERSION, commits, tags `vX.Y.Z` and pushes;
+# this workflow re-runs the gates on the tag, builds the archive and publishes it.
+#
+# Nothing here compiles: Troika is markdown plus two stdlib Python scripts. The
+# archive exists so an install can be pinned to a byte-identical tree without a
+# git clone — hosts that *can* clone should pin the tag instead (see docs).
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build (e.g. v0.1.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The tag is the claim; VERSION is what every host will report. A release
+      # whose tag and manifests disagree is the one bug this workflow can prevent
+      # outright, so it fails before anything is published.
+      - name: Check the tag matches VERSION
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          [ -n "${{ github.event.inputs.tag }}" ] && tag="${{ github.event.inputs.tag }}" && tag="${tag#v}"
+          version="$(cat VERSION)"
+          if [ "$tag" != "$version" ]; then
+            echo "tag v$tag does not match VERSION $version" >&2
+            exit 1
+          fi
+
+      - name: Gates
+        run: |
+          python3 tests/check.py
+          python3 tests/run.py --check
+
+      - name: Build the archive
+        id: build
+        run: |
+          version="$(cat VERSION)"
+          name="troika-$version"
+          # Ship what a host loads, plus the profile template and the licence.
+          # Not the tests, fixtures, or docs sources: they are development inputs.
+          git archive --format=tar.gz --prefix="$name/" \
+            -o "$name.tar.gz" HEAD \
+            .claude-plugin .codex-plugin .cursor-plugin .agents \
+            agents skills plugin \
+            AGENTS.template.md ROLES.md README.md LICENSE.md VERSION
+          sha256sum "$name.tar.gz" > "$name.tar.gz.sha256"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            ${{ steps.build.outputs.name }}.tar.gz
+            ${{ steps.build.outputs.name }}.tar.gz.sha256
