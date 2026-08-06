@@ -5,9 +5,11 @@
 # WARNING: `git clean -xfd` here removes exactly these three directories —
 # uncommitted dev branches, plans, proofs, memory. Use explicit paths instead.
 
-worktrees/
-scratchpad/
-memory/
+# Anchored with a leading slash: unanchored, `memory/` also matches
+# skills/memory/, and the skill is silently never committed.
+/worktrees/
+/scratchpad/
+/memory/
 
 __pycache__/
 *.pyc

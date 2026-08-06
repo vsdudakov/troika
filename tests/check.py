@@ -16,6 +16,7 @@ import importlib.util
 import json
 import os
 import re
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -254,6 +255,24 @@ def load_module(path, name):
     return module
 
 
+def check_tracked():
+    """A file this tree links to but git ignores exists for you and for nobody else.
+    An unanchored `memory/` in .gitignore matches `skills/memory/` too, and the skill is
+    silently never committed — which reads as a dead link in CI and nowhere else."""
+    files = role_and_skill_files() + plugin_files()
+    try:
+        proc = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            input="\n".join(files), capture_output=True, text=True, timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return  # no git, or no repository: nothing to verify against
+    if proc.returncode not in (0, 1):
+        return
+    for line in proc.stdout.splitlines():
+        fail(line.strip(), "ignored by .gitignore — it will be missing for everyone else")
+
+
 def check_resolved_paths():
     """No role may spell a workspace path out. `$WS/troika/scratchpad` is a path the
     workspace is now allowed to move, so a literal one silently ignores where it moved to."""
@@ -384,6 +403,7 @@ def main():
     check_versions()
     check_resolver()
     check_resolved_paths()
+    check_tracked()
     check_style()
 
     if FAIL:
