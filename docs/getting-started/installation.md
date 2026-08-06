@@ -54,6 +54,20 @@ cursor-agent plugin marketplace add https://github.com/vsdudakov/troika
 
 Cursor requires a **git URL** — a local path is not accepted.
 
+## Upgrading
+
+Every host installs from a cached marketplace snapshot, so an upgrade is always *refresh
+the marketplace, then update the plugin*:
+
+```bash
+claude plugin marketplace update troika && claude plugin update troika@troika
+codex plugin marketplace upgrade && codex plugin add troika@troika
+cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
+```
+
+Restart the host afterwards. A pinned version does not move until you bump the pin — see
+[Upgrading an installed plugin](../reference/releases.md#upgrading-an-installed-plugin).
+
 ## No plugin at all
 
 Every host that can read a file can run Troika:

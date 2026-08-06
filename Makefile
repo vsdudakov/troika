@@ -1,4 +1,4 @@
-.PHONY: help repo-seo check test test-check test-dry cov commands version dist release install install-release uninstall docs docs-install docs-serve clean
+.PHONY: help repo-seo check test test-check test-dry cov commands version dist release install install-release upgrade uninstall docs docs-install docs-serve clean
 
 # Troika is markdown plus two Python scripts on the stdlib, so there is nothing
 # to build and nothing to install for the gates — `make check` runs on a bare
@@ -42,6 +42,18 @@ install: commands check ## Install into Claude Code (project scope) and Codex
 	claude plugin install troika@troika --scope project
 	codex plugin marketplace add $(PWD) || true
 	codex plugin add troika@troika
+
+# A host installs from a cached marketplace snapshot, so refreshing the marketplace
+# and updating the plugin are two steps everywhere. Only the first one sees a new
+# release; skipping it re-installs the version already on disk. A pinned ref still
+# resolves to that ref — bump the pin first (docs/reference/releases.md).
+upgrade: ## Refresh the marketplace and update the plugin in Claude Code, Codex and Cursor
+	-claude plugin marketplace update troika
+	-claude plugin update troika@troika
+	-codex plugin marketplace upgrade
+	-codex plugin add troika@troika
+	-cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
+	@echo "restart the host to load the new version"
 
 uninstall: ## Remove the plugin from both hosts
 	-claude plugin uninstall troika@troika --scope project

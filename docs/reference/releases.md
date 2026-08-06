@@ -91,6 +91,80 @@ curl -fsSLO https://github.com/vsdudakov/troika/releases/download/v0.2.0/troika-
 shasum -a 256 -c troika-0.2.0.tar.gz.sha256
 ```
 
+## Upgrading an installed plugin
+
+A host caches the marketplace it installed from, so **refreshing the marketplace and
+updating the plugin are two steps** in all three. Skipping the first one re-installs the
+version you already have.
+
+=== "Claude Code"
+
+    ```bash
+    claude plugin marketplace update troika   # refresh the cached marketplace
+    claude plugin update troika@troika        # install the new version
+    ```
+
+    Restart Claude Code to load it. Confirm what is live:
+
+    ```bash
+    claude plugin list                        # troika@troika  0.2.0  enabled
+    ```
+
+=== "Codex"
+
+    ```bash
+    codex plugin marketplace upgrade          # refresh the Git marketplace snapshots
+    codex plugin add troika@troika            # re-install from the refreshed snapshot
+    ```
+
+    Codex has no `update` verb — `add` over an installed plugin is the upgrade.
+
+=== "Cursor"
+
+    ```bash
+    cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
+    ```
+
+    Cursor re-indexes the marketplace from git; there is no separate per-plugin step.
+
+All three in one go, against a checkout of this repo:
+
+```bash
+make upgrade
+```
+
+!!! warning "A pinned version does not move"
+    If the workspace pinned a tag — `"ref": "v0.1.0"` in `.claude/settings.json`, or
+    `owner/repo@v0.1.0` on the Codex/Cursor marketplace — the refresh still fetches that
+    tag. **Bump the ref first**, then upgrade. That is the point of pinning: the version
+    changes in a reviewable diff, not under you.
+
+Installing from a release archive is versioned by directory, so an upgrade is a fresh
+install of the new one:
+
+```bash
+make install-release V=0.2.0
+```
+
+Old `~/.troika/troika-<version>` trees are left in place; remove the ones you no longer
+have a marketplace pointing at.
+
+## Bumping the version on every release
+
+Every release bumps `VERSION` **before** the tag, and the manifests are written from it —
+never edited by hand. The whole cycle:
+
+```bash
+make version V=0.2.0             # VERSION + the four manifests, then the structural gate
+git commit -am "release: v0.2.0"
+make release                     # gates, tag v0.2.0, push
+```
+
+`release.yml` refuses to publish if the tag and `VERSION` disagree, and `tests/check.py`
+fails if any manifest drifts from `VERSION` — so a release that forgot the bump cannot
+reach a GitHub Release. Two releases sharing one version is the failure this prevents:
+a host keys the install on name *and* version, sees no change, and never upgrades.
+
 ## What a version means here
 
 Troika versions the **contract**, not an API:
