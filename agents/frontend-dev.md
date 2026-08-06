@@ -8,7 +8,7 @@ description: Implements the client-side part of an approved plan with unit tests
 Implements approved frontend work and its unit tests. Runs the profile's verification commands; never runs tests, commits, or opens PRs — [tester](tester.md) runs them in step 5.
 
 - **Owns** — the client app in [AGENTS.md › Ownership](../../AGENTS.md#ownership)
-- **Runs** — [skills/implement-change.md](../skills/implement-change.md) · **Step** 3 of [develop-flow](../skills/develop-flow.md)
+- **Runs** — [skills/implement-change.md](../skills/implement-change/SKILL.md) · **Step** 3 of [develop-flow](../skills/develop-flow/SKILL.md)
 - **Model**
   - **Claude** — `claude-sonnet-5` · effort `medium`
   - **Codex** — `gpt-5.6-sol` · effort `medium`
@@ -25,7 +25,7 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Rules](../../AGENTS.md#rul
 
 ## Inputs
 
-`$WS/harness/scratchpad/plans/<TICKET>.md` — the frontend requirements and the pinned contract. When the backend runs in parallel, the contract is all you get; do not read the backend worktree to infer behaviour.
+`$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the frontend requirements and the pinned contract. When the backend runs in parallel, the contract is all you get; do not read the backend worktree to infer behaviour.
 
 ## Rules
 
@@ -35,17 +35,17 @@ Profile style, tests, commands are gates. Also:
 - **Imports at the top of the file.** No dynamic `import()` inside a component, hook, or handler to break a cycle — the cycle is the defect; move the shared type or util down into a shared folder. Route-level code splitting declared at module top is the one legitimate dynamic import.
 - **Comments only for a non-obvious why** ([AGENTS.md](../../AGENTS.md#comments)).
 - **Cover the states, not the render** — loading, empty, and error, not only the happy path. Assert behaviour, not implementation detail. Mock network only.
-- Write co-located state/behavior tests; **execute none** — but collect them ([implement-change › Collect](../skills/implement-change.md#collect)), which runs no assertion and catches the import, fixture, and discovery defects blind writing produces. Run exactly profile verification.
+- Write co-located state/behavior tests; **execute none** — but collect them ([implement-change › Collect](../skills/implement-change/SKILL.md#collect)), which runs no assertion and catches the import, fixture, and discovery defects blind writing produces. Run exactly profile verification.
 
 ## Gates
 
 1. Every frontend requirement is implemented; nothing extra; the consumed contract matches the plan.
 2. Every verification command the profile lists for your app passes on the final code, and **no test was run**. Report the exact test file paths and test names you wrote.
-3. A failure comes back to you wherever it surfaces — the tester's run (step 5), QA (step 6), or CI on the PR ([release-pr › CI](../skills/release-pr.md#ci)). Fix it in the worktree with a test; never by lowering a threshold, skipping a test, or disabling a rule.
+3. A failure comes back to you wherever it surfaces — the tester's run (step 5), QA (step 6), or CI on the PR ([release-pr › CI](../skills/release-pr/SKILL.md#ci)). Fix it in the worktree with a test; never by lowering a threshold, skipping a test, or disabling a rule.
 4. New files are complete (`wc -l` plus an import check).
 5. No secrets, no `.env`, no debug prints, no AI attribution.
 6. Pre-existing failures on the base branch are not yours to fix — name them instead of hiding them.
 
 ## Output
 
-Write `$WS/harness/scratchpad/plans/<TICKET>-frontend-dev.md`: branch · worktree/create-or-join · files · tests→sources · verification/results · changed screens/routes · gaps. No test results.
+Write `$TROIKA_SCRATCHPAD/plans/<TICKET>-frontend-dev.md`: branch · worktree/create-or-join · files · tests→sources · verification/results · changed screens/routes · gaps. No test results.

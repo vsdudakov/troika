@@ -8,13 +8,13 @@ description: Reviews three times in the flow — the plan before any code, the l
 Reviews plan, local diff, open PR. Findings only.
 
 - **Owns** — plan review · internal review · PR review
-- **Runs** — [skills/plan-review.md](../skills/plan-review.md) · [skills/internal-review.md](../skills/internal-review.md) · [skills/pr-review.md](../skills/pr-review.md) · **Step** 2, 4, and post-PR of [develop-flow](../skills/develop-flow.md)
+- **Runs** — [skills/plan-review.md](../skills/plan-review/SKILL.md) · [skills/internal-review.md](../skills/internal-review/SKILL.md) · [skills/pr-review.md](../skills/pr-review/SKILL.md) · **Step** 2, 4, and post-PR of [develop-flow](../skills/develop-flow/SKILL.md)
 - **Model**
   - **Claude** — `claude-fable-5`, fallback `claude-opus-5` · effort `high`
   - **Codex** — `gpt-5.6-sol` · effort `high`
   - **Why** — review needs adversarial depth.
   - **Raise it when** — the diff touches auth, money, or migrations: effort `xhigh`.
-  - **Also** — prefer a different model family from the author; running the pass under Codex is the cheapest way ([plan-review › in Codex](../skills/plan-review.md#runner) · [internal-review › in Codex](../skills/internal-review.md#runner)).
+  - **Also** — prefer a different model family from the author; running the pass under Codex is the cheapest way ([plan-review › in Codex](../skills/plan-review/SKILL.md#runner) · [internal-review › in Codex](../skills/internal-review/SKILL.md#runner)).
 
 Inherits [AGENTS.md](../../AGENTS.md).
 
@@ -26,8 +26,8 @@ Inherits [AGENTS.md](../../AGENTS.md).
 
 ## Inputs
 
-- `$WS/harness/scratchpad/plans/<TICKET>.md` — the requirements the diff must meet.
-- `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` — the dev role's work log (branch, worktree path, what it claims is done).
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements the diff must meet.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — the dev role's work log (branch, worktree path, what it claims is done).
 - The diff itself: local branch diff for the internal pass, the PR diff for the PR pass.
 
 ## Rules
@@ -39,7 +39,7 @@ Check all nine on the whole diff and required context.
 3. **Verification** — profile commands only; quote decisive failure.
 4. **Layering** — [AGENTS.md › Layering](../../AGENTS.md#layering): no layer skipped, no cross-layer reach-around.
 5. **Queries** — N+1, missing prefetch/eager loading, unindexed or unbounded queries.
-6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included ([AGENTS.md › Tests](../../AGENTS.md#tests)); a collected count in the work log matching the tests written ([collect](../skills/implement-change.md#collect)) — a count that is missing, short, or overstated is a Blocker, and an overstated one is the worse case because it reads as coverage that was never written. Never run.
+6. **Tests** — mirror every changed source and branch; real behavior; only external services mocked; the form the profile requires, GIVEN/WHEN/THEN included ([AGENTS.md › Tests](../../AGENTS.md#tests)); a collected count in the work log matching the tests written ([collect](../skills/implement-change/SKILL.md#collect)) — a count that is missing, short, or overstated is a Blocker, and an overstated one is the worse case because it reads as coverage that was never written. Never run.
 7. **Migrations** — generated not hand-edited; no applied migration modified.
 8. **Contract match** — the implemented API shape equals the plan's pinned contract, and the consumer uses exactly that.
 9. **Hygiene** — no secrets, no `.env`, no debug prints, no commented-out code, no AI attribution ([no-ai-attribution](../../AGENTS.md#no-ai-attribution)), no truncated or empty new files.
@@ -71,4 +71,4 @@ Check all nine on the whole diff and required context.
 <Approve | Approve with nits | Request changes> — <one sentence>
 ```
 
-Plan uses [plan output](../skills/plan-review.md#output). Internal writes `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md`. PR passes findings through commenter and a quoted heredoc.
+Plan uses [plan output](../skills/plan-review/SKILL.md#output). Internal writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md`. PR passes findings through commenter and a quoted heredoc.

@@ -1,0 +1,15 @@
+{
+  "name": "troika",
+  "interface": {
+    "displayName": "troika"
+  },
+  "plugins": [
+    {
+      "name": "troika",
+      "source": {
+        "source": "local",
+        "path": "./"
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ description: Runs the change's unit tests — the ones the diff developed plus t
 Runs change tests once, in parallel lanes; routes failures.
 
 - **Owns** — the local unit-test run · the selection of what runs · the test report
-- **Runs** — [skills/run-unit-tests.md](../skills/run-unit-tests.md) · **Step** 5 of [develop-flow](../skills/develop-flow.md)
+- **Runs** — [skills/run-unit-tests.md](../skills/run-unit-tests/SKILL.md) · **Step** 5 of [develop-flow](../skills/develop-flow/SKILL.md)
 - **Model**
   - **Claude** — `claude-sonnet-5` · effort `medium`
   - **Codex** — `gpt-5.6-sol` · effort `medium`
@@ -19,14 +19,14 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tes
 
 ## Scope
 
-- Writes nothing. Run only [selected](../skills/run-unit-tests.md#selection) tests in work-log worktrees.
+- Writes nothing. Run only [selected](../skills/run-unit-tests/SKILL.md#selection) tests in work-log worktrees.
 - **Never weaken a test to green it** — no `skip`, no `xfail`, no widened assertion, no lowered threshold.
 
 ## Inputs
 
-- `$WS/harness/scratchpad/plans/<TICKET>.md` — the requirements the tests must prove.
-- `$WS/harness/scratchpad/plans/<TICKET>-<role>.md` — each dev role's work log: branch, worktree path, files changed, tests written.
-- `$WS/harness/scratchpad/plans/<TICKET>-review-<n>.md` — the internal review verdict; this role runs after it passes.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements the tests must prove.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — each dev role's work log: branch, worktree path, files changed, tests written.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md` — the internal review verdict; this role runs after it passes.
 - The diff itself, which is what the selection is computed from — not the work log's prose.
 
 ## Rules
@@ -49,6 +49,6 @@ Inherits [AGENTS.md](../../AGENTS.md) — especially [Tests](../../AGENTS.md#tes
 
 ## Output
 
-Write `$WS/harness/scratchpad/plans/<TICKET>-tests-<n>.md` in [test output format](../skills/run-unit-tests.md#output).
+Write `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` in [test output format](../skills/run-unit-tests/SKILL.md#output).
 
 Node IDs are exact and copy-pasteable — the human re-runs them.

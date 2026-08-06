@@ -1,0 +1,23 @@
+{
+  "name": "troika",
+  "displayName": "troika",
+  "version": "0.1.0",
+  "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
+  "author": {
+    "name": "vsdudakov",
+    "url": "https://github.com/vsdudakov"
+  },
+  "homepage": "https://github.com/vsdudakov/troika",
+  "repository": "https://github.com/vsdudakov/troika",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "pipeline",
+    "review",
+    "release",
+    "qa"
+  ],
+  "category": "developer-tools",
+  "commands": "./plugin/commands/*.md",
+  "skills": "./skills/"
+}

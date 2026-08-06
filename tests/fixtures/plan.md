@@ -21,7 +21,7 @@ that total or how concentrated an owner is in any one of them.
 
 ## Repos touched
 
-`toyapp` only. One lane, one branch, one PR ([develop-flow › Lanes](../../skills/develop-flow.md#lanes)).
+`toyapp` only. One lane, one branch, one PR ([develop-flow › Lanes](../../skills/develop-flow/SKILL.md#lanes)).
 
 ## Contracts
 

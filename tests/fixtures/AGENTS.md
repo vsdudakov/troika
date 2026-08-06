@@ -114,7 +114,7 @@ The toy stack has an in-memory store, so it proves nothing about migrations or a
 <a id="tracker"></a>
 ## Tracker
 
-**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in `harness/` means: do nothing. The ticket is the plan file at `$WS/harness/scratchpad/plans/<TICKET>.md`.
+**No tracker.** There is no CLI, no API, no auth check, and **no transitions** — the board's state does not exist. Every "transition the ticket" instruction in `troika/` means: do nothing. The ticket is the plan file at `$TROIKA_SCRATCHPAD/plans/<TICKET>.md`.
 
 <a id="pull-requests"></a>
 ## Pull requests
@@ -129,12 +129,12 @@ Not used — see Pull requests.
 <a id="release"></a>
 ## Release
 
-No release cadence. [release-cut](../../skills/release-cut.md) does not apply here.
+No release cadence. [release-cut](../../skills/release-cut/SKILL.md) does not apply here.
 
 <a id="deploy"></a>
 ## Deploy
 
-No deploy. [demo-prep](../../skills/demo-prep.md) does not apply here.
+No deploy. [demo-prep](../../skills/demo-prep/SKILL.md) does not apply here.
 
 <a id="demo"></a>
 ## Demo prep
@@ -149,7 +149,7 @@ None.
 <a id="observability"></a>
 ## Observability
 
-No platform. [incident-triage](../../skills/incident-triage.md) does not apply here.
+No platform. [incident-triage](../../skills/incident-triage/SKILL.md) does not apply here.
 
 <a id="voice"></a>
 ## Voice
@@ -164,4 +164,4 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 <a id="workspace-paths"></a>
 ## Workspace paths
 
-`WS` is the workspace root — the directory holding `AGENTS.md`, `harness/`, and `toyapp/`. Every scratchpad path is absolute.
+`WS` is the workspace root — the directory holding `AGENTS.md`, `troika/`, and `toyapp/`. Every scratchpad path is absolute.

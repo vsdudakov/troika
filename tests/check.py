@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Structural checks for the agents/ and skills/ trees.
+"""Structural checks for the agents/ and skills/ trees, and the plugin surface over them.
 
 The anchors this tree links into the project profile are a contract
-(harness/README.md); so are the file shapes in agents/README.md and skills/README.md.
+(troika/README.md); so are the file shapes in ROLES.md and skills/README.md.
 Nothing here validates prose — only the things that break silently.
 
     python3 tests/check.py        # exits non-zero on any failure
@@ -12,9 +12,12 @@ whether a gate still catches what it claims to. Neither needs a model.
 """
 
 import glob
+import importlib.util
+import json
 import os
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 # Runnable from anywhere; every path below is relative to the repo root.
@@ -51,12 +54,29 @@ def anchors_of(path):
     return found
 
 
+def skill_files():
+    """One `SKILL.md` per skill directory. The shape is the hosts' — Claude Code, Codex and
+    Cursor all discover a skill as a directory with that file in it — and the procedures live
+    in it directly rather than behind a wrapper."""
+    return sorted(glob.glob("skills/*/SKILL.md"))
+
+
 def role_and_skill_files():
-    return sorted(glob.glob("agents/*.md") + glob.glob("skills/*.md"))
+    # ROLES.md is the roles index, and it sits at the repo root rather than in agents/ for a
+    # mechanical reason: a host loads *every* file in agents/ as a role, so an index left in
+    # there is offered as a subagent named README.
+    return sorted(
+        glob.glob("agents/*.md") + ["ROLES.md", "skills/README.md"] + skill_files()
+    )
 
 
 def body_files():
-    return [f for f in role_and_skill_files() if not f.endswith("README.md")]
+    return [f for f in role_and_skill_files() if not f.endswith(("README.md", "ROLES.md"))]
+
+
+def skill_name(path):
+    """`skills/qa-verify/SKILL.md` -> `qa-verify`."""
+    return os.path.basename(os.path.dirname(path))
 
 
 # --- 1. every link resolves, in-tree and out ---------------------------------
@@ -130,7 +150,7 @@ def check_duplicated_enumerations():
     rules = [r.lower() for r in re.findall(r"^\d+\.\s+\*\*(.+?)\*\*", reviewer, re.M)]
 
     inline = {}
-    for f in ("skills/internal-review.md", "skills/pr-review.md"):
+    for f in ("skills/internal-review/SKILL.md", "skills/pr-review/SKILL.md"):
         m = re.search(r"reviewer › Rules\]\([^)]+\):\s*(.+?)\.$", text_of(f), re.M)
         if not m:
             fail(f, "no inline copy of the reviewer check list found")
@@ -157,8 +177,6 @@ MODEL_SUBS_OPTIONAL = ["Raise it when", "Drop it when", "Also"]
 
 def check_agent_shape():
     for f in sorted(glob.glob("agents/*.md")):
-        if f.endswith("README.md"):
-            continue
         text = text_of(f)
         body = re.sub(r"```.*?```", "", text, flags=re.S)  # fenced examples are not sections
         sections = re.findall(r"^## (.+)$", body, re.M)
@@ -180,9 +198,7 @@ def check_agent_shape():
 
 
 def check_skill_shape():
-    for f in sorted(glob.glob("skills/*.md")):
-        if f.endswith("README.md"):
-            continue
+    for f in skill_files():
         text = text_of(f)
         kind = re.search(r"\*\*Kind\*\* (\w+)", text)
         if not kind:
@@ -200,14 +216,157 @@ def check_frontmatter():
         if not m:
             fail(f, "frontmatter must open with name: then description:")
             continue
-        if m.group(1) != os.path.basename(f)[:-3]:
-            fail(f, f"frontmatter name '{m.group(1)}' != filename")
+        expected = skill_name(f) if f.endswith("SKILL.md") else os.path.basename(f)[:-3]
+        if m.group(1) != expected:
+            fail(f, f"frontmatter name '{m.group(1)}' != {expected}")
 
 
-# --- 5. house style ---------------------------------------------------------
+# --- 5. the plugin surface ---------------------------------------------------
+
+CLAUDE_MANIFEST = ".claude-plugin/plugin.json"
+CLAUDE_MARKETPLACE = ".claude-plugin/marketplace.json"
+CODEX_MANIFEST = ".codex-plugin/plugin.json"
+CODEX_MARKETPLACE = ".agents/plugins/marketplace.json"
+
+
+def plugin_files():
+    return sorted(glob.glob("plugin/commands/*.md"))
+
+
+def load_json(path):
+    if not os.path.exists(path):
+        fail(path, "missing — the plugin cannot be installed without it")
+        return None
+    try:
+        return json.loads(text_of(path))
+    except json.JSONDecodeError as e:
+        fail(path, f"invalid JSON: {e}")
+        return None
+
+
+def load_module(path, name):
+    spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None or spec.loader is None:
+        fail(path, "missing — the plugin surface cannot be verified")
+        return None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check_resolved_paths():
+    """No role may spell a workspace path out. `$WS/troika/scratchpad` is a path the
+    workspace is now allowed to move, so a literal one silently ignores where it moved to."""
+    for f in role_and_skill_files() + plugin_files():
+        for i, line in enumerate(text_of(f).splitlines(), 1):
+            if "$WS/troika" in line or "$WS/AGENTS.md" in line:
+                fail(f, f"line {i}: hardcoded path — use $TROIKA_HOME, $TROIKA_SCRATCHPAD, "
+                        "$TROIKA_WORKTREES, $TROIKA_MEMORY, or $TROIKA_PROFILE")
+
+
+def check_resolver():
+    """The resolver is the one piece of this tree that runs before a model reads anything,
+    so it is checked by running it — against a workspace built for the purpose."""
+    resolve = load_module("plugin/resolve.py", "resolve")
+    if resolve is None:
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        # .resolve(): on macOS the temp directory is reached through a symlink, and the
+        # resolver reports real paths — comparing against the symlinked one fails for a
+        # reason that has nothing to do with the code under test.
+        root = Path(tmp).resolve()
+        (root / "AGENTS.md").write_text("profile", encoding="utf-8")
+        elsewhere = root / "elsewhere" / "sp"
+        (root / ".troika.json").write_text(
+            json.dumps({"scratchpad": str(elsewhere)}), encoding="utf-8"
+        )
+        deep = root / "repo" / "pkg" / "sub"
+        deep.mkdir(parents=True)
+        try:
+            out = resolve.resolve(str(deep))
+        except SystemExit as e:
+            fail("plugin/resolve.py", f"failed on a valid workspace: {e}")
+            return
+        if out.get("WS") != str(root):
+            fail("plugin/resolve.py", f"resolved WS {out.get('WS')!r} from a subdirectory, not the root")
+        # An absolute override must survive verbatim; a declared path silently re-anchored
+        # under the workspace is the failure this whole mechanism exists to prevent.
+        if out.get("TROIKA_SCRATCHPAD") != str(elsewhere):
+            fail("plugin/resolve.py", "an absolute scratchpad in .troika.json was not honoured")
+        # Unset keys fall back, so an old workspace with no file behaves as it always did.
+        if out.get("TROIKA_WORKTREES") != str(root / "troika" / "worktrees"):
+            fail("plugin/resolve.py", "an undeclared path did not fall back to the troika/ layout")
+        # A repo carries its own AGENTS.md; stopping there would scatter handoff files
+        # through a worktree, so the fallback demands a troika/ beside it.
+        stray = root / "stray"
+        (stray / "repo").mkdir(parents=True)
+        (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
+        if resolve.resolve(str(stray / "repo")).get("WS") != str(root):
+            fail("plugin/resolve.py", "a bare AGENTS.md with no troika/ beside it was taken for a workspace")
+
+
+def check_plugin_wrappers():
+    """The wrappers are generated. Hand-editing one is how a command and the procedure it
+    names drift apart, so the check is regeneration, not inspection."""
+    module = load_module("plugin/generate.py", "generate")
+    if module is None:
+        return
+    for problem in module.drift():
+        fail("plugin/", problem)
+
+
+def check_versions():
+    """VERSION is the source; every manifest is written from it by plugin/version.py.
+    A host keys an installed plugin on name *and* version, so two manifests that disagree
+    install as two plugins from one tree and only one of them is ever updated."""
+    module = load_module("plugin/version.py", "version")
+    if module is None:
+        return
+    for problem in module.drift():
+        fail("VERSION", problem)
+
+
+def check_manifests():
+    claude = load_json(CLAUDE_MANIFEST)
+    codex = load_json(CODEX_MANIFEST)
+    market = load_json(CLAUDE_MARKETPLACE)
+    load_json(CODEX_MARKETPLACE)
+
+    if claude and codex and claude.get("name") != codex.get("name"):
+        fail(CODEX_MANIFEST, f"name {codex.get('name')!r} != {claude.get('name')!r} in {CLAUDE_MANIFEST}")
+
+    if claude and market:
+        entries = {p.get("name"): p for p in market.get("plugins", [])}
+        if claude.get("name") not in entries:
+            fail(CLAUDE_MARKETPLACE, f"no entry named {claude.get('name')!r}")
+
+    if not claude:
+        return
+
+    # Claude Code auto-loads agents/ and offers every file in it as a subagent, so anything
+    # in there that is not a role becomes one. An explicit list would be the alternative, but
+    # a listed path currently registers nothing — the directory has to be clean instead.
+    if "agents" in claude:
+        fail(CLAUDE_MANIFEST, "drop the agents key: a listed agent path registers nothing, "
+                              "and setting it disables the agents/ scan that does work")
+    # Nothing else guards the directory's contents, because nothing else has to:
+    # check_agent_shape() demands the five role sections of every file in agents/, so a
+    # stray note or index in there fails there first.
+
+    # `commands` takes command *files*; a directory there is read as a skill directory, which
+    # silently registers all 13 procedures a second time.
+    for path in claude.get("commands", []):
+        if os.path.isdir(path.lstrip("./")):
+            fail(CLAUDE_MANIFEST, f"commands lists the directory {path}; list the files in it")
+    skills = codex.get("skills") if codex else None
+    if skills and not os.path.isdir(skills.lstrip("./")):
+        fail(CODEX_MANIFEST, f"skills points at {skills}, which is not a directory")
+
+
+# --- 6. house style ---------------------------------------------------------
 
 def check_style():
-    for f in role_and_skill_files():
+    for f in role_and_skill_files() + plugin_files():
         for i, line in enumerate(text_of(f).splitlines(), 1):
             if re.search(r"[^\s]—[^\s]", line):
                 fail(f, f"line {i}: em dash needs spaces around it")
@@ -220,6 +379,11 @@ def main():
     check_agent_shape()
     check_skill_shape()
     check_frontmatter()
+    check_plugin_wrappers()
+    check_manifests()
+    check_versions()
+    check_resolver()
+    check_resolved_paths()
     check_style()
 
     if FAIL:
@@ -227,7 +391,10 @@ def main():
         for f in FAIL:
             print(f"  {f}")
         return 1
-    print(f"ok — {len(role_and_skill_files())} files, no structural problems")
+    print(
+        f"ok — {len(role_and_skill_files())} files "
+        f"+ {len(plugin_files())} commands, no structural problems"
+    )
     return 0
 
 

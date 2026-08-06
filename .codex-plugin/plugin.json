@@ -1,0 +1,38 @@
+{
+  "name": "troika",
+  "version": "0.1.0",
+  "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
+  "author": {
+    "name": "vsdudakov",
+    "url": "https://github.com/vsdudakov"
+  },
+  "homepage": "https://github.com/vsdudakov/troika",
+  "repository": "https://github.com/vsdudakov/troika",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "pipeline",
+    "review",
+    "release",
+    "qa"
+  ],
+  "skills": "./skills",
+  "interface": {
+    "displayName": "troika",
+    "shortDescription": "Roles, pipeline, and procedures for shipping a ticket end to end.",
+    "longDescription": "A tool-neutral agent troika. Every org-specific fact \u2014 repos, commands, branches, tracker, URLs \u2014 comes from the workspace's own AGENTS.md profile, so the same procedures run unchanged in any workspace.",
+    "developerName": "vsdudakov",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Interactive"
+    ],
+    "websiteURL": "https://github.com/vsdudakov/troika",
+    "defaultPrompt": [
+      "Run develop-flow for my next ticket.",
+      "Review the local branch diff before I push.",
+      "Verify this change on the local stack."
+    ]
+  }
+}

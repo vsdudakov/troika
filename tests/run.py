@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fault injection for the agent harness.
+"""Fault injection for the agent troika.
 
 Each case plants one known defect in a toy repo and asserts the gate that claims to
 catch it actually does. The claim under test is not "the model is good" — it is
@@ -17,10 +17,10 @@ Compare rates across two versions of agents/ and skills/ to measure a prompt cha
 The agent command is configurable; it must accept a prompt on stdin and write the
 role's reply to stdout:
 
-    HARNESS_CMD='claude -p --model claude-fable-5 --effort high'  python3 tests/run.py
-    HARNESS_CMD='codex exec -m gpt-5.6-sol -'                     python3 tests/run.py
+    TROIKA_CMD='claude -p --model claude-fable-5 --effort high'  python3 tests/run.py
+    TROIKA_CMD='codex exec -m gpt-5.6-sol -'                     python3 tests/run.py
 
-HARNESS_TIMEOUT sets --timeout's default (600); a run that overruns has its process group
+TROIKA_TIMEOUT sets --timeout's default (600); a run that overruns has its process group
 killed and counts as a miss rather than hanging the suite.
 """
 
@@ -36,13 +36,13 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-HARNESS = ROOT.parent
+TROIKA = ROOT.parent
 FIXTURES = ROOT / "fixtures"
 CASES = ROOT / "cases"
 DEFAULT_CMD = "claude -p --model claude-fable-5 --effort high"
 DEFAULT_TIMEOUT = 600
 # Cases are independent subprocesses, so the only cost of running them together is load on
-# whatever HARNESS_CMD talks to. Serially a full --runs 5 is hours; this makes it minutes.
+# whatever TROIKA_CMD talks to. Serially a full --runs 5 is hours; this makes it minutes.
 DEFAULT_JOBS = 6
 
 SEVERITIES = ("Blocker", "Major", "Nit")
@@ -186,10 +186,10 @@ def build_prompt(case: Path, spec: dict, diff: str, context: str) -> str:
     read = lambda p: p.read_text(encoding="utf-8")
     parts = [
         ("PROJECT PROFILE (AGENTS.md)", read(FIXTURES / "AGENTS.md")),
-        (f"ROLE ({spec['role']}.md)", read(HARNESS / "agents" / f"{spec['role']}.md")),
-        (f"SKILL ({spec['skill']}.md)", read(HARNESS / "skills" / f"{spec['skill']}.md")),
-        ("PLAN ($WS/harness/scratchpad/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
-        ("WORK LOG ($WS/harness/scratchpad/plans/TOY-1-backend-dev.md)", work_log(case)),
+        (f"ROLE ({spec['role']}.md)", read(TROIKA / "agents" / f"{spec['role']}.md")),
+        (f"SKILL ({spec['skill']}/SKILL.md)", read(TROIKA / "skills" / spec["skill"] / "SKILL.md")),
+        ("PLAN ($TROIKA_SCRATCHPAD/plans/TOY-1.md)", read(FIXTURES / "plan.md")),
+        ("WORK LOG ($TROIKA_SCRATCHPAD/plans/TOY-1-backend-dev.md)", work_log(case)),
         ("WORKTREE — files on main the diff does not touch, quoted in full", context),
         ("DIFF UNDER REVIEW (git diff, new files staged with add -N)", diff),
     ]
@@ -326,11 +326,11 @@ def env_timeout() -> int:
     """A zero or a typo would expire every run instantly and score the whole suite a miss
     with no hint why, so anything that is not a positive integer falls back — loudly, since
     a silently ignored setting is how someone reads a catch rate that measured nothing."""
-    raw = os.environ.get("HARNESS_TIMEOUT", "").strip()
+    raw = os.environ.get("TROIKA_TIMEOUT", "").strip()
     if raw.isdigit() and int(raw) > 0:
         return int(raw)
     if raw:
-        print(f"HARNESS_TIMEOUT={raw!r} is not a positive integer; using {DEFAULT_TIMEOUT}s",
+        print(f"TROIKA_TIMEOUT={raw!r} is not a positive integer; using {DEFAULT_TIMEOUT}s",
               file=sys.stderr)
     return DEFAULT_TIMEOUT
 
@@ -347,12 +347,13 @@ def check_spec(spec: dict) -> list:
             problems.append(f"forbid_severity '{s}' is not one of {list(SEVERITIES)}")
     # A role or skill named here that does not exist crashes the run at prompt-build time,
     # after the other cases have already been paid for.
-    for field, folder in (("role", "agents"), ("skill", "skills")):
+    for field, path in (("role", lambda n: TROIKA / "agents" / f"{n}.md"),
+                        ("skill", lambda n: TROIKA / "skills" / n / "SKILL.md")):
         name = spec.get(field)
         if not name:
             problems.append(f"no {field} named")
-        elif not (HARNESS / folder / f"{name}.md").is_file():
-            problems.append(f"{field} '{name}' has no {folder}/{name}.md")
+        elif not path(name).is_file():
+            problems.append(f"{field} '{name}' has no {path(name).relative_to(TROIKA)}")
     want = spec.get("expect_finding")
     if not want:
         return problems
@@ -405,7 +406,7 @@ def check_fixtures() -> int:
     for dup in sorted(a for a in anchors if declared.count(a) > 1):
         problems.append(f"fixtures/AGENTS.md declares #{dup} more than once")
     needed = set()
-    for f in list((HARNESS / "agents").glob("*.md")) + list((HARNESS / "skills").glob("*.md")):
+    for f in list((TROIKA / "agents").glob("*.md")) + list((TROIKA / "skills").glob("*/SKILL.md")):
         for _, target in re.findall(r"\[([^\]]*)\]\(([^)]+)\)", f.read_text(encoding="utf-8")):
             path, _, frag = target.partition("#")
             if frag and path.endswith("AGENTS.md"):
@@ -469,7 +470,7 @@ def main() -> int:
 
     names = args.case or sorted(c.name for c in CASES.iterdir()
                                 if c.is_dir() and not c.name.startswith("_"))
-    cmd = os.environ.get("HARNESS_CMD", DEFAULT_CMD)
+    cmd = os.environ.get("TROIKA_CMD", DEFAULT_CMD)
     results, failed = {}, False
 
     prompts = {}

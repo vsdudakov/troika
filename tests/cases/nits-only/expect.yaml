@@ -8,4 +8,4 @@ forbid_severity: [Blocker, Major]
 profile_requires: [restating the code is a nit]
 why: >
   Two comments that restate the line below them, and nothing else. A reviewer that
-  gates on this blocks the flow on style, which the harness explicitly forbids.
+  gates on this blocks the flow on style, which Troika explicitly forbids.

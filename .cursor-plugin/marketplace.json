@@ -1,0 +1,16 @@
+{
+  "name": "troika",
+  "owner": {
+    "name": "vsdudakov"
+  },
+  "metadata": {
+    "description": "Troika: a tool-neutral agent pipeline — roles, procedures, and the gates between them."
+  },
+  "plugins": [
+    {
+      "name": "troika",
+      "source": ".",
+      "description": "Tool-neutral agent pipeline: the roles, the procedures, and the gates between them"
+    }
+  ]
+}

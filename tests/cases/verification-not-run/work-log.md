@@ -1,7 +1,7 @@
 # TOY-1 — backend-dev work log
 
 Branch: `TOY-1-owner-allocation`
-Worktree: `$WS/harness/worktrees/toyapp-TOY-1` — created (no existing lane held it)
+Worktree: `$TROIKA_WORKTREES/toyapp-TOY-1` — created (no existing lane held it)
 
 ## Files changed
 

@@ -1,15 +1,15 @@
-# Harness tests
+# Troika tests
 
 Two layers, and they answer different questions.
 
 | | Question | Cost |
 | --- | --- | --- |
-| [`check.py`](check.py) | Is the tree structurally intact — links, anchors, file shapes, enumerations in sync? | seconds, every commit |
+| [`check.py`](check.py) | Is the tree structurally intact — links, anchors, file shapes, enumerations in sync, [`plugin/`](../plugin/README.md) surface current? | seconds, every commit |
 | [`run.py`](run.py) | Does a gate still **catch** what it claims to catch? | minutes + model spend, on prompt changes |
 
 You cannot unit-test a prompt. You *can* test a gate. Every role file makes a falsifiable
 claim — *"an import inside a function is a Major"*, *"a changed source with no mirror test is
-a Blocker"* — and the [handoff contract](../agents/README.md#handoff) makes each role write a
+a Blocker"* — and the [handoff contract](../ROLES.md#handoff) makes each role write a
 verdict in a fixed format. Plant the defect, run the role, assert the finding. That is the
 whole idea.
 
@@ -25,14 +25,14 @@ python3 tests/run.py --case clean --runs 5   # one case
 The agent command is configurable and must read a prompt on stdin, write the reply to stdout:
 
 ```bash
-HARNESS_CMD='claude -p --model claude-fable-5 --effort high' python3 tests/run.py --runs 5
-HARNESS_CMD='codex exec -m gpt-5.6-sol -'                    python3 tests/run.py --runs 5
+TROIKA_CMD='claude -p --model claude-fable-5 --effort high' python3 tests/run.py --runs 5
+TROIKA_CMD='codex exec -m gpt-5.6-sol -'                    python3 tests/run.py --runs 5
 ```
 
 **Always `--runs 5` or more.** Models are stochastic; a single run tells you nothing. Read the
 rate, not the pass/fail.
 
-Each run is capped at `--timeout` seconds (`HARNESS_TIMEOUT`, default 600). An agent that
+Each run is capped at `--timeout` seconds (`TROIKA_TIMEOUT`, default 600). An agent that
 overruns is killed and scored as a miss — a hung process must not take the suite with it.
 
 ## What the cases are
@@ -78,7 +78,7 @@ followed: to make a rule carry a severity, state it in `reviewer.md` and pin the
 
 **The two controls matter as much as the fifteen defects.** A gate that flags everything
 passes every injection test and is worthless — `clean` catches that, and `nits-only` catches
-the subtler version where a reviewer blocks the flow on style the harness says must not gate.
+the subtler version where a reviewer blocks the flow on style Troika says must not gate.
 
 ## Measuring a prompt change
 
@@ -124,7 +124,7 @@ Quote an item that contains a comma; the inline-list parser splits on the commas
 quotes. A quote only opens an item, so an apostrophe mid-phrase is ordinary text — but a
 quoted item cannot contain its own quote character, since there is no escape syntax.
 
-`--check` rejects a severity, verdict, role, or skill the harness does not recognise: a typo
+`--check` rejects a severity, verdict, role, or skill Troika does not recognise: a typo
 there makes a case unpassable, and without the check that only surfaces after a paid run.
 
 **`profile_requires` and `plan_requires` are what keep a case honest.** A case does not test
@@ -147,4 +147,4 @@ reproduce an exact sentence, and asserting on one would make the suite useless.
   coverage yet — tester cases need `pytest` installed and a real run.
 - Nothing here tests the orchestrator: lane assignment, parallelism, and the caps are
   unmeasured.
-- A passing suite means these fifteen defects are caught. It does not mean the harness is good.
+- A passing suite means these fifteen defects are caught. It does not mean Troika is good.

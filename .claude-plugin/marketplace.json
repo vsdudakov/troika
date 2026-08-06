@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "troika",
+  "description": "The agent troika \u2014 roles, pipeline, and procedures \u2014 as a Claude Code plugin",
+  "owner": {
+    "name": "vsdudakov",
+    "url": "https://github.com/vsdudakov"
+  },
+  "plugins": [
+    {
+      "name": "troika",
+      "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
+      "version": "0.1.0",
+      "category": "development",
+      "homepage": "https://github.com/vsdudakov/troika",
+      "source": "./"
+    }
+  ]
+}

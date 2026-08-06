@@ -40,7 +40,7 @@ Read and obey profile [voice](../../AGENTS.md#voice).
 
 | Target | Shape |
 | --- | --- |
-| PR body | the [template](../skills/pr-template.md), sections filled with facts; supporting questions answered honestly, elaborating on any "yes" |
+| PR body | the [template](../skills/pr-template/SKILL.md), sections filled with facts; supporting questions answered honestly, elaborating on any "yes" |
 | PR / review comment | verdict line, then findings as `**Severity** file:line — problem · fix`; no preamble |
 | Review reply | what was changed and where, one or two sentences; disagreement stated plainly with the reason |
 | Tracker comment | one line of what happened plus links (PR URL, proof attachments); no marker, no emoji |

@@ -1,17 +1,13 @@
-# Per-workspace, never shared between organisations.
-# Each folder keeps its tracked README.md so it survives a fresh clone.
+# Per-workspace, never shared between organisations. Ignored whole — nothing in
+# them is tracked, and `python3 plugin/resolve.py --ensure` creates them where the
+# workspace's .troika.json says they go, which may be outside this tree entirely.
 #
 # WARNING: `git clean -xfd` here removes exactly these three directories —
 # uncommitted dev branches, plans, proofs, memory. Use explicit paths instead.
 
-worktrees/*
-!worktrees/README.md
-
-scratchpad/*
-!scratchpad/README.md
-
-memory/*
-!memory/README.md
+worktrees/
+scratchpad/
+memory/
 
 __pycache__/
 *.pyc
@@ -20,3 +16,10 @@ __pycache__/
 .idea/
 .vscode/
 *.log
+
+# Docs build and release artefacts
+site/
+.venv/
+*.tar.gz
+*.tar.gz.sha256
+.cache/

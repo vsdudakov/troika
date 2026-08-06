@@ -2,7 +2,7 @@
 
 The project profile every workspace must provide. Copy to `<workspace>/AGENTS.md`, fill it in, delete the guidance in angle brackets.
 
-The harness in `harness/` is organisation-neutral: roles and skills link into this file **by anchor**. Keep the anchor ids below exactly as written — the headings above them are yours to reword. An anchor with no content is a role reading a dead link.
+The troika in `troika/` is organisation-neutral: roles and skills link into this file **by anchor**. Keep the anchor ids below exactly as written — the headings above them are yours to reword. An anchor with no content is a role reading a dead link.
 
 | Anchor | Must answer | Read by |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The harness in `harness/` is organisation-neutral: roles and skills link into th
 | `#voice` | how outward-facing text sounds | commenter |
 | `#repo-map` | which repos exist, what each is, what is out of scope | everyone |
 | `#ownership` | which role owns which repo or app | everyone |
-| `#workspace-paths` | the workspace root and the absolute-path rule | everyone |
+| `#workspace-paths` | the workspace root, the resolver, and the absolute-path rule | everyone |
 | `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
 | `#branches` | **remote name and default branch (the base ref every diff and worktree uses)**, branch naming, worktree dependency setup, push quirks | dev roles, reviewer, tester, releaser |
 | `#dependency-order` | provider → consumer order across repos, and how shared libraries are released | architect, releaser |
@@ -37,7 +37,7 @@ The harness in `harness/` is organisation-neutral: roles and skills link into th
 ```markdown
 # AGENTS.md — <Org>
 
-The project profile for the harness in harness/. Roles reference these sections by anchor.
+The project profile for Troika, the tree in troika/. Roles reference these sections by anchor.
 
 <a id="rules"></a>
 ## Rules
@@ -58,7 +58,12 @@ The project profile for the harness in harness/. Roles reference these sections 
 
 <a id="workspace-paths"></a>
 ## Workspace paths
-<workspace root; harness/worktrees/ and harness/scratchpad/ are anchored to it; set WS once>
+<the workspace root, and the rule that every path below it is used absolute>
+<the six variables `troika/plugin/resolve.py` exports, and what each holds here:>
+<`$WS` · `$TROIKA_PROFILE` · `$TROIKA_HOME` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
+<resolve them once per session: eval "$(python3 <workspace>/troika/plugin/resolve.py)">
+<their values come from `<workspace>/.troika.json` — the one place a path is declared; absent, the resolver falls back to the troika/ layout>
+<and: a non-zero exit from the resolver means stop, not guess>
 
 <a id="code-search"></a>
 ## Code search
@@ -141,7 +146,7 @@ The project profile for the harness in harness/. Roles reference these sections 
 ## Rules for writing it
 
 - **One home per fact.** If it is here, no role file repeats it — roles link.
-- **Say no explicitly.** "No transitions", "no review bot", "no build step", "one repo, one PR" are answers; `harness/` branches on them. Silence reads as the generic default and produces a role doing something this workspace forbids.
+- **Say no explicitly.** "No transitions", "no review bot", "no build step", "one repo, one PR" are answers; `troika/` branches on them. Silence reads as the generic default and produces a role doing something this workspace forbids.
 - Commands are copy-pasteable, with the environment variables they need.
 - Name what a green result does *not* prove; that is the section roles get wrong most.
 - If the organisation has no equivalent of a section (no layering, no local stack), keep the anchor and say so in one line. A missing anchor breaks links; an honest "not applicable" does not.
