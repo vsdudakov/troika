@@ -8,8 +8,11 @@ description: What the releaser does after QA passes — the gates it checks firs
 `release-pr` is the only procedure that produces history. Everything before it is worktrees
 and files.
 
+It has no `/` command: `/troika:dev` runs it as step 7, and on its own you ask for it by
+name, after review and QA have passed.
+
 ```
-/troika:release-pr SCRUM-123
+run release-pr for SCRUM-123
 ```
 
 ## 1. Gates first

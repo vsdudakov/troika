@@ -1,6 +1,6 @@
 {
   "name": "troika",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
   "author": {
     "name": "vsdudakov",
@@ -17,19 +17,13 @@
     "qa"
   ],
   "commands": [
-    "./plugin/commands/demo-prep.md",
-    "./plugin/commands/develop-flow.md",
-    "./plugin/commands/implement-change.md",
-    "./plugin/commands/incident-triage.md",
-    "./plugin/commands/internal-review.md",
-    "./plugin/commands/plan-review.md",
-    "./plugin/commands/pr-review.md",
-    "./plugin/commands/qa-verify.md",
-    "./plugin/commands/release-cut.md",
-    "./plugin/commands/release-notes.md",
-    "./plugin/commands/release-pr.md",
-    "./plugin/commands/run-unit-tests.md",
-    "./plugin/commands/ticket-intake.md"
+    "./plugin/commands/demo.md",
+    "./plugin/commands/dev.md",
+    "./plugin/commands/qa.md",
+    "./plugin/commands/release.md",
+    "./plugin/commands/review.md",
+    "./plugin/commands/spike.md",
+    "./plugin/commands/triage.md"
   ],
   "skills": "./skills"
 }

@@ -4,8 +4,8 @@ Tool-neutral procedures, references, templates. Run: `run troika/skills/develop-
 
 One directory per skill, holding one `SKILL.md`. That is the shape Claude Code, Codex, and
 Cursor all discover a skill in, so the procedure is the file they load — there is no wrapper
-and no second copy. The `/` command over each procedure is generated from this frontmatter;
-see [plugin/](../plugin/README.md).
+and no second copy. The `/` commands are generated from this frontmatter, for the seven procedures a session
+starts on; every other skill is discovered by name instead. See [plugin/](../plugin/README.md).
 
 **Kind** fixes shape:
 
@@ -20,6 +20,7 @@ see [plugin/](../plugin/README.md).
 | Skill | File | Run by |
 | --- | --- | --- |
 | Develop flow (ticket → merge-ready PR) | [develop-flow.md](develop-flow/SKILL.md) | orchestrator |
+| Spike (ticket → reviewed plan, no code) | [spike.md](spike/SKILL.md) | [architect](../agents/architect.md) |
 | Plan review (pre-code gate, replaces human approval) | [plan-review.md](plan-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
 | Implement change (one repo) | [implement-change.md](implement-change/SKILL.md) | [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) |
 | Internal review (pre-PR, local diff) | [internal-review.md](internal-review/SKILL.md) | [reviewer](../agents/reviewer.md) |

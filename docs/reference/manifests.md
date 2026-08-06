@@ -55,7 +55,7 @@ claude plugin details troika
 `tests/check.py` fails the build on each of the above:
 
 - a stale, missing, or orphaned generated command
-- a `commands` list in the manifest that has drifted from the procedures
+- a `commands` list in the manifest that has drifted from `generate.py`'s `COMMANDS` map
 - an `agents` key in the Claude manifest
 - a directory listed where a command file belongs
 - a version that disagrees between any two manifests

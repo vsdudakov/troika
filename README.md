@@ -36,7 +36,7 @@ hosts that ship a plugin system.
 One command runs the whole pipeline:
 
 ```
-/troika:develop-flow SCRUM-123
+/troika:dev SCRUM-123
 ```
 
 Behind it: the architect plans, a **different model family** reviews the plan and loops it
@@ -176,27 +176,34 @@ one installed plugin serves every workspace on the machine. See
 Every outward-facing sentence on the way — PR body, ticket comment, review reply — is written
 by the [commenter](agents/commenter.md) in your workspace's voice.
 
-Or run one piece:
+Or start somewhere else:
 
 ```
-/troika:plan-review SCRUM-123        /troika:internal-review SCRUM-123
-/troika:qa-verify SCRUM-123          /troika:release-pr SCRUM-123
-/troika:incident-triage <stack trace>
+/troika:spike SCRUM-123              # investigate and plan it, build nothing
+/troika:review 412                   # review an open PR
+/troika:qa https://github.com/<org>/<repo>/pull/412
+/troika:triage <stack trace>
+/troika:release 2026.8.0             /troika:demo
 ```
+
+Seven commands, and every other procedure — plan-review, implement-change, internal-review,
+run-unit-tests, release-pr, release-notes, ticket-intake — is still a skill all three hosts
+discover, invocable by name when you want just that step.
 
 ## What is in the box
 
 | | |
 | --- | --- |
 | [`agents/`](ROLES.md) | the eight roles — scope, inputs, rules, gates, output, and the model and effort each runs on |
-| [`skills/`](skills/README.md) | 13 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside |
+| [`skills/`](skills/README.md) | 14 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside |
 | [`plugin/`](plugin/README.md) | the three host manifests, the generated commands, and [`resolve.py`](plugin/resolve.py) |
 | [`tests/`](tests/README.md) | the two gates on this tree |
 | [`AGENTS.template.md`](AGENTS.template.md) | the profile you fill in, and the anchor contract |
 
-Procedures: `develop-flow` · `plan-review` · `implement-change` · `internal-review` ·
-`run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` · `ticket-intake` ·
-`incident-triage` · `demo-prep` · `release-cut` · `release-notes`. References: `worktree` ·
+Procedures: `develop-flow` · `spike` · `plan-review` · `implement-change` ·
+`internal-review` · `run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` ·
+`ticket-intake` · `incident-triage` · `demo-prep` · `release-cut` · `release-notes` — seven
+of them carry a `/` command, the rest are skills you name. References: `worktree` ·
 `scratchpad` · `memory` · `cross-repo` · `tracker`. Templates: `plan-template` ·
 `pr-template`.
 

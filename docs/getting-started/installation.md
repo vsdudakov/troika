@@ -27,7 +27,8 @@ Verify what registered:
 
 ```bash
 claude plugin details troika
-#   Skills (20)  cross-repo, demo-prep, develop-flow, …
+#   Skills (21)  cross-repo, demo-prep, develop-flow, …
+#   Commands (7)  demo, dev, qa, release, review, spike, triage
 #   Agents (8)   architect, backend-dev, …
 ```
 

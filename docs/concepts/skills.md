@@ -27,19 +27,26 @@ Every skill declares its `**Kind**`, and the kind fixes the body shape.
 | **reference** | topic sections, then `## Gotchas` | look up what you need |
 | **template** | `## Fill rules`, then `## Template` | copy the block, fill it, delete what does not apply |
 
-**Procedures** (13): `develop-flow` · `plan-review` · `implement-change` · `internal-review` ·
-`run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` · `ticket-intake` ·
-`incident-triage` · `demo-prep` · `release-cut` · `release-notes`
+**Procedures** (14): `develop-flow` · `spike` · `plan-review` · `implement-change` ·
+`internal-review` · `run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` ·
+`ticket-intake` · `incident-triage` · `demo-prep` · `release-cut` · `release-notes`
 
 **References** (5): `worktree` · `scratchpad` · `memory` · `cross-repo` · `tracker`
 
 **Templates** (2): `plan-template` · `pr-template`
 
-## Only procedures become commands
+## Only some procedures become commands
 
-A `/troika:<name>` command exists for each **procedure** and nothing else — a reference is
-read *by* a procedure, and a template is filled by one; neither can be "finished", so neither
-should appear in a menu of things to run.
+A command exists for the seven procedures you **start** a session with — `dev`, `spike`,
+`review`, `qa`, `triage`, `release`, `demo` — under a short name, listed in `COMMANDS` in
+`plugin/generate.py`.
+
+Everything else stays a skill. A reference is read *by* a procedure and a template is filled
+by one, so neither can be "finished"; and the procedures the flow runs for you (`plan-review`,
+`implement-change`, `internal-review`, `run-unit-tests`, `release-pr`, `release-notes`,
+`ticket-intake`) are read as `SKILL.md` by the role running them, so a menu entry would only
+offer a starting point that is wrong on its own. All three hosts still discover them, and a
+model pulls one in when you name it.
 
 The commands are generated from the procedure's own frontmatter:
 

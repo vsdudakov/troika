@@ -4,8 +4,14 @@
 `skills/<name>/SKILL.md` is the procedure itself, in the shape all three hosts discover a
 skill in — no wrapper, no second copy. What that shape cannot express is a *command*: an
 entry in the `/` menu, with an argument hint, that resolves the workspace before it starts.
-So Claude Code and Cursor get `plugin/commands/<name>.md` per procedure, and that file is
-the only generated one.
+So the procedures a caller *starts* a session with get `plugin/commands/<alias>.md`, and
+that file is the only generated one.
+
+Not every procedure earns a command. The steps `develop-flow` runs for you — plan-review,
+implement-change, internal-review, run-unit-tests, qa-verify, release-pr — are read as
+`SKILL.md` by the role running them, so a `/` entry for each only crowds the menu with
+entry points that are wrong to start on their own. They stay skills: still discovered by
+all three hosts, still invocable by name, just not in the `/` menu.
 
 Commands are generated, never hand-edited: `tests/check.py` fails on any drift.
 
@@ -27,67 +33,97 @@ ROOT = Path(__file__).resolve().parent.parent
 KIND = "procedure"
 
 
+# skill directory -> (alias, argument hint). A procedure absent from this map gets no
+# command; one present gets exactly one.
+#
+# The **alias** is what the caller types, so it is short and unambiguous across the whole
+# map — `review` can only mean pr-review because internal-review and plan-review have no
+# command at all.
+#
+# The **hint** is what the `/` menu shows next to it, and it is spelled out per command
+# rather than defaulted: a hint inherited from a default is how `/troika:review` came to
+# advertise `<TICKET>` for a procedure that reads a PR. `<>` is required, `[]` optional, `|`
+# separates the forms the procedure genuinely accepts — each one has to be a thing its first
+# step knows how to resolve.
+COMMANDS = {
+    "demo-prep": ("demo", "[demo label]"),
+    "develop-flow": ("dev", "<TICKET>"),
+    "incident-triage": ("triage", "<issue link | stack trace | event>"),
+    "pr-review": ("review", "<PR number | PR link>"),
+    "qa-verify": ("qa", "<PR number | PR link | TICKET>"),
+    "release-cut": ("release", "<version>"),
+    "spike": ("spike", "<TICKET>"),
+}
+
+
 def skills():
-    """(name, description) for every procedure skill, in filename order."""
+    """(skill, alias, hint, description) per commanded procedure, in alias order."""
     out = []
     for path in sorted(glob.glob(str(ROOT / "skills" / "*" / "SKILL.md"))):
+        name = os.path.basename(os.path.dirname(path))
+        if name not in COMMANDS:
+            continue
         text = Path(path).read_text(encoding="utf-8")
         kind = re.search(r"\*\*Kind\*\* (\w+)", text)
         if not kind or kind.group(1) != KIND:
-            continue
+            # A command whose target stopped being a procedure would read a file that no
+            # longer describes a runnable one, so this is a failure, not a skip.
+            raise SystemExit(f"{name} has a command but is not a {KIND}")
         desc = re.search(r"^description: (.+)$", text, re.M)
         if not desc:
-            continue
-        out.append((os.path.basename(os.path.dirname(path)), desc.group(1).strip()))
-    return out
+            raise SystemExit(f"{name} has a command but no description")
+        alias, hint = COMMANDS[name]
+        out.append((name, alias, hint, desc.group(1).strip()))
+    return sorted(out, key=lambda row: row[1])
 
+# The body every command shares. Four numbered steps, in the order they must happen: the
+# argument is stated first so a caller who typed nothing is stopped before the resolver
+# runs, and the procedure is read before the profile so the profile is read for what the
+# procedure actually asks of it.
+BODY = """Run Troika's **{name}** procedure.
 
-# What each procedure is invoked *on*. The `/` menu shows this next to the command, so a
-# wrong hint sends the caller looking for a ticket key the procedure never reads.
-HINTS = {
-    "demo-prep": "[demo label]",
-    "incident-triage": "<issue link | stack trace | event>",
-    "release-cut": "<version>",
-    "release-notes": "<version>",
-    "ticket-intake": "<request>",
-}
-DEFAULT_HINT = "<TICKET>"
+**Argument** — `{hint}`: $ARGUMENTS
+{missing}
 
-PREAMBLE = """1. Resolve the workspace, before anything else:
+1. Resolve the workspace, before anything else:
 
    ```bash
-   eval "$(python3 {resolver} --ensure)"
+   eval "$(python3 "${{CLAUDE_PLUGIN_ROOT}}/plugin/resolve.py" --ensure)"
    ```
-{note}
+
    That exports `WS`, `TROIKA_PROFILE`, `TROIKA_HOME`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika.json` where the
-   workspace declares them, and creates the three it writes into. It exits non-zero when there is no workspace above the current
-   directory — **stop there and say so**; a guessed path writes handoff files nobody reads.
+   workspace declares them, and creating the three it writes into. It exits non-zero when
+   there is no workspace above the current directory — **stop there and say so**; a guessed
+   path writes handoff files nobody reads.
 
-2. Read the procedure: {procedure}
+2. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`. If that variable is
+   unset — a plain clone rather than an installed plugin — read
+   `$TROIKA_HOME/skills/{name}/SKILL.md` instead.
 3. Read `$TROIKA_PROFILE` — the workspace profile. Every repo, command, branch, base ref,
    tracker, and URL comes from there; the procedure names none of them, and where the
    profile declares a limit the profile wins.
-4. Follow the procedure in order. Every step is a gate: never advance past a failed one.
+4. Follow the procedure in order. Every step is a gate: never advance past a failed one, and
+   stop on any of its stop conditions rather than working around it.
 
 Roles run with their cwd inside a worktree, so every path from step 1 is used verbatim and
 absolute. A relative one writes a file no later role finds.
 """
 
+# What to do with no argument. Optional for exactly one command, so the two lines are not
+# interchangeable: asking for a demo label the profile already declares is a needless
+# question, and guessing a ticket key is worse than asking for one.
+MISSING_REQUIRED = "\nWith no argument, ask for one and stop — do not guess."
+MISSING_OPTIONAL = "\nWith no argument, use the profile's default and say which you used."
 
-def command_text(name, desc):
-    procedure = (
-        f"`${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`. If that\n"
-        f"   variable is unset, read `$TROIKA_HOME/skills/{name}/SKILL.md` instead."
-    )
+
+def command_text(name, alias, hint, desc):
     return (
-        f"---\nname: {name}\ndescription: {desc}\n"
-        f"argument-hint: {HINTS.get(name, DEFAULT_HINT)}\n---\n\n"
-        f"Run Troika's **{name}** procedure for: $ARGUMENTS\n\n"
-        + PREAMBLE.format(
-            resolver='"${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py"',
-            note="",
-            procedure=procedure,
+        f"---\nname: {alias}\ndescription: {desc}\nargument-hint: {hint}\n---\n\n"
+        + BODY.format(
+            name=name,
+            hint=hint,
+            missing=MISSING_OPTIONAL if hint.startswith("[") else MISSING_REQUIRED,
         )
     )
 
@@ -98,8 +134,8 @@ MANIFEST = ROOT / ".claude-plugin" / "plugin.json"
 def manifest_commands():
     """Claude Code's `commands` key takes command *files*. Pointed at a directory it reads
     that directory as a skill directory instead, which registers every procedure a second
-    time — 13 phantom skills, no commands. So the list is spelled out, and generated."""
-    return [f"./plugin/commands/{name}.md" for name, _ in skills()]
+    time — phantom skills, no commands. So the list is spelled out, and generated."""
+    return [f"./plugin/commands/{alias}.md" for _, alias, _, _ in skills()]
 
 
 def sync_manifest():
@@ -114,8 +150,8 @@ def sync_manifest():
 def wanted():
     """path -> content, for every file this script owns."""
     out = {}
-    for name, desc in skills():
-        out[ROOT / "plugin" / "commands" / f"{name}.md"] = command_text(name, desc)
+    for name, alias, hint, desc in skills():
+        out[ROOT / "plugin" / "commands" / f"{alias}.md"] = command_text(name, alias, hint, desc)
     return out
 
 
@@ -129,11 +165,12 @@ def drift():
             problems.append(f"{rel}: missing — run python3 plugin/generate.py")
         elif path.read_text(encoding="utf-8") != content:
             problems.append(f"{rel}: stale — run python3 plugin/generate.py")
-    # An orphan is the dangerous direction: a command for a skill that no longer exists
-    # still shows up in the `/` menu and sends the model to read a deleted file.
+    # An orphan is the dangerous direction: a command for a skill that no longer exists, or
+    # that has been dropped from COMMANDS, still shows up in the `/` menu and sends the
+    # model to read a file that may be gone.
     for found in glob.glob(str(ROOT / "plugin" / "commands" / "*.md")):
         if Path(found) not in files:
-            problems.append(f"{Path(found).relative_to(ROOT)}: no matching procedure in skills/")
+            problems.append(f"{Path(found).relative_to(ROOT)}: not a command in generate.py's COMMANDS map")
     listed = json.loads(MANIFEST.read_text(encoding="utf-8")).get("commands")
     if listed != manifest_commands():
         problems.append(f"{MANIFEST.relative_to(ROOT)}: commands list is stale — run python3 plugin/generate.py")

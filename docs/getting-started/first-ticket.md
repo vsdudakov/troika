@@ -8,7 +8,7 @@ description: Run the whole pipeline on one ticket, see what each gate produces, 
 With a profile written and paths resolved, one command runs everything:
 
 ```
-/troika:develop-flow SCRUM-123
+/troika:dev SCRUM-123
 ```
 
 Start with a **small, well-specified ticket** in a repo whose profile section you trust. The
@@ -44,18 +44,27 @@ It is supposed to stop. A gate that fails is the product working:
 - **The resolver exits non-zero** — nothing ran. You are standing outside any workspace, or
   `.troika.json` is missing; see [Paths](../concepts/paths.md).
 
-## Run one piece instead
+## Start somewhere else instead
 
-Nothing requires the full pipeline:
+Nothing requires the full pipeline. The other six commands each start a session of their own:
 
 ```
-/troika:ticket-intake   make a ticket for the Q3 export work
-/troika:plan-review     SCRUM-123
-/troika:internal-review SCRUM-123
-/troika:qa-verify       SCRUM-123
-/troika:release-pr      SCRUM-123
-/troika:pr-review       412
-/troika:incident-triage <paste a stack trace or an issue link>
+/troika:spike   SCRUM-123     # investigate and plan it, and stop — nothing gets built
+/troika:review  412           # review an open PR
+/troika:qa      412           # verify an open PR on your local stack, with proofs
+/troika:triage  <paste a stack trace or an issue link>
+/troika:release 2026.8.0
+/troika:demo
+```
+
+The steps in between — `plan-review`, `implement-change`, `internal-review`,
+`run-unit-tests`, `release-pr`, `release-notes`, `ticket-intake` — have no `/` entry, because
+starting on one out of order is usually a mistake. They are still skills every host
+discovers, so ask for one by name when you do mean it:
+
+```
+run internal-review on this branch
+run ticket-intake for the Q3 export work
 ```
 
 [Every command :material-arrow-right:](../reference/commands.md){ .md-button }

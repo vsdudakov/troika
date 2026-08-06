@@ -11,6 +11,30 @@ Verify on the local stack; produce proofs.
 
 Never edit product code. Put test-data scripts in scratchpad. Use profile stack commands only.
 
+<a id="from-pr"></a>
+## 0a. Starting from a PR link — outside the flow
+
+Inside develop-flow the branch, the worktree and the plan already exist; step 0 pre-warms and step 1 points the stack at them. Invoked on its own with a **PR link or number**, build that context first:
+
+```bash
+gh pr view <N> --json title,body,headRefName,baseRefName,files,url
+git fetch <remote> && git worktree add <path> <remote>/<headRefName>
+```
+
+Worktree path, base ref and cleanup follow [worktree](../worktree/SKILL.md#naming) — the same naming contract, so nothing collides with a lane the flow owns.
+
+Then assemble what steps 1 – 5 read:
+
+| Normally from | With only a PR | 
+| --- | --- |
+| the branch in the dev work log | the PR's head branch, checked out above |
+| requirements in `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` | that plan if the ticket key in the branch or PR title has one; otherwise the ticket's own surfaces ([ticket surfaces](../plan-review/SKILL.md#ticket-surfaces)), and failing that the PR body |
+| the dev work logs' setup notes | the PR's changed files, to split frontend from backend at step 3 |
+
+Say in the report which of these you used. Requirements taken from a PR body are the PR author's summary of the change, not the ticket's statement of what was asked for — a Pass against them proves less, and the report must not hide that.
+
+Multi-repo change: one PR link per repo, and the stack is pointed at every one of those worktrees before step 2. Verifying one repo's PR against the primary clone of the others tests a combination nobody is shipping.
+
 <a id="prewarm"></a>
 ## 0. Pre-warm — start this the moment the first dev lane reports done
 

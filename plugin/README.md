@@ -1,7 +1,7 @@
 # plugin/
 
-What turns this repo into a plugin for Claude Code, Codex, and Cursor. Three manifests, one
-generated command per procedure, and the resolver every role runs first.
+What turns this repo into a plugin for Claude Code, Codex, and Cursor. Three manifests, a
+generated command per entry-point procedure, and the resolver every role runs first.
 
 - [`../.claude-plugin/`](../.claude-plugin/plugin.json) — Claude Code: commands, skills, and
   the eight roles as subagents. [`marketplace.json`](../.claude-plugin/marketplace.json)
@@ -11,8 +11,10 @@ generated command per procedure, and the resolver every role runs first.
   [`../.agents/plugins/marketplace.json`](../.agents/plugins/marketplace.json).
 - [`../.cursor-plugin/plugin.json`](../.cursor-plugin/plugin.json) — Cursor: commands as a
   glob, plus the same skills.
-- `commands/<name>.md` — **generated**, one per procedure, by
-  [`generate.py`](generate.py). `/troika:<name>` in Claude Code and Cursor.
+- `commands/<alias>.md` — **generated** by [`generate.py`](generate.py) from its `COMMANDS`
+  map: `dev`, `spike`, `review`, `qa`, `triage`, `release`, `demo`. `/troika:<alias>` in
+  Claude Code and Cursor. A procedure absent from that map has no command and stays a skill —
+  the steps the flow runs for you are wrong to start on their own.
 - [`resolve.py`](resolve.py) — where this workspace keeps its files. Every command runs it
   first.
 
@@ -27,9 +29,10 @@ python3 plugin/generate.py          # rewrite the commands after editing a proce
 python3 plugin/generate.py --check  # what tests/check.py runs
 ```
 
-Never hand-edit a command: edit the procedure's frontmatter and regenerate. `check.py` fails
-on a stale command, and on one left behind by a deleted procedure — an orphan still appears
-in the `/` menu and sends the model to read a file that is gone.
+Never hand-edit a command: edit the procedure's frontmatter (or `COMMANDS`) and regenerate.
+`check.py` fails on a stale command, and on one left behind by a deleted procedure or one
+dropped from the map — an orphan still appears in the `/` menu and sends the model to read a
+file that may be gone.
 
 ## The two roots
 

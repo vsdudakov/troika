@@ -33,7 +33,7 @@ templates — that any coding agent loads by path, wired into slash commands for
 hosts that ship a plugin system.
 
 ```
-/troika:develop-flow SCRUM-123
+/troika:dev SCRUM-123
 ```
 
 Behind that one command: the architect plans, a **different model family** reviews the plan

@@ -10,7 +10,7 @@ A skill is a directory with one `SKILL.md` in it:
 ```bash
 mkdir skills/backport
 $EDITOR skills/backport/SKILL.md
-python3 plugin/generate.py     # a procedure gets /troika:backport
+python3 plugin/generate.py     # add it to COMMANDS first if it needs a /troika: entry
 python3 tests/check.py
 ```
 
