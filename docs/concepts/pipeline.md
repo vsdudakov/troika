@@ -10,8 +10,8 @@ is the whole product. Nine steps, each one a gate: nothing advances past a step 
 
 **How a ticket opens depends on what it is**; from step 3 the two paths are one flow:
 
-- **bug** — steps to reproduce → **local QA reproduces it on the base checkout** → fix → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
-- **feature** — requirements → plan → **plan review loop** → implement → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
+- **bug** — steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
+- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it:
 `--ask` is what puts the gate in.

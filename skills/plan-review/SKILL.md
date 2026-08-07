@@ -7,7 +7,7 @@ description: Reviews the architect's plan before any code is written — by a di
 
 Pre-code gate. Use a **different model family** from the architect.
 
-**Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** the architect has written the plan (develop-flow step 2) · **Ends with** an `Approve` verdict on the plan file, or a loop back to the architect
+**Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** the architect has written the plan (develop-flow step 2f) · **Ends with** an `Approve` verdict on the plan file, or a loop back to the architect
 
 Read-only. Architect rewrites. Set `TROIKA_WORKSPACE` first.
 
@@ -88,9 +88,9 @@ Stop and ask for:
 - the ticket itself is ambiguous about what "done" means;
 - the cap in step 3 is hit.
 
-Decide everything else here. Do not seek ceremonial approval — **this gate never asks the reporter whether the plan is good.** That is a separate, later gate the flow owns ([develop-flow › Reporter review](../develop-flow/SKILL.md#reporter-review)), and it runs only in `ask` mode ([Autonomy](../develop-flow/SKILL.md#autonomy)). Reaching one of the four cases above stops the flow in **either** mode: `auto` removes an approval, not a decision nobody is authorized to make.
+Decide everything else here. Do not seek ceremonial approval — **this gate never asks the reporter whether the plan is good.** That is a separate, later gate the flow owns ([develop-flow › Reporter review](../develop-flow/SKILL.md#reporter-review)), and it runs only under `--ask` ([Autonomy](../develop-flow/SKILL.md#autonomy)). Reaching one of the four cases above stops the flow either way: running unattended removes an approval, not a decision nobody is authorized to make.
 
-On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — this is the flow's only chance, and release's transition is invalid from the initial state. Where the profile declares no transitions, this gate writes nothing to the tracker.
+On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — this is the flow's only chance, and release's transition is invalid from the initial state. On an `--ask` run, leave it to the flow: it runs the transition after the reporter answers ([develop-flow › 2r](../develop-flow/SKILL.md#reporter-review)), so a rejected plan never moves the ticket. Where the profile declares no transitions, this gate writes nothing to the tracker.
 
 <a id="output"></a>
 ## Output

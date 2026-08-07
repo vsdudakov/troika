@@ -74,10 +74,10 @@ flowchart TD
 <a id="dev"></a>
 ### `/tr:dev` — ticket to merge-ready PR
 
-Steps 0 – 2r decide what gets built, and both chains end in *approved*:
+Steps 0 – 2r decide what gets built; from step 3 the two paths are one flow:
 
-- **bug** — steps to reproduce → reproduce on the base ref → reporter review → **approved**
-- **feature** — plan → plan review loop → reporter review → **approved**
+- **bug** — steps to reproduce → **local QA reproduces it on the base ref** → *(reporter review, under `--ask`)* → fix → internal review loop → unit tests → local QA before/after → PR with proofs → CI + post-PR actions
+- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review loop → unit tests → local QA before/after → PR with proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it —
 `--ask` is what puts the gate in. Your profile's `#autonomy` anchor says who that reporter is

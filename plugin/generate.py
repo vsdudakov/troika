@@ -142,6 +142,17 @@ Every other `/tr:*` command resolves that workspace instead of creating one.
 MISSING_REQUIRED = "\nWith no argument, ask for one and stop — do not guess."
 MISSING_OPTIONAL = "\nWith no argument, use the profile's default and say which you used."
 
+# Flags a procedure reads out of $ARGUMENTS, keyed by skill. Named here rather than left to
+# the procedure alone, because the `/` menu is where a caller looks for them: a flag nobody
+# can see is one nobody passes.
+FLAGS = {
+    "develop-flow": (
+        "\n\n**Flag** — `--ask`: stop at the reporter-review gate and wait for their answer. "
+        "Without it the run is unattended end to end, and there is no flag for that direction "
+        "because a plain run already is it."
+    ),
+}
+
 # Procedures that must not open by resolving a workspace, keyed by skill.
 BODIES = {"workspace-setup": SETUP_BODY}
 
@@ -153,7 +164,8 @@ def command_text(name, alias, hint, desc):
         + body.format(
             name=name,
             hint=hint,
-            missing=MISSING_OPTIONAL if hint.startswith("[") else MISSING_REQUIRED,
+            missing=(MISSING_OPTIONAL if hint.startswith("[") else MISSING_REQUIRED)
+            + FLAGS.get(name, ""),
         )
     )
 

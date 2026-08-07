@@ -182,8 +182,8 @@ marker and nothing falls back: no workspace above you is a stop, not a default. 
 
 **How a ticket opens depends on what it is**; from step 3 the two paths are one flow:
 
-- **bug** — collect the steps to reproduce → **local QA reproduces it on the base checkout** → fix in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
-- **feature** — collect requirements → plan → **plan review loop** (a different model family, max 3) → implement in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
+- **bug** — collect the steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
+- **feature** — collect requirements → plan → **plan review loop** (a different model family, max 3) → *(reporter review, under `--ask`)* → implement in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it —
 `/tr:dev SCRUM-123` goes from ticket to PR unattended. `--ask` puts the gate in.

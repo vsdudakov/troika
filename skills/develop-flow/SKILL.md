@@ -21,43 +21,24 @@ Subagents inherit session effort; use the highest effort any role needs.
 
 **The ticket's kind picks steps 1 and 2, and nothing else.** A bug is reproduced before it is fixed; a feature is planned before it is built. From step 3 on, the two paths are the same flow ([Kind](#kind)).
 
-```
-ticket
-  └─ 0 ∥ index refresh per repo · ticket surfaces (comments, attachments, links) · memory
-        └─ classify: bug | feature ────────────────────────┐
-        │                                                  │
-   ┌────┴──── bug ────────────────────┐   ┌──── feature ───┴──────────────────────┐
-   ▼ 1b ∥ steps to reproduce (brief)  │   ▼ 1f architect ── plan ◀── ∥ read-only  │
-        ∥ cause probes, read-only     │        probes, one per repo/area          │
-        ∥ QA stack pre-warm starts    │                                           │
-   ▼ 2b QA reproduces on the base ────┤   ▼ 2f plan review ∥ 2 lenses (other      │
-        checkout — the failing        │        model family) ── rewrite loop      │
-        capture IS the `before` proof │        (max 3) ── approved                │
-   └────┬─────────────────────────────┘   └───────────────┬───────────────────────┘
-        ▼ 2r reporter review ── change requested ──▶ back to 1b / 1f (max 2)
-        │    runs only under `--ask` ([Autonomy](#autonomy))
-        ▼ join — reproduced or planned, and confirmed
-   ┌────┴─────────────────────┬──────────────────────────┬─────────────────────┐
-   ▼ repo lane A              ▼ repo lane B              ▼ QA pre-warm         │
-   3 dev role(s) for repo A   3 dev role(s) for repo B   boot the stack        │
-     code + tests written       code + tests written     seed data             │
-     tests NOT run, lint green  tests NOT run, lint green (no barrier)         │
-   4 internal review ∥ 3 dims 4 internal review ∥ 3 dims                       │
-     (lint · tests · design)    (lint · tests · design)                        │
-   5 tester ∥ lanes per area  5 tester ∥ lanes per area                        │
-     changed tests only         changed tests only                             │
-   └────┬─────────────────────┴──────────────────────────┴─────────────────────┘
-        ▼ join — every lane green
-        ▼ 6 QA on local stack — before/after per requirement (∥ capture) + fix loop (max 3)
-        ▼ 7 release ── ∥ commit+push per repo · PR bodies drafted during 6
-        │              PRs opened in dependency order, QA proofs attached
-        ▼ 8 ∥ per PR: CI watch + review waves + PR review (max 3) ──▶ green + quiet
-        ▼   post-PR actions: profile's tracker writes · worktree cleanup
-```
+| Step | Who runs it | Advance only when | Cap | Writes |
+| --- | --- | --- | --- | --- |
+| 0 | orchestrator ∥ index · ticket · memory | the kind is decided from evidence | — | — |
+| 1b *(bug)* | architect ∥ cause probes ∥ QA pre-warm | the brief has steps, observed, expected | — | `plans/<TICKET>.md` |
+| 2b *(bug)* | qa, on the **base checkout** | `Reproduced`, or `Reproduced differently` | 2 attempts | `-repro-<n>.md` + the `before` proof |
+| 1f *(feature)* | architect ∥ read-only probes | the plan follows [plan-template](../plan-template/SKILL.md) | — | `plans/<TICKET>.md` |
+| 2f *(feature)* | reviewer, other model family ∥ 2 lenses | `Approve` / `Approve with nits` | 3 | `-plan-review-<n>.md` |
+| 2r | commenter asks, the reporter answers — **only under `--ask`** | *go ahead* | 2 | the answer, in the plan file |
+| 3 | dev roles, one lane per repo | profile verification commands green, tests written and collected | — | `-<role>.md` |
+| 4 | reviewer ∥ 3 dimensions per lane | no Blocker or Major open | 3 | `-review-<n>.md` |
+| 5 | tester ∥ one lane per area | the change's tests green, counts checked | 3 | `-tests-<n>.md` |
+| 6 | qa, on the local stack | `Pass`, one before/after proof per requirement | 3 | `-qa-<n>.md`, `proofs/<TICKET>/` |
+| 7 | releaser | one PR per repo, proofs attached, PRs in dependency order | — | the PRs |
+| 8 | releaser ∥ per PR | CI green and the bots quiet, then the post-PR actions | 3 waves | tracker writes · worktree cleanup |
 
-`∥` means concurrent. **A lane is a repo, not a role** ([Lanes](#lanes)). Sibling lanes do not wait. Barriers: the step-2 join (a confirmed reproduction or an approved plan, plus the reporter where the mode asks for one), the pre-QA join, CI.
+Failed gate → back to the owning role, never forward. `∥` means concurrent, and **a lane is a repo, not a role** ([Lanes](#lanes)); sibling lanes do not wait. Barriers: the step-2 join (a confirmed reproduction or an approved plan, plus the reporter under `--ask`), the pre-QA join, CI.
 
-Tests run locally once: dev writes (3), reviewer reads (4), [tester](../../agents/tester.md) runs change tests (5), CI runs all (8). Exactly one gate waits for a person — [2r](#reporter-review), and only in `ask` mode ([Autonomy](#autonomy)); everywhere else the human is reached only under [Stop conditions](#stop-conditions).
+Tests run locally once: dev writes (3), reviewer reads (4), [tester](../../agents/tester.md) runs change tests (5), CI runs all (8). Exactly one gate waits for a person — [2r](#reporter-review), and only under `--ask` ([Autonomy](#autonomy)); everywhere else the human is reached only under [Stop conditions](#stop-conditions).
 
 <a id="kind"></a>
 ## Kind — bug or feature, decided at step 0
@@ -181,7 +162,7 @@ Run [qa-verify.md](../qa-verify/SKILL.md#reproduce) in its reproduction pass, ag
 
 Cap at 2 reproduction attempts before stopping; a third variation of the steps is a question for the reporter, not another run.
 
-On **Reproduced**, run the profile's in-progress transition if it declares one (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)) — the flow's only chance, exactly as `Approve` is on the feature path.
+On **Reproduced**, run the profile's in-progress transition if it declares one (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)) — the flow's only chance, exactly as `Approve` is on the feature path. **Under `--ask`, run it after [2r](#reporter-review) answers**: a ticket moved to in progress and then rejected by its own reporter is a board state nobody can explain.
 
 ## 1f. Feature — collect requirements and plan
 
@@ -203,7 +184,7 @@ Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md`.
 
 Ask the human only for scope/behavior with no safe assumption, unowned scope, undefined completion, or a hit cap ([human](../plan-review/SKILL.md#human)). `Approve` authorizes downstream commits and PRs.
 
-On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — the flow's only chance, and step 7's transition is invalid from the initial state. Where the profile declares none, make **no** tracker write here.
+On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — the flow's only chance, and step 7's transition is invalid from the initial state. **Under `--ask`, run it after [2r](#reporter-review) answers** instead, for the same reason. Where the profile declares none, make **no** tracker write here.
 
 <a id="reporter-review"></a>
 ## 2r. Reporter review — the one gate that waits for a person
@@ -214,7 +195,7 @@ The point is not approval as ceremony. The reviewer already checked the plan aga
 
 1. [commenter](../../agents/commenter.md) writes one message, in the workspace's voice (`#voice`), to the reporter and the channel the profile names (`#autonomy`): what will be built or fixed, as numbered requirements; every assumption made for them; and — on the bug path — what was reproduced and whether it matches what they reported.
 2. Ask for one of three answers: **go ahead**, **change this** (with what), **not this at all**.
-3. Wait as long as the profile declares. When the wait runs out, do exactly what the profile says — proceed and record it, or stop. Where it says neither, stop and ask the operator: a silent timeout that starts writing code is `auto` nobody chose.
+3. Wait as long as the profile declares. When the wait runs out, do exactly what the profile says — proceed and record it, or stop. Where it says neither, stop and ask the operator: a silent timeout that starts writing code is an unattended run nobody asked for.
 
 | Answer | What happens |
 | --- | --- |

@@ -7,7 +7,7 @@ description: Verifies a change on the real local stack — browser E2E with befo
 
 Verify on the local stack; produce proofs.
 
-**Kind** procedure · **Used by** [qa](../../agents/qa.md) · **When** every lane has cleared review and its tests (develop-flow step 6); the stack boot starts earlier, in parallel with step 3 · **Ends with** a QA report file, a proof per user-visible requirement on disk, and a `Pass`/`Fail` verdict
+**Kind** procedure · **Used by** [qa](../../agents/qa.md) · **When** every lane has cleared review and its tests (develop-flow step 6), or before any fix exists on a bug ticket ([reproduction pass](#reproduce), step 2b); the stack boot starts earlier, in parallel with step 3 · **Ends with** a QA report file — or a reproduction report — a proof per user-visible requirement on disk, and a verdict
 
 Never edit product code. Put test-data scripts in scratchpad. Use profile stack commands only.
 
@@ -153,3 +153,4 @@ Use the [QA report format](../../agents/qa.md#output) and include: the exact com
 - Browser tool unresponsive or a page failing after 2–3 attempts → stop and report; don't retry the same action or wander the app.
 - `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, internal review runs again, then this skill, writing `-qa-<n+1>.md`. **Cap at 3 QA cycles**, then stop and report to the human.
 - A worktree named in a work log is missing → stop and report ([worktree › Gotchas](../worktree/SKILL.md#gotchas)).
+- **Reproduction pass only:** two attempts that do not reproduce → stop and report `Not reproduced`. Never widen the steps a third time, and never edit product code to make the bug appear.

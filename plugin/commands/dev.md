@@ -10,6 +10,8 @@ Run Troika's **develop-flow** procedure.
 
 With no argument, ask for one and stop — do not guess.
 
+**Flag** — `--ask`: stop at the reporter-review gate and wait for their answer. Without it the run is unattended end to end, and there is no flag for that direction because a plain run already is it.
+
 1. Resolve the workspace, before anything else:
 
    ```bash
