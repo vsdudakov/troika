@@ -41,7 +41,7 @@ Inherits the workspace profile, `$TROIKA_PROFILE`.
 2. Every requirement in the plan exercised on the running stack, with steps and result recorded.
 3. Async paths confirmed end to end: task triggered, completion in the logs, state effect in the datastore.
 4. A proof exists in `$TROIKA_SCRATCHPAD/proofs/<TICKET>/` for every requirement — before/after GIFs for UI, a request + datastore transcript for API and async — named so the PR can reference it.
-5. `Fail` on any Blocker or Major sends the work back to the owning dev role. **Cap at 3 QA cycles**, then stop and report to the human.
+5. `Fail` on any Blocker or Major sends the work back to the owning dev role. **Cap at the profile's loop cap (`#loops`, default 3) QA cycles**, then stop and report to the human.
 
 ## Output
 

@@ -151,6 +151,6 @@ Use the [QA report format](../../agents/qa.md#output) and include: the exact com
 
 - Stack won't come up after the profile's documented reset and one restart → stop and report; don't debug the environment for hours.
 - Browser tool unresponsive or a page failing after 2–3 attempts → stop and report; don't retry the same action or wander the app.
-- `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, internal review runs again, then this skill, writing `-qa-<n+1>.md`. **Cap at 3 QA cycles**, then stop and report to the human.
+- `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, internal review runs again, then this skill, writing `-qa-<n+1>.md`. **Cap at the profile's loop cap (`#loops`, default 3) QA cycles**, then stop and report to the human.
 - A worktree named in a work log is missing → stop and report ([worktree › Gotchas](../worktree/SKILL.md#gotchas)).
 - **Reproduction pass only:** two attempts that do not reproduce → stop and report `Not reproduced`. Never widen the steps a third time, and never edit product code to make the bug appear.

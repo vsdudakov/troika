@@ -52,4 +52,4 @@ Failure stops release.
 
 ## Output
 
-PR URL(s) in dependency order · ticket state and which tracker writes were made · proofs attached (with names) · CI state per check and what was fixed to green it · automated-review comments, when configured, fixed vs rejected with reasons · existing human comments handled · PR-review verdict · worktrees cleaned up · anything left open. Blockers and Majors from the PR review go back to the owning dev role; cap at 3 cycles, then report to the human.
+PR URL(s) in dependency order · ticket state and which tracker writes were made · proofs attached (with names) · CI state per check and what was fixed to green it · automated-review comments, when configured, fixed vs rejected with reasons · existing human comments handled · PR-review verdict · worktrees cleaned up · anything left open. Blockers and Majors from the PR review go back to the owning dev role; cap at the profile's loop cap (`#loops`, default 3) cycles, then report to the human.

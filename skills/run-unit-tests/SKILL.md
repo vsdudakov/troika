@@ -66,7 +66,7 @@ Route to code owner:
 - **Code wrong** → the code changes, with the test left asserting the real requirement.
 - **Fails on the base branch too** — verify in the primary clone before claiming it, then name it as pre-existing and do not fix it here.
 
-After fix, re-review; rerun same selection plus new/changed tests. Cap at 3 cycles.
+After fix, re-review; rerun same selection plus new/changed tests. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 ## Output
 

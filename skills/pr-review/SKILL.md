@@ -65,4 +65,4 @@ Post [reviewer format](../../agents/reviewer.md#output) headed `## Review of PR 
 
 ## Stop conditions
 
-Blocker/Major → author fixes/pushes ([fix-pr](../fix-pr/SKILL.md), when the fix is Troika's to make); re-review. Cheap nits fix; others do not gate. **Cap at 3 cycles** — then stop, leave the latest review on the PR, and report the unresolved findings to the human.
+Blocker/Major → author fixes/pushes ([fix-pr](../fix-pr/SKILL.md), when the fix is Troika's to make); re-review. Cheap nits fix; others do not gate. **Cap at the profile's loop cap (`#loops`, default 3) cycles** — then stop, leave the latest review on the PR, and report the unresolved findings to the human.

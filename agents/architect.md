@@ -54,7 +54,7 @@ Plan must pin:
 2. Every cross-repo boundary has a pinned contract, or the repos are marked sequential; work sharing one repo is ordered, not parallel.
 3. Every requirement has at least one test (unit or QA) that proves it.
 4. Every ticket surface was read — comments, attachments, links, fields — and anything unreachable is named in the plan as unread.
-5. The plan carries an `Approve` / `Approve with nits` verdict from [plan-review](../skills/plan-review/SKILL.md) before any code work starts. Rewrite `<TICKET>.md` in place on each round of findings; **cap 3 rounds**, then the human decides.
+5. The plan carries an `Approve` / `Approve with nits` verdict from [plan-review](../skills/plan-review/SKILL.md) before any code work starts. Rewrite `<TICKET>.md` in place on each round of findings; **cap at the profile's loop cap (`#loops`, default 3) rounds**, then the human decides.
 
 ## Output
 

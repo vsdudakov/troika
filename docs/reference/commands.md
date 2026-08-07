@@ -122,7 +122,7 @@ flowchart TD
   T[ticket] --> F[fan out:<br/>index · ticket · memory]
   F --> I[read-only probe per repo]
   I --> P[plan + cost + alternatives]
-  P --> R{plan review<br/>cap 3 cycles}
+  P --> R{plan review<br/>capped: loop cap, default 3}
   R -- request changes --> P
   R -- approved --> O([plan file — no branch, no code])
 ```

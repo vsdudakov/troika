@@ -54,7 +54,7 @@ flowchart TD
 | 1b | **Steps to reproduce** — the reporter's own steps, environment, observed versus expected, plus read-only cause probes | steps you improved are labelled as yours |
 | 2b | **Reproduce** — QA runs those steps on the **base checkout**, before a fix exists | no reproduction, no fix: a fix for a bug nobody has seen fail is a guess |
 | 1f | **Plan** — requirements, repo order, pinned contracts, test plan, risks | the plan is the contract every lane codes against |
-| 2f | **Plan review** — a reviewer on a *different model family* | catches the plan that does not match the ticket; cap 3 rounds, then a human decides |
+| 2f | **Plan review** — a reviewer on a *different model family* | catches the plan that does not match the ticket; capped at the profile's loop cap (default 3) rounds, then a human decides |
 | 2r | **Reporter review** — the person who filed it reads what will be built or what was reproduced, and answers *go ahead* / *change this* / *not this at all* | the only gate that waits for a person, and **it runs only on a `--ask` run** |
 | 3 | **Development** — one lane per repo, own worktree, tests written but **not run** | a lane touches only its own worktree; a bug fix carries the regression test that encodes the reproduction |
 | 4 | **Internal review** — [nine checks](../guides/review.md) on the local diff, lint only | nothing is pushed with a Blocker or Major open |

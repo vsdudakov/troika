@@ -46,7 +46,7 @@ Check all nine on the whole diff and required context.
 ## Gates
 
 1. Blockers and Majors gate the flow; Nits do not.
-2. Loop back to the owner — [architect](architect.md) for a plan finding, the dev role for a code finding — until the verdict is `Approve` / `Approve with nits`. **Cap at 3 cycles per pass**, then stop and report the unresolved findings to the human.
+2. Loop back to the owner — [architect](architect.md) for a plan finding, the dev role for a code finding — until the verdict is `Approve` / `Approve with nits`. **Cap each pass at the profile's loop cap (`#loops`, default 3) cycles**, then stop and report the unresolved findings to the human.
 3. Nothing is posted outside the workspace from the internal pass.
 
 <a id="output"></a>

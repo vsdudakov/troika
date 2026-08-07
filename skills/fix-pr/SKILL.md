@@ -147,7 +147,7 @@ Run [internal-review](../internal-review/SKILL.md) over the diff this cycle adde
 is of the fix, not of the PR — the PR already had its pass ([pr-review](../pr-review/SKILL.md)),
 and re-reviewing the whole diff every cycle is how a two-line fix costs an hour.
 
-Blocker/Major → owner fixes and re-verifies; re-review. Cap at 3 cycles. Each pass writes
+Blocker/Major → owner fixes and re-verifies; re-review. Cap at the profile's loop cap (`#loops`, default 3) cycles. Each pass writes
 `$TROIKA_SCRATCHPAD/plans/<KEY>-review-<n>.md` at the next free `<n>`, continuing the PR's
 existing numbering.
 
@@ -215,8 +215,8 @@ tens of minutes — and handle failures exactly as the release flow does
 ([release-pr › CI](../release-pr/SKILL.md#ci)): code failures to the owning role, one re-run
 for a flake, infra and secrets to the human.
 
-A new bot wave is a new fix cycle: back to step 3 with `<n>` incremented, capped at 3 waves
-total. **Never make CI pass by weakening it** — no lowered coverage gate, no `skip`/`xfail` on
+A new bot wave is a new fix cycle: back to step 3 with `<n>` incremented, capped at the
+profile's loop cap (`#loops`, default 3) waves total. **Never make CI pass by weakening it** — no lowered coverage gate, no `skip`/`xfail` on
 a genuinely failing test, no disabled lint rule.
 
 ## 11. Clean up
@@ -254,5 +254,5 @@ branch is on a fork the token cannot push to; the instruction cannot be turned i
 change, or describes a new feature rather than a fix to this PR; a comment demands work in a
 repo or app no role owns; the branch has diverged such that the push needs a rebase or a force
 ([release-pr](../release-pr/SKILL.md) never force-pushes either); the internal review, the
-tests, QA, or a bot wave is still failing after **3 cycles**; or a CI failure is infra,
+tests, QA, or a bot wave is still failing after **the loop cap's cycles** (`#loops`, default 3); or a CI failure is infra,
 secrets, or runner-side.

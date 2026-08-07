@@ -187,6 +187,11 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 
 Plan pass: `codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -`. Diff pass: `codex exec review --uncommitted -`, and `--base <BASE>` for work already committed. The fault-injection cases feed the prompt on stdin themselves, so a case never shells out to it.
 
+<a id="loops"></a>
+## Loop cap
+
+Every fix → re-review loop stops after 3 cycles and reports what is still unresolved. The fixture cases run a single pass, so the cap never bites here — it exists so a role reading this anchor finds a number.
+
 <a id="autonomy"></a>
 ## Autonomy
 

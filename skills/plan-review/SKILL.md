@@ -76,7 +76,7 @@ Union verdicts. One lens is allowed for one repo with no cross-repo contract.
 
 ## 3. Loop
 
-Blocker/Major → architect rewrites in place; re-review. Cap at 3 cycles.
+Blocker/Major → architect rewrites in place; re-review. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 <a id="human"></a>
 ## 4. When the human is asked

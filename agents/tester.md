@@ -44,7 +44,7 @@ Inherits the workspace profile, `$TROIKA_PROFILE` — especially Tests (`#tests`
 3. Every lane reached a real result — tests collected, counts matched, coverage summary reached where applicable.
 4. Every failure is routed with an owner and a verdict of *test wrong* / *code wrong* / *pre-existing*.
 5. After a fix, the same selection re-runs **and** internal review runs again on the new diff before QA — a fix is a diff, and no diff reaches QA unreviewed.
-6. **Cap 3 cycles**, then stop and report to the human.
+6. **Cap at the profile's loop cap (`#loops`, default 3) cycles**, then stop and report to the human.
 
 ## Output
 

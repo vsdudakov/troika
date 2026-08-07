@@ -76,7 +76,7 @@ Then, per failure:
 | flake — passes on re-run, unrelated to the diff | releaser: re-run the failed jobs once, then say so in the report | — |
 | infra / secrets / runner failure | stop and hand to the human | — |
 
-Fix on the same branch; push and watch. Cap at 3 cycles. **Never make CI pass by weakening it** — no lowered coverage threshold, no `skip`/`xfail` on a genuinely failing test, no disabled lint rule.
+Fix on the same branch; push and watch. Cap at the profile's loop cap (`#loops`, default 3) cycles. **Never make CI pass by weakening it** — no lowered coverage threshold, no `skip`/`xfail` on a genuinely failing test, no disabled lint rule.
 
 <a id="review-bot"></a>
 ### Automated review comments — same loop, until it stops commenting
@@ -88,7 +88,7 @@ Per comment, one of two outcomes — never silence:
 - **Valid** → fix in the worktree, with a test when behaviour changes, then reply saying what changed.
 - **Wrong or not applicable** → reply with the reason (the layering rule it missed, the test that covers it, the plan's deliberate trade-off). A reasoned rejection is a complete answer.
 
-Replies come from [commenter](../../agents/commenter.md). If a configured bot stalls, re-request it; if rejected, ask the human. Loop bot with CI, capped at 3 waves.
+Replies come from [commenter](../../agents/commenter.md). If a configured bot stalls, re-request it; if rejected, ask the human. Loop bot with CI, capped at the profile's loop cap (`#loops`, default 3) waves.
 
 <a id="7-pr-review"></a>
 ## 7. PR review
@@ -110,4 +110,4 @@ PR URL(s) in dependency order · ticket state after the run · proofs attached, 
 
 ## Stop conditions
 
-Stop and hand back when: a gate in step 1 fails; the profile's required commit mode cannot be completed; `git status` shows anything outside the change set; a transition the profile declares is invalid after checking what the tracker allows; CI is still red or a configured review bot is still raising new substantive comments after **3 waves** (step 6); a CI failure is infra, secrets, or runner-side; or the PR review is still failing after **3 cycles**.
+Stop and hand back when: a gate in step 1 fails; the profile's required commit mode cannot be completed; `git status` shows anything outside the change set; a transition the profile declares is invalid after checking what the tracker allows; CI is still red or a configured review bot is still raising new substantive comments after **the loop cap's waves** (`#loops`, step 6); a CI failure is infra, secrets, or runner-side; or the PR review is still failing after **the loop cap's cycles** (`#loops`).

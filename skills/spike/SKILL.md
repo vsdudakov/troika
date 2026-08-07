@@ -52,7 +52,7 @@ Run [plan-review.md](../plan-review/SKILL.md) with [reviewer](../../agents/revie
 
 1. Check ticket coverage, testability, symbols, ownership, contracts, tests, assumptions.
 2. Blocker/Major → architect rewrites `<TICKET>.md`; re-review.
-3. Cap at 3 cycles; then stop and report.
+3. Cap at the profile's loop cap (`#loops`, default 3) cycles; then stop and report.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md`.
 

@@ -77,4 +77,4 @@ Nothing leaves the workspace, so this report skips [commenter](../../agents/comm
 
 ## Stop conditions
 
-**Cap at 3 cycles.** Third review still holding Blockers or Majors → stop the flow and report the unresolved findings. Also stop if the diff no longer matches the plan's scope, or a worktree named in the work log is missing ([worktree › Gotchas](../worktree/SKILL.md#gotchas)).
+**Cap at the profile's loop cap (`#loops`, default 3) cycles.** The last allowed review still holding Blockers or Majors → stop the flow and report the unresolved findings. Also stop if the diff no longer matches the plan's scope, or a worktree named in the work log is missing ([worktree › Gotchas](../worktree/SKILL.md#gotchas)).

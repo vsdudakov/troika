@@ -15,6 +15,7 @@ Write no path to the plugin's own tree here. A role reads its procedure from `${
 | `#repo-map` | which repos exist, what each is, what is out of scope | everyone |
 | `#ownership` | which role owns which repo or app | everyone |
 | `#autonomy` | **who the reporter is and how `--ask` reaches them**, how long a run waits, and the decisions that may never be automatic on an unattended run | orchestrator, architect, reviewer, releaser |
+| `#loops` | **the loop cap: how many fix → re-review cycles any loop runs before it stops and reports** — default 3 | everyone |
 | `#models` | **the model and effort each role runs on, per host** — the values the orchestrator passes at spawn | orchestrator, everyone |
 | `#review-runner` | **which tool runs an independent review pass, and the exact command** — or an explicit "there is none" | reviewer |
 | `#workspace-paths` | the workspace root, the resolver, and the absolute-path rule | everyone |
@@ -73,6 +74,10 @@ The project profile for Troika. Roles reference these sections by anchor; Troika
 <- a change to a public API contract other teams consume>
 <- a production deploy, and anything that touches production data>
 <running unattended never silences a stop condition: a cap that is hit, an unowned repo or an unreproducible bug still stops the run.>
+
+<a id="loops"></a>
+## Loop cap
+<how many cycles any fix → re-review loop runs before it stops and reports: the plan-review rewrite loop, the internal-review fix loop, the unit-test fix loop, the QA fix loop, the PR review loop, the review-bot waves. One number for all of them; default 3 when this section names none. A hit cap is a stop condition, never silently exceeded.>
 
 <a id="models"></a>
 ## Models and effort

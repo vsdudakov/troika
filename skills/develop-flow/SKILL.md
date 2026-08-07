@@ -27,16 +27,16 @@ Subagents inherit session effort; use the highest effort any role needs.
 | 1b *(bug)* | architect ∥ cause probes ∥ QA pre-warm | the brief has steps, observed, expected | — | `plans/<TICKET>.md` |
 | 2b *(bug)* | qa, on the **base checkout** | `Reproduced`, or `Reproduced differently` | 2 attempts | `-repro-<n>.md` + the `before` proof |
 | 1f *(feature)* | architect ∥ read-only probes | the plan follows [plan-template](../plan-template/SKILL.md) | — | `plans/<TICKET>.md` |
-| 2f *(feature)* | reviewer, other model family ∥ 2 lenses | `Approve` / `Approve with nits` | 3 | `-plan-review-<n>.md` |
+| 2f *(feature)* | reviewer, other model family ∥ 2 lenses | `Approve` / `Approve with nits` | `#loops` | `-plan-review-<n>.md` |
 | 2r | commenter asks, the reporter answers — **only under `--ask`** | *go ahead* | 2 | the answer, in the plan file |
 | 3 | dev roles, one lane per repo | profile verification commands green, tests written and collected | — | `-<role>.md` |
-| 4 | reviewer ∥ 3 dimensions per lane | no Blocker or Major open | 3 | `-review-<n>.md` |
-| 5 | tester ∥ one lane per area | the change's tests green, counts checked | 3 | `-tests-<n>.md` |
-| 6 | qa, on the local stack | `Pass`, one before/after proof per requirement | 3 | `-qa-<n>.md`, `proofs/<TICKET>/` |
+| 4 | reviewer ∥ 3 dimensions per lane | no Blocker or Major open | `#loops` | `-review-<n>.md` |
+| 5 | tester ∥ one lane per area | the change's tests green, counts checked | `#loops` | `-tests-<n>.md` |
+| 6 | qa, on the local stack | `Pass`, one before/after proof per requirement | `#loops` | `-qa-<n>.md`, `proofs/<TICKET>/` |
 | 7 | releaser | one PR per repo, proofs attached, PRs in dependency order | — | the PRs |
-| 8 | releaser ∥ per PR | CI green and the bots quiet, then the post-PR actions | 3 waves | tracker writes · worktree cleanup |
+| 8 | releaser ∥ per PR | CI green and the bots quiet, then the post-PR actions | `#loops` waves | tracker writes · worktree cleanup |
 
-Failed gate → back to the owning role, never forward. `∥` means concurrent, and **a lane is a repo, not a role** ([Lanes](#lanes)); sibling lanes do not wait. Barriers: the step-2 join (a confirmed reproduction or an approved plan, plus the reporter under `--ask`), the pre-QA join, CI.
+`#loops` in the Cap column is the profile's loop cap (PROFILE.md › Loop cap (`#loops`)), default 3. Failed gate → back to the owning role, never forward. `∥` means concurrent, and **a lane is a repo, not a role** ([Lanes](#lanes)); sibling lanes do not wait. Barriers: the step-2 join (a confirmed reproduction or an approved plan, plus the reporter under `--ask`), the pre-QA join, CI.
 
 Tests run locally once: dev writes (3), reviewer reads (4), [tester](../../agents/tester.md) runs change tests (5), CI runs all (8). Exactly one gate waits for a person — [2r](#reporter-review), and only under `--ask` ([Autonomy](#autonomy)); everywhere else the human is reached only under [Stop conditions](#stop-conditions).
 
@@ -178,7 +178,7 @@ Run [plan-review.md](../plan-review/SKILL.md) with [reviewer](../../agents/revie
 
 1. Check ticket coverage, testability, symbols, ownership, contracts, tests, assumptions.
 2. Blocker/Major → architect rewrites `<TICKET>.md`; re-review.
-3. Cap at 3 cycles; then stop.
+3. Cap at the profile's loop cap (`#loops`, default 3) cycles; then stop.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md`.
 
@@ -226,7 +226,7 @@ Run [internal-review.md](../internal-review/SKILL.md) on each local diff before 
 1. Concurrently check profile commands, tests, and design; merge verdict. Never run tests.
 2. Require a real mirror test for every source and branch.
 3. Blocker/Major → owner fixes and verifies; re-review. Fix cheap nits.
-4. Cap at 3 cycles.
+4. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md`; release reads the highest `<n>`.
 
@@ -237,7 +237,7 @@ Run [run-unit-tests.md](../run-unit-tests/SKILL.md) per repo as soon as review p
 1. Select changed tests, source mirrors, and tests naming changed symbols ([selection](../run-unit-tests/SKILL.md#selection)).
 2. Run one concurrent lane per profile area ([lanes](../run-unit-tests/SKILL.md#lanes)).
 3. Verify collection, counts, and coverage — not only exit zero.
-4. Fail → owner fixes; repeat review, then tests. Cap at 3 cycles.
+4. Fail → owner fixes; repeat review, then tests. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` plus one log per lane; release reads the highest `<n>`.
 
@@ -248,7 +248,7 @@ Run [qa-verify.md](../qa-verify/SKILL.md) on the dev worktrees and local stack (
 1. Verify every requirement and adjacent regression; parallelize independent flows. Save a **before and an after** proof per requirement under `$TROIKA_SCRATCHPAD/proofs/<TICKET>/` — the before side on the base checkout, the after side on the branch. Net-new behaviour has no before: `n/a — new`, never a staged one.
 2. **On the bug path the before proof already exists** — step 2b captured the failure. Reuse that file; recording it again on the base checkout costs a stack restart and proves nothing new.
 3. Blocker/Major → owner fixes; repeat review, tests, QA.
-4. Cap at 3 cycles.
+4. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything (PROFILE.md › Stack limits (`#stack-limits`)), and what is listed ships on unit tests alone.
 
