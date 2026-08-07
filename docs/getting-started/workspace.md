@@ -34,18 +34,34 @@ and everything specific to you is in this one directory.
 
 ## What setup asks you
 
-Most of the profile is already written down in your repos, so setup reads before it asks.
-Manifests, `Makefile`s, CI workflows, linter configs, git remotes and PR templates give it
-the stack, the verification commands, the test framework and naming, the base branch, the
-deploy triggers and the release scheme. It drafts those and shows them for confirmation.
+Setup runs as a **wizard**, in this order:
+
+1. **Fix the root** — the folder that holds your repos, never a repo itself.
+2. **Scope** — it lists every repo it found and you tick the ones Troika may touch. An
+   unticked repo is written into `#repo-map` by name, marked out of scope, so a role that
+   stumbles on it knows that was a decision.
+3. **Scaffold** — `settings.json`, the `.gitignore`, the three state directories.
+4. **Derive from the code** — one read-only probe per ticked repo, reading real source files
+   and not only config: the style a reviewer can cite, the test framework and mirror rule and
+   mocking policy, the exact verification commands, the branches, and a *runnable* local-stack
+   sequence with its health check and what it cannot prove.
+5. **Find credentials already on this machine** — `gh auth status`, then the environment and
+   your shell files for a tracker or tool token. It shows the **variable name and the file**
+   and asks whether to use it. A value is never printed and never written into the profile.
+6. **One batched interview** for what no file records — below.
+7. **Confirm the whole draft once**, then write it and verify every anchor exists.
 
 What no repo records, it asks:
 
 | It asks about | Because |
 | --- | --- |
+| which repos are in scope | a ticked list, not an open question; an unticked repo is recorded as out of scope rather than forgotten |
+| the review runner | which second tool reviews the plan and the diff, so the reviewer is not the family that wrote them |
+| the base and demo branches | the base ref every diff, worktree and PR is measured against — and the throwaway demo branch, if there is one |
 | the tracker | URL, project key, CLI, and **which writes a role may make** — silence here is read as "the usual transitions", and a role moves someone else's ticket |
+| investigation tools | a ticked list — Sentry, Datadog, Grafana, CloudWatch, and the rest — and the credential for each, or how to get it |
 | ownership | which role owns which repo or app; a repo nobody owns is a fine answer, and must be said |
-| voice | how outward-facing text should sound, with one do and one don't |
+| voice | **two or three sentences you actually wrote** to your team — a real PR description or Slack message, not a description of how you would like to sound. Setup derives the do and the don't from them |
 | gotchas | destructive commands, production-access rules, the traps a newcomer hits |
 | stack limits | what a green local run does **not** prove |
 | autonomy | who the reporter is and how a `--ask` run reaches them, how long it waits, and what may never be automatic on an unattended run |

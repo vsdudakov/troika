@@ -127,12 +127,13 @@ writes:
 flowchart TD
   A[folder of repos] --> B{already set up?}
   B -- yes --> Z([ask: leave · update · rewrite])
-  B -- no --> C[--init: settings.json,<br/>.gitignore, state dirs]
-  C --> D[probe every repo<br/>read-only]
-  D --> E[draft the anchors<br/>evidence can prove]
-  E --> F[ask what no repo records:<br/>tracker · ownership · voice · gotchas]
-  F --> G[confirm the whole draft, once]
-  G --> H([.troika/PROFILE.md])
+  B -- no --> C[list every repo<br/>tick what Troika covers]
+  C --> D[--init: settings.json,<br/>.gitignore, state dirs]
+  D --> E[probe each repo, read-only<br/>style · tests · commands · stack · branches]
+  E --> F[find credentials already here<br/>gh · tracker token · tool keys]
+  F --> G[one batched interview<br/>reviewer · branches · tracker · tools · voice]
+  G --> H[confirm the whole draft, once]
+  H --> I([.troika/PROFILE.md])
 ```
 
 Most of the profile is already in your repos — manifests, `Makefile`s, CI workflows, linter
