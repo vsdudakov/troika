@@ -91,6 +91,22 @@ From the dev work logs, classify each requirement in `$TROIKA_SCRATCHPAD/plans/<
 
 A change that touches frontend code but no user-visible behaviour is verified as backend and said so in the report.
 
+<a id="cycle-scope"></a>
+### Cycle 2 and after — the failed requirement, not the whole matrix
+
+A QA cycle after the first re-captures:
+
+- the **after** proof of every requirement that failed, and
+- the after proof of every requirement whose code path the fix's files sit on — resolved from the cycle snapshot ([develop-flow › Re-entry](../develop-flow/SKILL.md#reentry)), not from the requirement list.
+
+**No before proof is ever re-captured.** The base checkout did not move, so the file from cycle 1 — or, on a bug ticket, from the [reproduction pass](#reproduce) — is still the before side, and re-recording it costs a stack restart to prove the same thing twice.
+
+The stack itself is not rebuilt either: point it at the fixed worktree and restart only the processes the fix's files affect, where the profile's stack commands allow it (`#stack`). A full teardown and reseed per cycle is minutes of wall clock for a four-line fix.
+
+Widen back to every requirement under [the widening rules](../develop-flow/SKILL.md#widen) — a shared model, config, middleware, public contract or migration among the fix's files; a missing previous snapshot; or the last cycle the cap allows. A migration is the one that always widens: it moves the data every other proof was captured against.
+
+The report names the scope and lists the requirements it carried forward rather than re-verified.
+
 ## 4. Frontend — browser E2E, before/after GIF
 
 Drive the running app along the plan's click path with a browser automation tool that records GIFs (Claude in Chrome, or equivalent); fall back to before/after screenshots only if none exists. Per requirement:
@@ -151,6 +167,6 @@ Use the [QA report format](../../agents/qa.md#output) and include: the exact com
 
 - Stack won't come up after the profile's documented reset and one restart → stop and report; don't debug the environment for hours.
 - Browser tool unresponsive or a page failing after 2–3 attempts → stop and report; don't retry the same action or wander the app.
-- `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, internal review runs again, then this skill, writing `-qa-<n+1>.md`. **Cap at the profile's loop cap (`#loops`, default 3) QA cycles**, then stop and report to the human.
+- `Fail` on any Blocker or Major sends the work back to the owning dev role; after the fix, review and the unit tests run again together and this skill follows, writing `-qa-<n+1>.md` at [cycle scope](#cycle-scope). **Cap at the profile's loop cap (`#loops`, default 3) QA cycles**, then stop and report to the human.
 - A worktree named in a work log is missing → stop and report ([worktree › Gotchas](../worktree/SKILL.md#gotchas)).
 - **Reproduction pass only:** two attempts that do not reproduce → stop and report `Not reproduced`. Never widen the steps a third time, and never edit product code to make the bug appear.

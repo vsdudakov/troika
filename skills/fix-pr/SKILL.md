@@ -15,7 +15,7 @@ Change an open PR without opening a new one. Same branch, same PR, one push per 
   └─ 2 worktree on the head branch (writable, tracking)
   └─ 3 fix list ── instruction mode │ comment mode (fix ∥ reject with a reason)
   └─ 4 ∥ dev roles by ownership ── implement-change, tests written not run
-  └─ 5 internal review (max 3) ──▶ 6 unit tests on the change ──▶ 7 QA if user-visible
+  └─ 5 internal review ∥ 6 unit tests on the change (max 3) ──▶ 7 QA if user-visible
   └─ 8 releaser commits + pushes the same branch — no new PR
   └─ 9 commenter answers every thread ──▶ 10 CI green ──▶ 11 clean up
 ```
@@ -145,9 +145,13 @@ in words needs none.
 
 Run [internal-review](../internal-review/SKILL.md) over the diff this cycle added. The review
 is of the fix, not of the PR — the PR already had its pass ([pr-review](../pr-review/SKILL.md)),
-and re-reviewing the whole diff every cycle is how a two-line fix costs an hour.
+and re-reviewing the whole diff every cycle is how a two-line fix costs an hour. That is the
+same rule the flow's own loops run on ([develop-flow › Re-entry](../develop-flow/SKILL.md#reentry)),
+including its [widening cases](../develop-flow/SKILL.md#widen) — a fix landing on a shared
+model, config, migration or inherited fixture is reviewed against the whole diff again.
 
-Blocker/Major → owner fixes and re-verifies; re-review. Cap at the profile's loop cap (`#loops`, default 3) cycles. Each pass writes
+Blocker/Major → owner fixes and re-verifies; re-review, one effort tier below the reviewer's
+row. Cap at the profile's loop cap (`#loops`, default 3) cycles. Each pass writes
 `$TROIKA_SCRATCHPAD/plans/<KEY>-review-<n>.md` at the next free `<n>`, continuing the PR's
 existing numbering.
 
@@ -155,8 +159,15 @@ existing numbering.
 
 Run [run-unit-tests](../run-unit-tests/SKILL.md) over the tests this cycle wrote plus the
 existing tests tied to the sources it touched ([selection](../run-unit-tests/SKILL.md#selection)).
-This is the first execution of anything in this cycle. Failures route back to the owning role;
-cap at 3. Writes `$TROIKA_SCRATCHPAD/plans/<KEY>-tests-<n>.md`.
+This is the first execution of anything in this cycle.
+
+**Start it with step 5, not after it** ([develop-flow › 4 ∥ 5](../develop-flow/SKILL.md#review-tests)):
+the reviewer is read-only and the tester writes nothing, and holding a narrow test run behind a
+review is the same hour the step above exists to avoid. Discard the run only if the review's fix
+touched a source these tests cover.
+
+Failures route back to the owning role; cap at 3. Writes
+`$TROIKA_SCRATCHPAD/plans/<KEY>-tests-<n>.md`.
 
 ## 7. QA — only when the fix is user-visible
 

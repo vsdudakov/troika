@@ -98,6 +98,7 @@ The project profile for Troika. Roles reference these sections by anchor; Troika
 <`→` means fallback: the second id is used where the first is unavailable>
 <each role file states what its row *needs* — judgment tier or execution tier, and why — and when to raise either dial; the ids and efforts themselves live here and only here>
 <a host with no effort control: say so, and say which model tier stands in for a `high`+ role>
+<an effort above is the *first* pass's. A pass re-entering a gate after a fix runs one tier down, because it reads only what the fix changed; a widened cycle and the last cycle the loop cap allows keep the row's effort. Say here if this workspace wants that flat instead, and why.>
 
 <a id="review-runner"></a>
 ### Review runner

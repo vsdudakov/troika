@@ -201,8 +201,8 @@ marker and nothing falls back: no workspace above you is a stop, not a default. 
 
 **How a ticket opens depends on what it is**; from step 3 the two paths are one flow:
 
-- **bug** — collect the steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
-- **feature** — collect requirements → plan → **plan review loop** (a different model family, max 3) → *(reporter review, under `--ask`)* → implement in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
+- **bug** — collect the steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix in parallel lanes → internal review ∥ unit tests (max 3) → **local QA before/after** → PR with the proofs → CI + post-PR actions
+- **feature** — collect requirements → plan → **plan review loop** (a different model family, max 3) → *(reporter review, under `--ask`)* → implement in parallel lanes → internal review ∥ unit tests (max 3) → **local QA before/after** → PR with the proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it —
 `/tr:dev SCRUM-123` goes from ticket to PR unattended. `--ask` puts the gate in.
@@ -222,9 +222,11 @@ flowchart TD
   H --> J[lane B · frontend-dev<br/>code and tests written, not run]
   I --> K
   J --> K{4 · internal review loop<br/>lint only, max 3}
+  I --> L
+  J --> L{5 · unit tests<br/>only the changed tests}
   K -- blocker or major --> H
-  K -- approved --> L{5 · unit tests<br/>only the changed tests}
   L -- fail --> H
+  K -- approved --> M
   L -- green --> M{6 · local QA before and after<br/>one proof per requirement, max 3}
   M -- fail --> H
   M -- approved --> N[7 · create the PR<br/>template · QA proofs · ticket link]
@@ -247,7 +249,7 @@ flowchart TD
 | 2r   | **Reporter review** — the person who filed it reads what will be built, or what was reproduced, and answers _go ahead_ / _change this_ / _not this at all_. The only gate that waits for a person, and it runs **only** on a `--ask` run | [commenter](agents/commenter.md) asks, the reporter answers                   |
 | 3    | Development — one lane per repo, own worktree, tests written but not run                                                                                                                                                                 | [backend-dev](agents/backend-dev.md) · [frontend-dev](agents/frontend-dev.md) |
 | 4    | **Internal review loop** — nine checks on the local diff, lint only, nothing posted                                                                                                                                                      | [reviewer](agents/reviewer.md)                                                |
-| 5    | Unit tests — the change's own tests only, parallel lanes, failures routed back                                                                                                                                                           | [tester](agents/tester.md)                                                    |
+| 5    | Unit tests — the change's own tests only, parallel lanes, **started with step 4 rather than after it**, failures routed back                                                                                                             | [tester](agents/tester.md)                                                    |
 | 6    | **QA on the real local stack** — before/after per requirement: GIFs for UI, API + datastore for backend                                                                                                                                  | [qa](agents/qa.md)                                                            |
 | 7    | Release — commit, push, PR from your template with proofs, ticket updated                                                                                                                                                                | [releaser](agents/releaser.md)                                                |
 | 8    | CI watch, review-bot waves, then the post-PR actions — tracker writes, worktree cleanup                                                                                                                                                  | [releaser](agents/releaser.md)                                                |
@@ -256,6 +258,20 @@ A bug fix carries the regression test that encodes the reproduction — internal
 the test against `-repro-1.md`, and one that would pass on the base ref is a Blocker. The
 failing capture from step 2b is reused as the `before` proof at step 6, so the pair the PR
 carries costs one stack boot, not two.
+
+**A fix re-runs the fix, not the whole change.** Steps 4, 5 and 6 all loop the same way, and a
+second cycle reads only what the fix touched — resolved from a hash snapshot each gate writes,
+not from the dev role's account of it ([re-entry](skills/develop-flow/SKILL.md#reentry)). The
+review re-runs all nine checks over those files plus every earlier finding, the tests re-run
+the failures and the fix's mirrors, and QA re-captures the failed requirement's `after` proof
+and nothing already proved. A fix landing on a shared model, config, migration or inherited
+fixture widens back to the full diff, and so does the last cycle the loop cap allows. Each
+narrowed cycle also runs one effort tier below its role's row. Without this a four-line fix
+found at QA costs a full review + test + QA cascade, up to three times.
+
+Every step is stamped, and the run's output carries a timing table that separates **working**
+from **waiting** — a step that took forty minutes on a CI queue and one that took forty
+minutes of review read identically otherwise, and they are not the same problem.
 
 ### Run it unattended
 

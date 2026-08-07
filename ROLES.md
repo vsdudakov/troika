@@ -36,6 +36,8 @@ The **judgment tier** is the strongest model the profile names; the **execution 
 
 **The dials move independently.** [commenter](agents/commenter.md) takes the strongest model at the lowest effort. [releaser](agents/releaser.md) takes a mid model at low effort. Raise **effort** when a role loses to depth on a task it understands; raise the **model** when it loses to capability. Each role file carries its own `Why` / `Raise it when` / `Drop it when` / `Also`.
 
+**A row's effort is what the role's first pass costs.** A pass re-entering a gate after a fix reads a fraction of what the first one read, so it runs one tier down ([develop-flow › Re-entry](skills/develop-flow/SKILL.md#reentry)) — a widened cycle and the last cycle the loop cap allows are the two that keep the row's effort, because both are deciding the flow's outcome rather than confirming a small change.
+
 The [reviewer](agents/reviewer.md)'s independent pass runs on a different family from the author's — which tool, and the exact command, is PROFILE.md › Review runner (`#review-runner`).
 
 Values are not automatic; pass them at launch/session, from the profile's rows.
@@ -80,6 +82,7 @@ Roles communicate through files. Use the absolute paths from `plugin/resolve.py`
 | `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md` | [qa](agents/qa.md) | dev roles, release |
 | `$TROIKA_SCRATCHPAD/proofs/<TICKET>/*.gif\|png` | [qa](agents/qa.md) | release |
 | `$TROIKA_SCRATCHPAD/lanes/<repo>-<TICKET>` | whoever holds the lane | any role about to join it ([claim](skills/worktree/SKILL.md#claim)) |
+| `$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha` | [reviewer](agents/reviewer.md), at the end of every internal pass | reviewer, tester, qa — it is what a [re-entry scope](skills/develop-flow/SKILL.md#reentry) is computed from |
 
 `<role>` is frontmatter name; `<n>` starts at 1. Release reads highest review/tests/QA files. Lane logs are evidence, not gates.
 

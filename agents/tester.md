@@ -25,7 +25,8 @@ Inherits the workspace profile, `$TROIKA_PROFILE` — especially Tests (`#tests`
 
 - `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements the tests must prove.
 - `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — each dev role's work log: branch, worktree path, files changed, tests written.
-- `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md` — the internal review verdict; this role runs after it passes.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md` — the internal review verdict. This role does **not** wait for it: both start when the lane reports done ([develop-flow › 4 ∥ 5](../skills/develop-flow/SKILL.md#review-tests)). Read it when it lands, and discard this run only if its fix touched a source these tests cover.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha` — the cycle snapshot, which is what a re-entry scope is computed from ([re-entry](../skills/develop-flow/SKILL.md#reentry)).
 - The diff itself, which is what the selection is computed from — not the work log's prose.
 
 ## Rules
@@ -39,11 +40,11 @@ Inherits the workspace profile, `$TROIKA_PROFILE` — especially Tests (`#tests`
 
 ## Gates
 
-1. Every test file in the diff was run. No exception, no sampling.
-2. Every changed source file's mirror test exists and was run, or is reported as a missing-test defect.
+1. On the first cycle, every test file in the diff was run. No exception, no sampling. A later cycle runs [its re-entry scope](../skills/run-unit-tests/SKILL.md#cycle-scope) and names in the report every node ID it carried forward instead.
+2. Every changed source file's mirror test exists and was run, or is reported as a missing-test defect. The existence half holds in every cycle; only the running half narrows.
 3. Every lane reached a real result — tests collected, counts matched, coverage summary reached where applicable.
 4. Every failure is routed with an owner and a verdict of *test wrong* / *code wrong* / *pre-existing*.
-5. After a fix, the same selection re-runs **and** internal review runs again on the new diff before QA — a fix is a diff, and no diff reaches QA unreviewed.
+5. After a fix, this run and internal review go again **together**, each narrowed to the fix — a fix is a diff, and no diff reaches QA unreviewed or untested.
 6. **Cap at the profile's loop cap (`#loops`, default 3) cycles**, then stop and report to the human.
 
 ## Output

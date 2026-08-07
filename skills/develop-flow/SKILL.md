@@ -17,6 +17,8 @@ claude --model <the architect row's model> --effort <its effort> -p "read ${CLAU
 
 Subagents inherit session effort; use the highest effort any role needs.
 
+**Effort is per pass, not per role.** The row's effort is what a role's *first* pass costs. A pass that re-enters a gate after a fix ([Re-entry](#reentry)) reads a fraction of the work the first one did, so it runs **one effort tier down** from the row — a re-review of a four-line fix does not need the depth that found it. Two exceptions keep their row's effort: a re-entry that [widened to full scope](#reentry), and the last cycle the loop cap allows, which is the one whose verdict stops the flow. Say in each cycle's report which tier it ran at; a cycle nobody can price is one nobody can tune.
+
 **Kind** procedure · **Used by** orchestrator · **When** a ticket or described change needs shipping · **Ends with** one PR per touched repo — CI green, review quiet, proofs attached, ticket updated per the profile
 
 **The ticket's kind picks steps 1 and 2, and nothing else.** A bug is reproduced before it is fixed; a feature is planned before it is built. From step 3 on, the two paths are the same flow ([Kind](#kind)).
@@ -31,7 +33,7 @@ Subagents inherit session effort; use the highest effort any role needs.
 | 2r | commenter asks, the reporter answers — **only under `--ask`** | *go ahead* | 2 | the answer, in the plan file |
 | 3 | dev roles, one lane per repo | profile verification commands green, tests written and collected | — | `-<role>.md` |
 | 4 | reviewer ∥ 3 dimensions per lane | no Blocker or Major open | `#loops` | `-review-<n>.md` |
-| 5 | tester ∥ one lane per area | the change's tests green, counts checked | `#loops` | `-tests-<n>.md` |
+| 5 | tester ∥ one lane per area, started with 4, not after it | the change's tests green, counts checked | `#loops` | `-tests-<n>.md` |
 | 6 | qa, on the local stack | `Pass`, one before/after proof per requirement | `#loops` | `-qa-<n>.md`, `proofs/<TICKET>/` |
 | 7 | releaser | one PR per repo, proofs attached, PRs in dependency order | — | the PRs |
 | 8 | releaser ∥ per PR | CI green and the bots quiet, then the post-PR actions | `#loops` waves | tracker writes · worktree cleanup |
@@ -105,6 +107,7 @@ Never let two agents write one worktree. Split by repo, not role or feature.
 | Dev roles in **different repos** (3) | separate worktrees and branches — **only with a pinned contract** |
 | The three review dimensions in one repo (4) | read-only over one diff |
 | Test lanes, one per area, across ready worktrees (5) | separate processes and test roots |
+| Internal review and the change's unit tests, in one lane (4 ∥ 5) | the reviewer is read-only and the tester writes nothing, so neither can disturb the other's view of the worktree ([4 ∥ 5](#review-tests)) |
 | Whole per-repo lanes 3→4→5 against each other | a lane touches only its own worktree |
 | QA's stack boot, from the first dev role's done | boot depends on the checkout, not on review |
 | Proof capture per requirement (6), paths not sharing state | independent flows on one stack |
@@ -120,14 +123,72 @@ Never let two agents write one worktree. Split by repo, not role or feature.
 | Reproduction → any fix (bug) | a fix for a bug nobody has seen fail is a guess, and its regression test has nothing to encode |
 | The reproduction pass → any dev branch on the stack | 2b runs on the base checkout; a dev branch under it would hide the bug it exists to show |
 | Dev roles sharing one repo's worktree (3) | one checkout, one branch — they take turns in dependency order |
-| Review → tests, inside a lane | review removes what a test run finds the slow way |
-| A fix → re-review → re-test | a fix is a diff, and no diff advances unreviewed |
+| A fix → its re-review and its re-test | a fix is a diff, and no diff advances unreviewed — but the two gates it re-enters run concurrently, exactly as they do on the first pass |
 | All lanes → QA | one stack, one branch under test |
 | Provider PR → consumer PR | dependency order ([cross-repo](../cross-repo/SKILL.md)) |
 | A suite the profile marks sequential | correctness, not speed (PROFILE.md › Gotchas (`#gotchas`)) |
 | Migration work inside one repo | migration numbers collide silently |
 
-Report wall clock per lane. Resolve the paths once (`plugin/resolve.py`); all handoff paths are absolute (workspace paths (`#workspace-paths`)).
+Resolve the paths once (`plugin/resolve.py`); all handoff paths are absolute (workspace paths (`#workspace-paths`)).
+
+<a id="reentry"></a>
+## Re-entry — a fix re-runs the fix, not the whole change
+
+Steps 4, 5 and 6 all loop the same way: a Blocker goes back to the owning dev role, and the gates run again. **The second run is scoped to the fix.** Re-reviewing a diff that already passed, re-running tests that already went green and re-capturing proofs of requirements nobody touched is the single most expensive habit in this flow — one late QA finding otherwise costs a full 4 → 5 → 6 cascade on a four-line change, up to `#loops` times.
+
+Nothing about the gates weakens. What narrows is their input.
+
+<a id="snapshot"></a>
+### The snapshot — what makes the fix diff computable
+
+Nothing is committed before step 7, so there is no ref to diff a fix against. Make one: **every role that passes a gate hashes the diff's files before it reports**, in each worktree it cleared.
+
+```bash
+cd "$TROIKA_WORKTREES/<repo>-<TICKET>"
+git add -N -- .                                        # untracked files count as changed
+{ git --no-pager diff --name-only "$BASE"...HEAD; git --no-pager diff --name-only; } \
+  | sort -u | xargs -r shasum > "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha"
+```
+
+At the next cycle, re-run the same command and compare: **the fix's files are the ones whose hash changed, plus the ones the list gained.** That is checkable evidence, not a dev role's account of what it touched — a fixer who quietly edited a fourth file cannot narrow a gate away from it.
+
+A missing snapshot is not a licence to guess: the cycle runs at full scope and the report says the snapshot was missing.
+
+<a id="reentry-scope"></a>
+### What each gate re-runs
+
+| Gate | Cycle 1 | Cycle 2+ |
+| --- | --- | --- |
+| **4 · review** | the whole diff, nine checks | the fix's files, nine checks, plus every finding the previous cycle raised — including the ones it accepted as fixed |
+| **5 · tests** | the full [selection](../run-unit-tests/SKILL.md#selection) | the node IDs that failed · the mirror tests of the fix's files · every test the fix added or changed |
+| **6 · QA** | before and after per requirement | the after proof of each failed requirement, and of any requirement whose code path the fix's files sit on. **Before proofs are never re-captured** — the base checkout did not move |
+
+The findings from earlier cycles travel with the scope. A narrowed re-review still reads `-review-<n-1>.md` and confirms each Blocker is actually gone; narrowing the diff never narrows the verdict.
+
+<a id="widen"></a>
+### When re-entry widens back to full scope
+
+Some files have a blast radius the fix diff cannot express. If any of the fix's files is one of these, the cycle runs at **cycle-1 scope**, and the report says which file widened it:
+
+- a shared model, base class, utility, config, middleware or public contract — the same classes [internal review](../internal-review/SKILL.md) already names as regression risk
+- a migration, in any repo
+- a test fixture or conftest other tests inherit from
+- anything the profile marks as sequential or fragile (PROFILE.md › Gotchas (`#gotchas`))
+
+Also widen when the fix changed the plan's contract, when the previous cycle's snapshot is missing, and on the **last cycle the loop cap allows** — the one whose verdict stops the flow deserves the full read.
+
+<a id="timing"></a>
+## Timing — every step is stamped, or none of this is tunable
+
+Take a UTC stamp when each step starts and when it ends, per lane where the step has lanes:
+
+```bash
+date -u +%FT%TZ
+```
+
+Report the elapsed time of every step in the run's [Output](#output), including the ones that waited on something outside the flow — a stack boot, a CI queue, a person under `--ask`. **Separate waiting from working**: a step that took forty minutes because CI was queued and a step that took forty minutes of review are the same number and completely different problems, and a report that cannot tell them apart sends the next tuning pass at the wrong target.
+
+Write a [`memory/`](../memory/SKILL.md) entry, with its `**Cost:**` line, when a step cost far more than the run's shape predicts — a gate that looped to its cap, a suite whose narrow selection still took tens of minutes, a stack that needed three boots. Those entries are what turn one slow run into a rule.
 
 ## 0. Fan out — index, ticket, memory, kind, all at once
 
@@ -225,19 +286,34 @@ Run [internal-review.md](../internal-review/SKILL.md) on each local diff before 
 
 1. Concurrently check profile commands, tests, and design; merge verdict. Never run tests.
 2. Require a real mirror test for every source and branch.
-3. Blocker/Major → owner fixes and verifies; re-review. Fix cheap nits.
+3. Blocker/Major → owner fixes and verifies; re-review, at [re-entry scope](#reentry). Fix cheap nits.
 4. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md`; release reads the highest `<n>`.
 
+<a id="review-tests"></a>
+### 4 ∥ 5 — review and the tests run at the same time
+
+Both start the moment the lane reports done. The reviewer is read-only and the tester writes nothing, so one worktree carries both without breaking the one-writer rule.
+
+They were once ordered, on the argument that review removes what a test run finds the slow way. That argument is about *tokens*, and the tests are the cheap half — a machine run of a narrow node-ID selection. Ordering them spends a full test cycle of wall clock to save a test run the flow usually needs anyway.
+
+| Outcome | What happens to the concurrent run |
+| --- | --- |
+| review `Approve` / `Approve with nits` | the test result already in hand is the step-5 result — nothing re-runs |
+| review Blocker or Major, fix touches **no** source the tests cover | the test result stands; only the fix's own new tests are added at step 5's next cycle |
+| review Blocker or Major, fix touches a covered source | discard that lane's run and re-run at [re-entry scope](#reentry) — a green result for code that no longer exists is worse than no result |
+
+The gate order does not move: release still needs both a passing review and a passing test report, and a lane reaching QA on one of the two is a stop.
+
 ## 5. Unit tests — the change's tests only, in parallel
 
-Run [run-unit-tests.md](../run-unit-tests/SKILL.md) per repo as soon as review passes. This is the first test execution.
+Run [run-unit-tests.md](../run-unit-tests/SKILL.md) per repo as soon as the lane reports done — **concurrently with step 4**, not after it ([4 ∥ 5](#review-tests)). This is the first test execution.
 
 1. Select changed tests, source mirrors, and tests naming changed symbols ([selection](../run-unit-tests/SKILL.md#selection)).
 2. Run one concurrent lane per profile area ([lanes](../run-unit-tests/SKILL.md#lanes)).
 3. Verify collection, counts, and coverage — not only exit zero.
-4. Fail → owner fixes; repeat review, then tests. Cap at the profile's loop cap (`#loops`, default 3) cycles.
+4. Fail → owner fixes; review and tests run again together, both at [re-entry scope](#reentry). Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` plus one log per lane; release reads the highest `<n>`.
 
@@ -247,7 +323,7 @@ Run [qa-verify.md](../qa-verify/SKILL.md) on the dev worktrees and local stack (
 
 1. Verify every requirement and adjacent regression; parallelize independent flows. Save a **before and an after** proof per requirement under `$TROIKA_SCRATCHPAD/proofs/<TICKET>/` — the before side on the base checkout, the after side on the branch. Net-new behaviour has no before: `n/a — new`, never a staged one.
 2. **On the bug path the before proof already exists** — step 2b captured the failure. Reuse that file; recording it again on the base checkout costs a stack restart and proves nothing new.
-3. Blocker/Major → owner fixes; repeat review, tests, QA.
+3. Blocker/Major → owner fixes; review, tests and QA run again at [re-entry scope](#reentry) — the fix's files, the failed tests, the failed requirement's after proof, and nothing else unless the fix [widened](#widen) it.
 4. Cap at the profile's loop cap (`#loops`, default 3) cycles.
 
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-qa-<n>.md`. Read its **Not verified** section — the stack cannot exercise everything (PROFILE.md › Stack limits (`#stack-limits`)), and what is listed ships on unit tests alone.
@@ -281,6 +357,18 @@ Never weaken CI — no lowered coverage threshold, no `skip`/`xfail` on a genuin
 ## Output
 
 Kind and the evidence for it · whether the run was unattended or `--ask` · PR URLs in dependency order · ticket state · reproduction verdict (bug) or plan review verdicts (feature) · the reporter's answer, or that the run was unattended · code review verdicts · unit tests per lane and CI remainder · QA before/after proofs · CI state/fixes · review responses · gaps and assumptions.
+
+Then the [timing](#timing) table — one row per step, per lane where the step has lanes:
+
+```markdown
+| Step | Lane | Elapsed | Of which waiting | Cycles | Effort tier |
+| --- | --- | --- | --- | --- | --- |
+| 4 review | <repo> | 12m | — | 2 (1 narrowed) | high, then medium |
+| 8 CI | <repo> | 41m | 38m — queue + suite | 1 wave | — |
+| **Total** | | **<wall clock>** | **<sum>** | | |
+```
+
+A cycle counted here says whether it ran at cycle-1 or [re-entry](#reentry) scope, and a widened one says [which file widened it](#widen). Wall clock is the run's, not the sum of the rows — the lanes overlap, and that overlap is the point.
 
 <a id="stop-conditions"></a>
 ## Stop conditions

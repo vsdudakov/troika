@@ -78,8 +78,8 @@ flowchart TD
 
 Steps 0 – 2r decide what gets built; from step 3 the two paths are one flow:
 
-- **bug** — steps to reproduce → **local QA reproduces it on the base ref** → *(reporter review, under `--ask`)* → fix → internal review loop → unit tests → local QA before/after → PR with proofs → CI + post-PR actions
-- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review loop → unit tests → local QA before/after → PR with proofs → CI + post-PR actions
+- **bug** — steps to reproduce → **local QA reproduces it on the base ref** → *(reporter review, under `--ask`)* → fix → internal review ∥ unit tests → local QA before/after → PR with proofs → CI + post-PR actions
+- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review ∥ unit tests → local QA before/after → PR with proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it —
 `--ask` is what puts the gate in. Your profile's `#autonomy` anchor says who that reporter is
@@ -100,9 +100,11 @@ flowchart TD
   H --> J[lane B · frontend-dev<br/>code and tests written, not run]
   I --> K
   J --> K{4 · internal review loop<br/>lint only, max 3}
+  I --> L
+  J --> L{5 · unit tests<br/>only the changed tests}
   K -- blocker or major --> H
-  K -- approved --> L{5 · unit tests<br/>only the changed tests}
   L -- fail --> H
+  K -- approved --> M
   L -- green --> M{6 · local QA before and after<br/>one proof per requirement, max 3}
   M -- fail --> H
   M -- approved --> N[7 · create the PR<br/>template · QA proofs · ticket link]

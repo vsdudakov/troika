@@ -10,8 +10,8 @@ is the whole product. Nine steps, each one a gate: nothing advances past a step 
 
 **How a ticket opens depends on what it is**; from step 3 the two paths are one flow:
 
-- **bug** — steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
-- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review loop → unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
+- **bug** — steps to reproduce → **local QA reproduces it on the base checkout** → *(reporter review, under `--ask`)* → fix → internal review ∥ unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
+- **feature** — requirements → plan → **plan review loop** → *(reporter review, under `--ask`)* → implement → internal review ∥ unit tests → **local QA before/after** → PR with proofs → CI + post-PR actions
 
 The reporter review is the only step that waits for a person, and a plain run does not run it:
 `--ask` is what puts the gate in.
@@ -31,9 +31,11 @@ flowchart TD
   H --> J[lane B · frontend-dev<br/>code and tests written, not run]
   I --> K
   J --> K{4 · internal review loop<br/>lint only, max 3}
+  I --> L
+  J --> L{5 · unit tests<br/>only the changed tests}
   K -- blocker or major --> H
-  K -- approved --> L{5 · unit tests<br/>only the changed tests}
   L -- fail --> H
+  K -- approved --> M
   L -- green --> M{6 · local QA before and after<br/>one proof per requirement, max 3}
   M -- fail --> H
   M -- approved --> N[7 · create the PR<br/>template · QA proofs · ticket link]
@@ -58,7 +60,7 @@ flowchart TD
 | 2r | **Reporter review** — the person who filed it reads what will be built or what was reproduced, and answers *go ahead* / *change this* / *not this at all* | the only gate that waits for a person, and **it runs only on a `--ask` run** |
 | 3 | **Development** — one lane per repo, own worktree, tests written but **not run** | a lane touches only its own worktree; a bug fix carries the regression test that encodes the reproduction |
 | 4 | **Internal review** — [nine checks](../guides/review.md) on the local diff, lint only | nothing is pushed with a Blocker or Major open |
-| 5 | **Unit tests** — only the tests the change developed, parallel lanes | a zero exit code is not a pass; collection counts are checked |
+| 5 | **Unit tests** — only the tests the change developed, parallel lanes, started **with** step 4 rather than after it | a zero exit code is not a pass; collection counts are checked |
 | 6 | **QA** — the real local stack, before/after per requirement | a requirement with no proof is "not verified", never "passed" |
 | 7 | **Release** — commit, push, PR from your template, proofs, ticket | the only commits in the flow happen here |
 | 8 | **CI watch + post-PR actions** — until CI is green and the bots are quiet, then the tracker writes and worktree cleanup | a red check is routed back, never patched green |
@@ -137,6 +139,25 @@ handoff files are numbered per cycle and why two roles never append to one.
 Every backward arrow is bounded. Plan review caps at three rounds and the reporter review at
 two; internal review and QA loop until clean but each cycle is a new numbered file, so an
 oscillation is visible rather than silent. When a cap is hit, the flow stops and asks — it does not lower the bar.
+
+**A second cycle reads the fix, not the change.** Each gate hashes its diff's files before it
+reports, so the next cycle can compute exactly what the fix touched instead of taking the dev
+role's word for it. The review then runs all nine checks over those files plus every finding the
+previous cycle raised, the tests run the failures and the fix's mirrors, and QA re-captures only
+the failed requirement's `after` proof — a before proof is never recorded twice, because the base
+checkout did not move. Fewer files, never fewer checks.
+
+Scope widens back to the whole diff when the fix lands on something whose blast radius the diff
+cannot express — a shared model, config, middleware, public contract, migration or inherited
+fixture — when the previous snapshot is missing, and on the last cycle the cap allows. Narrowed
+cycles also drop one effort tier; the widened and final ones do not.
+
+Without this, one Blocker found at QA on a four-line fix costs a full review + test + QA cascade,
+and the cap allows three of them.
+
+Every step is stamped as it runs, and the report ends with a timing table that separates
+**working** from **waiting** — a step that spent forty minutes in a CI queue and one that spent
+forty minutes reviewing look identical in a total, and they are not the same problem to fix.
 
 ## What the flow never does
 

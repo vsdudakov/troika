@@ -7,7 +7,7 @@ description: Reviews the local branch diff before QA and before any push — cat
 
 Pre-push local diff review.
 
-**Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** dev roles report done, before the tests run and before any push (develop-flow step 4) · **Ends with** a verdict file and a loop back to the dev role, nothing posted outside the workspace
+**Kind** procedure · **Used by** [reviewer](../../agents/reviewer.md) · **When** dev roles report done and before any push — alongside the tester, not before it ([develop-flow › 4 ∥ 5](../develop-flow/SKILL.md#review-tests)) · **Ends with** a verdict file and a loop back to the dev role, nothing posted outside the workspace
 
 Read-only: no edit, push, or test. Set `TROIKA_WORKSPACE`.
 
@@ -31,6 +31,22 @@ git --no-pager diff --stat "$BASE"...HEAD
 ```
 
 Account for every `??` — an untracked, unreviewed file ships unseen. `git add -N` records intent-to-add so new files enter the diff; their content stays unstaged and release commits normally afterwards. Review the whole diff and needed context.
+
+<a id="cycle-scope"></a>
+### Cycle 2 and after — the fix's files, not the diff again
+
+A re-review reads what the fix changed, resolved from the previous cycle's snapshot ([develop-flow › Re-entry](../develop-flow/SKILL.md#reentry)), never from the dev role's account of what it touched:
+
+```bash
+{ git --no-pager diff --name-only "$BASE"...HEAD; git --no-pager diff --name-only; } \
+  | sort -u | xargs -r shasum > "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha"
+diff "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n-1>.sha" \
+     "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha"     # the fix's files
+```
+
+Run all nine checks over those files, and re-check every finding `-review-<n-1>.md` raised — a narrowed diff never means a narrowed verdict, and a Blocker is not closed because the file it lived in stopped being read. Widen back to the whole diff under [the widening rules](../develop-flow/SKILL.md#widen): a shared model, base class, utility, config, middleware, public contract, migration, or inherited fixture among the fix's files; a missing previous snapshot; or the last cycle the loop cap allows.
+
+Write the snapshot at the end of **every** cycle, including the first, whatever the verdict. The next cycle has nothing to diff against otherwise, and a cycle with nothing to diff against runs at full scope.
 
 <a id="runner"></a>
 ### Running this pass on the other family
@@ -67,9 +83,13 @@ Use the [reviewer output format](../../agents/reviewer.md#output).
 
 ## 5. Loop
 
-Blocker/Major → owner fixes/verifies; re-review. Fix cheap nits.
+Blocker/Major → owner fixes/verifies; re-review at [cycle scope](#cycle-scope). Fix cheap nits.
+
+Each cycle after the first runs **one effort tier below the reviewer's row** ([develop-flow](../develop-flow/SKILL.md)) — except a widened cycle and the last one the cap allows, which keep the row's effort. Name the tier in the report.
 
 ## Output
+
+Say at the top of every report which scope the cycle ran at — whole diff, the fix's files, or widened by a named file — and at which effort tier. A cycle whose scope nobody can name cannot be trusted to have covered anything.
 
 Write the report to `$TROIKA_SCRATCHPAD/plans/<TICKET>-review-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. That file is the release gate's evidence — [releaser](../../agents/releaser.md) runs in a separate context and reads the highest-numbered one ([handoff contract](../../ROLES.md#handoff)).
 

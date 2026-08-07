@@ -7,7 +7,7 @@ description: Runs only the unit tests the change developed — plus the existing
 
 First test execution: change-related tests only, parallel by area.
 
-**Kind** procedure · **Used by** [tester](../../agents/tester.md) · **When** internal review is `Approve` / `Approve with nits`, before QA (develop-flow step 5) · **Ends with** a test report file, a `Pass`/`Fail` verdict, and failures routed to the owning dev role
+**Kind** procedure · **Used by** [tester](../../agents/tester.md) · **When** the dev lane reports done — alongside the internal review, not after it ([develop-flow › 4 ∥ 5](../develop-flow/SKILL.md#review-tests)) — and before QA · **Ends with** a test report file, a `Pass`/`Fail` verdict, and failures routed to the owning dev role
 
 Read-only. Owner fixes failures. Set `TROIKA_WORKSPACE`.
 
@@ -34,6 +34,25 @@ Run only:
 3. **Tests directly tied to a changed symbol** — an existing test that imports the changed module or exercises a function, class, endpoint, or migration the diff changed. Resolve by symbol search over the test tree (PROFILE.md › Code search (`#code-search`)), not by guessing.
 
 Direct means the test names/imports the symbol. CI owns indirect regression. Record node IDs before running.
+
+<a id="cycle-scope"></a>
+### Cycle 2 and after — the failures and the fix, not the selection again
+
+Re-running a selection that already went green is the loop's biggest waste. A cycle after the first runs only:
+
+1. **The node IDs that failed** in `-tests-<n-1>.md`.
+2. **The mirror tests of the fix's files** — resolved from the cycle snapshot, not from the work log ([develop-flow › Re-entry](../develop-flow/SKILL.md#reentry)):
+
+   ```bash
+   diff "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n-1>.sha" \
+        "$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha"
+   ```
+
+3. **Every test the fix added or changed.**
+
+Widen back to the full selection under [the widening rules](../develop-flow/SKILL.md#widen) — a shared model, base class, utility, config, middleware, public contract, migration or inherited fixture among the fix's files; a missing previous snapshot; or the last cycle the cap allows. An inherited `conftest` or fixture is the one that bites: it changes tests whose own files never moved.
+
+The report says which of the two scopes ran, and a narrowed cycle lists the node IDs it did **not** re-run.
 
 <a id="lanes"></a>
 ## 2. Run — one lane per area, all lanes at once
@@ -66,14 +85,18 @@ Route to code owner:
 - **Code wrong** → the code changes, with the test left asserting the real requirement.
 - **Fails on the base branch too** — verify in the primary clone before claiming it, then name it as pre-existing and do not fix it here.
 
-After fix, re-review; rerun same selection plus new/changed tests. Cap at the profile's loop cap (`#loops`, default 3) cycles.
+After a fix the review and this run go again **together**, each at [its own re-entry scope](#cycle-scope) — not the same selection over again. Cap at the profile's loop cap (`#loops`, default 3) cycles.
+
+A run started concurrently with a review that then returned a Blocker is only discarded when the fix touched a source those tests cover; otherwise its result stands and the next cycle adds the fix's tests to it ([develop-flow › 4 ∥ 5](../develop-flow/SKILL.md#review-tests)).
 
 ## Output
 
 Write to `$TROIKA_SCRATCHPAD/plans/<TICKET>-tests-<n>.md` (`<n>` = cycle, from 1) **and** return it to the orchestrator. [releaser](../../agents/releaser.md) reads the highest-numbered one ([handoff contract](../../ROLES.md#handoff)).
 
 ```markdown
+- Scope: <cycle 1, full selection | cycle <n>, the fix's files | cycle <n>, widened by `<file>`>
 - Selection: <count> tests · <count> changed test files · <count> mirror tests · <count> symbol-tied tests
+- Not re-run this cycle: <node IDs green in cycle <n-1> and untouched by the fix — blank on cycle 1>
 - Lanes: <area> (<count>) · <area> (<count>) — run concurrently
 - Result per lane: <area> <Pass | Fail> — <counts> · coverage <line, or N/A>
 - Not selected on purpose: <what was in the diff's blast radius but left to CI>

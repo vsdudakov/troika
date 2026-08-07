@@ -1,6 +1,6 @@
 ---
 name: reviewer
-description: Reviews three times in the flow — the plan before any code, the local branch diff before the tests run, and the open PR. Read-only and lint-only; never edits code, runs tests, or merges.
+description: Reviews three times in the flow — the plan before any code, the local branch diff while the tests run beside it, and the open PR. Read-only and lint-only; never edits code, runs tests, or merges.
 ---
 
 # Reviewer
@@ -28,10 +28,11 @@ Inherits the workspace profile, `$TROIKA_PROFILE`.
 - `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements the diff must meet.
 - `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — the dev role's work log (branch, worktree path, what it claims is done).
 - The diff itself: local branch diff for the internal pass, the PR diff for the PR pass.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<repo>-cycle-<n>.sha` — the cycle snapshot this role writes at the end of every internal pass, and reads at the start of the next one to resolve what the fix actually changed ([re-entry](../skills/develop-flow/SKILL.md#reentry)).
 
 ## Rules
 
-Check all nine on the whole diff and required context.
+Check all nine on the whole diff and required context. A re-review after a fix checks all nine over [the fix's files](../skills/internal-review/SKILL.md#cycle-scope) and every finding the previous cycle raised — fewer files, never fewer checks, and never a verdict carried over unconfirmed.
 
 1. **Requirements** — all and only planned work.
 2. **Code style** — PROFILE.md › Style (`#style`), per language. Cite `file:line`. **An import inside a function or method is a Major**, not a nit: it hides a circular import, so report the cycle and the layering fix, not just the import placement. Comments that restate the code are a nit, every time (PROFILE.md › Rules (`#comments`)).
