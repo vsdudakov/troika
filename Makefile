@@ -58,7 +58,7 @@ upgrade: ## Refresh the marketplace and update the plugin in Claude Code, Codex 
 uninstall: ## Remove the plugin from both hosts
 	-claude plugin uninstall tr@troika --scope project
 	-claude plugin marketplace remove troika
-	-codex plugin remove tr
+	-codex plugin remove tr@troika
 	-codex plugin marketplace remove troika
 
 # --- Repository metadata (discoverability) -----------------------------------
