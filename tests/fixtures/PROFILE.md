@@ -165,3 +165,31 @@ No AI product is ever named or hinted at — not in code, comments, commit messa
 ## Workspace paths
 
 `TROIKA_WORKSPACE` is the workspace root — the directory holding `.troika/` and `toyapp/`. Every scratchpad path is absolute.
+
+<a id="models"></a>
+## Models and effort
+
+| Role | Claude model (fallback) | Claude effort | Codex model | Codex effort |
+| --- | --- | --- | --- | --- |
+| architect | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| backend-dev | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| frontend-dev | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| reviewer | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| tester | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| qa | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| releaser | `claude-sonnet-5` | low | `gpt-5.6-sol` | medium |
+| commenter | `claude-fable-5` → `claude-opus-5` | low | `gpt-5.6-sol` | low |
+
+`→` means fallback. The fixtures run whatever `TROIKA_CMD` names, so these rows are what a real workspace would declare, not what the harness spawns.
+
+<a id="review-runner"></a>
+### Review runner
+
+Plan pass: `codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -`. Diff pass: `codex exec review --uncommitted -`, and `--base <BASE>` for work already committed. The fault-injection cases feed the prompt on stdin themselves, so a case never shells out to it.
+
+<a id="autonomy"></a>
+## Autonomy
+
+No reporter and no channel exist for a toy workspace, so `--ask` is never used here and every fixture case runs unattended: the reporter review at 2r never runs.
+
+Never automatic: a change to what the case asks for, a destructive migration, or anything outside `toyapp`. Those stop the run, `--ask` or not.

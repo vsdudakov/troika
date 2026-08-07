@@ -10,7 +10,7 @@ Change an open PR without opening a new one. Same branch, same PR, one push per 
 **Kind** procedure · **Used by** orchestrator · **When** a PR exists and needs work — a review left comments, CI or a human found a defect, or the change itself must be different · **Ends with** the fix pushed to the PR's head branch, CI green, every comment thread answered, and a fix report per cycle
 
 ```
-/troika:fix <PR> [what to fix]
+/tr:fix <PR> [what to fix]
   └─ 1 read the PR ── ticket key · head branch · files · unresolved threads
   └─ 2 worktree on the head branch (writable, tracking)
   └─ 3 fix list ── instruction mode │ comment mode (fix ∥ reject with a reason)

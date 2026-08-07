@@ -5,8 +5,8 @@ description: Install Troika as a plugin in Claude Code, Codex or Cursor, pin it 
 
 # Installation
 
-Install it as a plugin — for `/troika:*` commands, subagents, and model-invoked skills — then
-run `/troika:setup` once in the folder that holds your repos. That is the whole install.
+Install it as a plugin — for `/tr:*` commands, subagents, and model-invoked skills — then
+run `/tr:setup` once in the folder that holds your repos. That is the whole install.
 
 There is nothing to compile. The only executable surface is two Python scripts on the standard
 library, so any Python 3.9+ works and no virtualenv is needed.
@@ -18,7 +18,7 @@ plugin system at all — see [Running without a plugin](../guides/no-plugin.md).
 
 ```bash
 claude plugin marketplace add vsdudakov/troika
-claude plugin install troika@troika
+claude plugin install tr@troika
 ```
 
 Add `--scope project` to the install to enable it for one workspace only; that writes
@@ -27,7 +27,7 @@ Add `--scope project` to the install to enable it for one workspace only; that w
 Verify what registered:
 
 ```bash
-claude plugin details troika
+claude plugin details tr
 #   Skills (23)  cross-repo, demo-prep, develop-flow, …
 #   Commands (9)  demo, dev, fix, qa, release, review, setup, spike, triage
 #   Agents (8)   architect, backend-dev, …
@@ -41,7 +41,7 @@ claude plugin details troika
 
 ```bash
 codex plugin marketplace add vsdudakov/troika        # or a local path, or owner/repo@v0.1.0
-codex plugin add troika@troika
+codex plugin add tr@troika
 ```
 
 Codex has no `commands` concept, so its surface is the skills — the model invokes them by
@@ -62,8 +62,8 @@ Every host installs from a cached marketplace snapshot, so an upgrade is always 
 the marketplace, then update the plugin*:
 
 ```bash
-claude plugin marketplace update troika && claude plugin update troika@troika
-codex plugin marketplace upgrade && codex plugin add troika@troika
+claude plugin marketplace update troika && claude plugin update tr@troika
+codex plugin marketplace upgrade && codex plugin add tr@troika
 cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
 ```
 
@@ -91,7 +91,7 @@ The install is half of it. Every command exits immediately until a workspace exi
 none of them will guess where your repos, plans and worktrees go:
 
 ```
-/troika:setup
+/tr:setup
 ```
 
 It reads your repos, drafts the profile from what they prove, and asks about the rest.

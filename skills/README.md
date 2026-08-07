@@ -20,13 +20,13 @@ starts on; every other skill is discovered by name instead. See [plugin/](../plu
 | Skill | File | Run by |
 | --- | --- | --- |
 | Workspace setup (folder of repos → `.troika/` + profile) | [workspace-setup.md](workspace-setup/SKILL.md) | [architect](../agents/architect.md) |
-| Develop flow (ticket → merge-ready PR) | [develop-flow.md](develop-flow/SKILL.md) | orchestrator |
+| Develop flow (ticket → merge-ready PR; bug reproduces, feature plans) | [develop-flow.md](develop-flow/SKILL.md) | orchestrator |
 | Spike (ticket → reviewed plan, no code) | [spike.md](spike/SKILL.md) | [architect](../agents/architect.md) |
-| Plan review (pre-code gate, replaces human approval) | [plan-review.md](plan-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
+| Plan review (the feature path's pre-code gate, replaces human approval) | [plan-review.md](plan-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
 | Implement change (one repo) | [implement-change.md](implement-change/SKILL.md) | [backend-dev](../agents/backend-dev.md) · [frontend-dev](../agents/frontend-dev.md) |
 | Internal review (pre-PR, local diff) | [internal-review.md](internal-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
 | Run unit tests (changed only, parallel lanes) | [run-unit-tests.md](run-unit-tests/SKILL.md) | [tester](../agents/tester.md) |
-| QA verify (local stack) | [qa-verify.md](qa-verify/SKILL.md) | [qa](../agents/qa.md) |
+| QA verify (local stack; also the bug path's reproduction pass) | [qa-verify.md](qa-verify/SKILL.md) | [qa](../agents/qa.md) |
 | Release PR (commit, PR, proofs, ticket) | [release-pr.md](release-pr/SKILL.md) | [releaser](../agents/releaser.md) |
 | PR review (post-PR, posted to the PR host) | [pr-review.md](pr-review/SKILL.md) | [reviewer](../agents/reviewer.md) |
 | Fix PR (an instruction, or the review comments) | [fix-pr.md](fix-pr/SKILL.md) | orchestrator |
@@ -50,7 +50,7 @@ starts on; every other skill is discovered by name instead. See [plugin/](../plu
 
 | Skill | File | Filled by |
 | --- | --- | --- |
-| Plan | [plan-template.md](plan-template/SKILL.md) | [architect](../agents/architect.md) |
+| Plan, and the bug brief | [plan-template.md](plan-template/SKILL.md) | [architect](../agents/architect.md) |
 | PR body and title | [pr-template.md](pr-template/SKILL.md) | [releaser](../agents/releaser.md) via [commenter](../agents/commenter.md) |
 
 Skills contain no organization facts; read them from the workspace profile, `$TROIKA_PROFILE`. Missing anchor means not applicable. See [conventions](../README.md#conventions).

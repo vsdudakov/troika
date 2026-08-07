@@ -34,19 +34,19 @@ Collect all before review (tracker (`#tracker`)):
 A requirement on any surface but absent from the plan is a **Blocker** under check 1. Name every source you could not reach as unread; never skip one silently.
 
 <a id="runner"></a>
-### Running this pass in Codex
+### Running this pass on the other family
 
-Preferred, because the plan is normally written by Claude:
+Preferred, because the plan is normally written by whichever family the orchestrator ran the architect on. **The tool and the exact command are the workspace's** — PROFILE.md › Review runner (`#review-runner`) — and the review reads on stdin:
 
 ```bash
 cat "$TROIKA_PROFILE" \
     "${CLAUDE_PLUGIN_ROOT}/agents/reviewer.md" \
     "${CLAUDE_PLUGIN_ROOT}/skills/plan-review/SKILL.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>.md" \
-  | codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -
+  | <the profile's plan-pass review command>
 ```
 
-Use [reviewer](../../agents/reviewer.md) model/effort. The gate reads the [output file](#output), not terminal text.
+Model and effort come from the `reviewer` row of PROFILE.md › Models and effort (`#models`); nothing here pins either. Where the profile declares no separate runner, run the pass in a fresh session on that row instead, and say in the output that author and reviewer shared a family. The gate reads the [output file](#output), not terminal text.
 
 ## 2. Checks
 
@@ -88,7 +88,7 @@ Stop and ask for:
 - the ticket itself is ambiguous about what "done" means;
 - the cap in step 3 is hit.
 
-Decide everything else here. Do not seek ceremonial approval.
+Decide everything else here. Do not seek ceremonial approval — **this gate never asks the reporter whether the plan is good.** That is a separate, later gate the flow owns ([develop-flow › Reporter review](../develop-flow/SKILL.md#reporter-review)), and it runs only in `ask` mode ([Autonomy](../develop-flow/SKILL.md#autonomy)). Reaching one of the four cases above stops the flow in **either** mode: `auto` removes an approval, not a decision nobody is authorized to make.
 
 On `Approve`, **if the profile declares an in-progress transition** (PROFILE.md › Tracker (`#tracker`) · [tracker › Transitions](../tracker/SKILL.md#transitions)), run it here — this is the flow's only chance, and release's transition is invalid from the initial state. Where the profile declares no transitions, this gate writes nothing to the tracker.
 

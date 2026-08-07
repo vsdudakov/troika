@@ -1,11 +1,11 @@
 {
   "name": "troika",
   "interface": {
-    "displayName": "troika"
+    "displayName": "Troika"
   },
   "plugins": [
     {
-      "name": "troika",
+      "name": "tr",
       "source": {
         "source": "local",
         "path": "./"

@@ -1,6 +1,6 @@
 ---
 title: PROFILE.md anchors
-description: The twenty-five anchors roles cite in .troika/PROFILE.md, what each must answer, and which roles read it.
+description: The twenty-nine anchors roles cite in .troika/PROFILE.md, what each must answer, and which roles read it.
 ---
 
 # `PROFILE.md` anchors
@@ -17,7 +17,7 @@ verifies that every anchor the tree cites exists in `PROFILE.template.md`, and f
 that links the profile instead of citing it — so a fresh workspace never inherits a reference
 that answers nothing.
 
-[`/troika:setup`](commands.md) writes all twenty-five for you, drafting what your repos prove
+[`/tr:setup`](commands.md) writes all twenty-nine for you, drafting what your repos prove
 and asking about the rest.
 
 | Anchor | Must answer | Read by |
@@ -28,6 +28,9 @@ and asking about the rest.
 | `#voice` | how outward-facing text sounds | commenter |
 | `#repo-map` | which repos exist, what each is, what is out of scope | everyone |
 | `#ownership` | which role owns which repo or app | everyone |
+| `#autonomy` | **whether a run waits for the reporter's approval or proceeds on its own**, who the reporter is, and what may never be automatic | orchestrator, architect, reviewer, releaser |
+| `#models` | **the model and effort each role runs on, per host** — the values passed at spawn | orchestrator, everyone |
+| `#review-runner` | **which tool runs an independent review pass, and the exact command** — or an explicit "there is none" | reviewer |
 | `#workspace-paths` | the workspace root, the resolver, the absolute-path rule | everyone |
 | `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
 | `#branches` | **remote and default branch (the base ref)**, naming, worktree dependency setup, push quirks | dev roles, reviewer, tester, releaser |

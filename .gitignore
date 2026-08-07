@@ -1,6 +1,6 @@
 # A workspace keeps its own state in its `.troika/` directory, which is not here — this
 # repo is the tree, not a workspace. The entry covers the one case where they coincide:
-# running /troika:setup in this clone to dogfood it.
+# running /tr:setup in this clone to dogfood it.
 #
 # Anchored with a leading slash so it cannot match anything nested. Inside a real
 # workspace the resolver writes `.troika/.gitignore` instead, which keeps the three state

@@ -13,8 +13,9 @@ result.
 
 | File | Written by | Read by |
 | --- | --- | --- |
-| `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` | architect | everyone |
-| `…/<TICKET>-plan-review-<n>.md` | reviewer, plan pass | architect, orchestrator |
+| `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` | architect — the plan, or the bug brief | everyone |
+| `…/<TICKET>-plan-review-<n>.md` | reviewer, plan pass *(feature path)* | architect, orchestrator |
+| `…/<TICKET>-repro-<n>.md` | qa, reproduction on the base checkout *(bug path)* | dev roles, reviewer, orchestrator |
 | `…/<TICKET>-<role>.md` | each dev role | reviewer, qa, release |
 | `…/<TICKET>-review-<n>.md` | reviewer, internal pass | dev roles, release |
 | `…/<TICKET>-tests-<n>.md` | tester | dev roles, release |

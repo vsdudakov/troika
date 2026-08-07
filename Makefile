@@ -39,9 +39,9 @@ commands: ## Regenerate the / commands and the manifest list from skills/
 
 install: commands check ## Install into Claude Code (project scope) and Codex
 	claude plugin marketplace add $(PWD) || claude plugin marketplace update troika
-	claude plugin install troika@troika --scope project
+	claude plugin install tr@troika --scope project
 	codex plugin marketplace add $(PWD) || true
-	codex plugin add troika@troika
+	codex plugin add tr@troika
 
 # A host installs from a cached marketplace snapshot, so refreshing the marketplace
 # and updating the plugin are two steps everywhere. Only the first one sees a new
@@ -49,16 +49,16 @@ install: commands check ## Install into Claude Code (project scope) and Codex
 # resolves to that ref — bump the pin first (docs/reference/releases.md).
 upgrade: ## Refresh the marketplace and update the plugin in Claude Code, Codex and Cursor
 	-claude plugin marketplace update troika
-	-claude plugin update troika@troika
+	-claude plugin update tr@troika
 	-codex plugin marketplace upgrade
-	-codex plugin add troika@troika
+	-codex plugin add tr@troika
 	-cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
 	@echo "restart the host to load the new version"
 
 uninstall: ## Remove the plugin from both hosts
-	-claude plugin uninstall troika@troika --scope project
+	-claude plugin uninstall tr@troika --scope project
 	-claude plugin marketplace remove troika
-	-codex plugin remove troika
+	-codex plugin remove tr
 	-codex plugin marketplace remove troika
 
 # --- Repository metadata (discoverability) -----------------------------------
@@ -110,9 +110,9 @@ install-release: ## Install a published release (make install-release V=0.2.0)
 	curl -fsSL "https://github.com/vsdudakov/troika/releases/download/v$(V)/troika-$(V).tar.gz" \
 	  | tar xz -C $(HOME)/.troika-dist
 	claude plugin marketplace add $(HOME)/.troika-dist/troika-$(V) || true
-	claude plugin install troika@troika
+	claude plugin install tr@troika
 	codex plugin marketplace add $(HOME)/.troika-dist/troika-$(V) || true
-	codex plugin add troika@troika
+	codex plugin add tr@troika
 
 # --- Documentation (MkDocs Material) -----------------------------------------
 

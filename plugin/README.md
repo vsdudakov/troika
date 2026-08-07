@@ -13,7 +13,7 @@ generated command per entry-point procedure, and the resolver every role runs fi
   glob, plus the same skills.
 - `commands/<alias>.md` — **generated** by [`generate.py`](generate.py) from its `COMMANDS`
   map: `setup`, `dev`, `spike`, `fix`, `review`, `qa`, `triage`, `release`, `demo`.
-  `/troika:<alias>` in Claude Code and Cursor. A procedure absent from that map has no command
+  `/tr:<alias>` in Claude Code and Cursor. A procedure absent from that map has no command
   and stays a skill — the steps the flow runs for you are wrong to start on their own.
 - [`resolve.py`](resolve.py) — where this workspace keeps its files. Every command runs it
   first, except `setup`, which is the command that creates the workspace it would resolve.
@@ -61,7 +61,7 @@ workspace is allowed to move them.
 
 ## Configuring a workspace
 
-`/troika:setup` creates the workspace. It writes `.troika/settings.json`, the one place a
+`/tr:setup` creates the workspace. It writes `.troika/settings.json`, the one place a
 path is declared, plus a `.gitignore` and the three state directories, and then fills in the
 profile from what the repos say:
 
@@ -107,7 +107,7 @@ python3 <plugin root>/plugin/resolve.py --init <workspace>   # settings, .gitign
 ```
 
 That leaves the profile to write by hand from [`PROFILE.template.md`](../PROFILE.template.md);
-`/troika:setup` is the same job with the repos read for you.
+`/tr:setup` is the same job with the repos read for you.
 
 ## Install
 
@@ -115,10 +115,10 @@ That leaves the profile to write by hand from [`PROFILE.template.md`](../PROFILE
 
 ```bash
 claude plugin marketplace add vsdudakov/troika
-claude plugin install troika@troika                 # --scope project to pin it to one workspace
+claude plugin install tr@troika                 # --scope project to pin it to one workspace
 ```
 
-Then restart the host and run `/troika:setup` in the folder that holds your repos. Nothing
+Then restart the host and run `/tr:setup` in the folder that holds your repos. Nothing
 else works until that has been done once.
 
 Committed per workspace instead, in `<workspace>/.claude/settings.json`:
@@ -128,7 +128,7 @@ Committed per workspace instead, in `<workspace>/.claude/settings.json`:
   "extraKnownMarketplaces": {
     "troika": { "source": { "source": "github", "repo": "vsdudakov/troika" } }
   },
-  "enabledPlugins": { "troika@troika": true }
+  "enabledPlugins": { "tr@troika": true }
 }
 ```
 
@@ -136,7 +136,7 @@ Committed per workspace instead, in `<workspace>/.claude/settings.json`:
 
 ```bash
 codex plugin marketplace add vsdudakov/troika
-codex plugin add troika
+codex plugin add tr
 ```
 
 Codex installs are global — there is no per-project enable, and no `commands` concept

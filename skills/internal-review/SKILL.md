@@ -33,9 +33,9 @@ git --no-pager diff --stat "$BASE"...HEAD
 Account for every `??` — an untracked, unreviewed file ships unseen. `git add -N` records intent-to-add so new files enter the diff; their content stays unstaged and release commits normally afterwards. Review the whole diff and needed context.
 
 <a id="runner"></a>
-### Running this pass in Codex
+### Running this pass on the other family
 
-Preferred for independent review. `--uncommitted` covers staged, unstaged, and untracked files.
+Preferred for independent review. **The tool and the exact command are the workspace's** — PROFILE.md › Review runner (`#review-runner`), diff pass — and it must cover staged, unstaged **and** untracked files, which is what step 2's `git add -N` prepares:
 
 ```bash
 cd "$TROIKA_WORKTREES/<repo>-<TICKET>"
@@ -44,10 +44,10 @@ cat "$TROIKA_PROFILE" \
     "${CLAUDE_PLUGIN_ROOT}/skills/internal-review/SKILL.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>.md" \
     "$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md" \
-  | codex exec review --uncommitted -
+  | <the profile's diff-pass review command>
 ```
 
-Use `--base` for committed work. Follow reviewer model/effort and [output](#output).
+For work already committed on the branch, use the profile's base-ref form of that command. Model and effort come from the `reviewer` row of PROFILE.md › Models and effort (`#models`); where the profile declares no separate runner, run the pass in a fresh session on that row. Follow [output](#output).
 
 ## 3. Checks
 
@@ -59,6 +59,7 @@ Internal-pass specifics:
 - **Tests:** mirror every source/branch; real behavior; node IDs match diff. Missing/hollow is Blocker.
 - **Runnable:** the work log must carry a collected count matching the tests written ([collect](../implement-change/SKILL.md#collect)); a missing or short count is a Blocker, because nothing else has proved these files even import. Read for what collection cannot see: a fixture that resolves but returns the wrong shape, an assertion that passes for the wrong reason.
 - **Regression:** name shared model/base/util/config/middleware/migration/public-contract blast radius left to CI.
+- **Bug tickets:** the diff must carry a regression test that encodes what `$TROIKA_SCRATCHPAD/plans/<TICKET>-repro-<n>.md` recorded — same input, same path, asserting the corrected behaviour. Read it against the reproduction, not against the brief's prose: a test that would pass on the base ref has not encoded the bug, and that is a Blocker under check 6.
 
 ## 4. Report
 

@@ -47,6 +47,7 @@ their own generic wording:
 
 | Anchor | Why it pays first |
 | --- | --- |
+| `#models` | every role is spawned on its row here, so an id your accounts cannot run fails at spawn; `#review-runner` under it is what keeps the reviewer off the family that wrote the work |
 | `#commands` | the dev roles' verification gate. A command not in that table **is not a gate** — say so explicitly, or a role will count one that is not |
 | `#tests` | tells the reviewer what a mirror test looks like, which is check 6 of nine |
 | `#branches` | the base ref for every diff and worktree; get this wrong and reviews read the wrong changes |

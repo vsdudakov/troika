@@ -1,6 +1,6 @@
 # PROFILE.template.md
 
-The project profile every workspace must provide. `/troika:setup` writes it for you: it reads your repos, drafts every section it can prove, asks about the rest, and saves the result as `<workspace>/.troika/PROFILE.md`. Filling it in by hand is the same job — copy this skeleton there, and delete the guidance in angle brackets.
+The project profile every workspace must provide. `/tr:setup` writes it for you: it reads your repos, drafts every section it can prove, asks about the rest, and saves the result as `<workspace>/.troika/PROFILE.md`. Filling it in by hand is the same job — copy this skeleton there, and delete the guidance in angle brackets.
 
 Troika ships as a plugin, so its roles and skills live in the host's plugin cache, not in your workspace — `${CLAUDE_PLUGIN_ROOT}` is where a running command finds them. Nothing in them names your organisation: they cite **this** file **by anchor**, as `` `#tracker` ``. Keep the anchor ids below exactly as written — the headings above them are yours to reword. An anchor with no content is a role reading a dead reference.
 
@@ -14,11 +14,15 @@ Write no path to the plugin's own tree here. A role reads its procedure from `${
 | `#voice` | how outward-facing text sounds | commenter |
 | `#repo-map` | which repos exist, what each is, what is out of scope | everyone |
 | `#ownership` | which role owns which repo or app | everyone |
+| `#autonomy` | **who the reporter is and how `--ask` reaches them**, how long a run waits, and the decisions that may never be automatic on an unattended run | orchestrator, architect, reviewer, releaser |
+| `#models` | **the model and effort each role runs on, per host** — the values the orchestrator passes at spawn | orchestrator, everyone |
+| `#review-runner` | **which tool runs an independent review pass, and the exact command** — or an explicit "there is none" | reviewer |
 | `#workspace-paths` | the workspace root, the resolver, and the absolute-path rule | everyone |
 | `#code-search` | the code search tool and how to refresh its index | architect, dev roles, reviewer, tester |
 | `#branches` | **remote name and default branch (the base ref every diff and worktree uses)**, branch naming, worktree dependency setup, push quirks | dev roles, reviewer, tester, releaser |
 | `#dependency-order` | provider → consumer order across repos, and how shared libraries are released | architect, releaser |
 | `#commands` | per repo or area: narrowed tests, **the exact verification commands a dev role must run as its gate** (lint, and a type check or build only if that is how this workspace runs it), full suite, per-runner parallel flags; and for migrations, **the generator command plus what may be done to a revision that has already been applied** | dev roles, reviewer, tester |
+| `#parallel-tests` | one lane per area, the parallel flag each runner takes, suites that must stay sequential | tester |
 | `#style` | per-language style rules | dev roles, reviewer |
 | `#layering` | the architectural layers, if the codebase has them | backend-dev, reviewer |
 | `#tests` | test framework, naming, location, coverage gate, who runs them and when | dev roles, reviewer, tester |
@@ -58,14 +62,52 @@ The project profile for Troika. Roles reference these sections by anchor; Troika
 ## Ownership
 <role → repos table>
 
+<a id="autonomy"></a>
+## Autonomy
+<a run is unattended unless it is started with `--ask`, which stops after the plan is approved (or the bug is reproduced) and waits for the reporter. Say here whether this team expects `--ask` on every ticket, on some kinds of ticket, or never — it is a norm the humans hold each other to, not a switch.>
+<who the reporter is: the ticket's reporter field, the requester, a named role — and where they are asked (a tracker comment, a chat channel, the terminal the run started in)>
+<how long an `--ask` run waits for them, and what happens when the wait runs out — proceed and say so, or stop. Silence is not a decision; say which one it is here.>
+<the decisions that may never be automatic — this list is what keeps an unattended run honest, so fill it even if every run here uses `--ask`. Suggested floor, edit it:>
+<- a change to what the ticket asked for — scope, or user-visible behaviour nobody signed off>
+<- a destructive or irreversible migration, and any data backfill that cannot be replayed>
+<- a change to a public API contract other teams consume>
+<- a production deploy, and anything that touches production data>
+<running unattended never silences a stop condition: a cap that is hit, an unowned repo or an unreproducible bug still stops the run.>
+
+<a id="models"></a>
+## Models and effort
+<one row per role, one column per host you actually use. These are the values the orchestrator passes at spawn; nothing reads them from a role file.>
+<the defaults below are Troika's shipped starting point — replace the ids with what your accounts can run, and verify each id exists before pinning it>
+
+| Role | Claude model (fallback) | Claude effort | Codex model | Codex effort |
+| --- | --- | --- | --- | --- |
+| architect | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| backend-dev | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| frontend-dev | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| reviewer | `claude-fable-5` → `claude-opus-5` | high | `gpt-5.6-sol` | high |
+| tester | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| qa | `claude-sonnet-5` | medium | `gpt-5.6-sol` | medium |
+| releaser | `claude-sonnet-5` | low | `gpt-5.6-sol` | medium |
+| commenter | `claude-fable-5` → `claude-opus-5` | low | `gpt-5.6-sol` | low |
+
+<`→` means fallback: the second id is used where the first is unavailable>
+<each role file states what its row *needs* — judgment tier or execution tier, and why — and when to raise either dial; the ids and efforts themselves live here and only here>
+<a host with no effort control: say so, and say which model tier stands in for a `high`+ role>
+
+<a id="review-runner"></a>
+### Review runner
+<the tool that runs the plan and internal review passes independently, and the exact command, so the reviewer is not the family that wrote the work>
+<e.g. `codex exec -m gpt-5.6-sol -c model_reasoning_effort="high" -` for the plan pass and `codex exec review --uncommitted -` for the diff pass>
+<if this workspace has only one model family available, say "no separate runner" and name what replaces it — a fresh session on the reviewer row, with no memory of writing the work>
+
 <a id="workspace-paths"></a>
 ## Workspace paths
 <the workspace root, and the rule that every path below it is used absolute>
 <the five variables the plugin's resolver exports, and what each holds here:>
 <`$TROIKA_WORKSPACE` · `$TROIKA_PROFILE` · `$TROIKA_WORKTREES` · `$TROIKA_SCRATCHPAD` · `$TROIKA_MEMORY`>
 <resolve them once per session: eval "$(python3 "${CLAUDE_PLUGIN_ROOT}/plugin/resolve.py" --ensure)">
-<the `/troika:*` commands already run that as their first step; spell it out here for a role or script started outside one>
-<their values come from `<workspace>/.troika/settings.json`, written by /troika:setup — the one place a path is declared>
+<the `/tr:*` commands already run that as their first step; spell it out here for a role or script started outside one>
+<their values come from `<workspace>/.troika/settings.json`, written by /tr:setup — the one place a path is declared>
 <and: a non-zero exit from the resolver means stop, not guess>
 
 <a id="code-search"></a>

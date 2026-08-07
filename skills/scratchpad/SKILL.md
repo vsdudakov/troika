@@ -36,8 +36,9 @@ nothing to the ticket.
 ## Layout
 
 ```
-plans/<TICKET>.md                    the plan — requirements, repo split, pinned contracts
-plans/<TICKET>-plan-review-<n>.md    plan review (the pre-code gate), cycle <n>
+plans/<TICKET>.md                    the plan, or the bug brief — requirements either way
+plans/<TICKET>-plan-review-<n>.md    plan review (the feature path's pre-code gate), cycle <n>
+plans/<TICKET>-repro-<n>.md          reproduction on the base checkout (the bug path's gate)
 plans/<TICKET>-<role>.md             one dev role's work log
 plans/<TICKET>-fix-<n>.md            one fix cycle on an already-open PR, cycle <n>
 plans/<TICKET>-fix-<n>-<role>.md     one dev role's work log inside that fix cycle
@@ -61,7 +62,13 @@ The `-fix-<n>` pair is written by [fix-pr](../fix-pr/SKILL.md) and uses `pr-<N>`
 `<TICKET>-<role>.md`: the record of what the PR looked like before the fix is what a reviewer
 reads to judge the fix.
 
-Plan files follow [plan-template](../plan-template/SKILL.md). Proofs are named after the
+A ticket has **either** a `-plan-review-<n>` chain **or** a `-repro-<n>` one, never both:
+[develop-flow](../develop-flow/SKILL.md#kind) gates a feature on an approved plan and a bug on
+a reproduction. The bug path's `-repro-1.md` also names the proof files it captured on the base
+checkout, which the QA report reuses as the **before** side rather than re-recording them.
+
+Plan files follow [plan-template](../plan-template/SKILL.md) — the full template for a feature,
+the [bug brief](../plan-template/SKILL.md#bug-brief) for a bug. Proofs are named after the
 requirement they prove (`req-2-portfolio-filter.gif`) — see
 [qa-verify › Proofs](../qa-verify/SKILL.md#8-proofs-for-the-pr) for what counts as one per
 kind of change. Never fabricate a proof; unexercised requirements go under **Not verified** in

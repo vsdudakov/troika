@@ -9,11 +9,10 @@ Implements approved frontend work and its unit tests. Runs the profile's verific
 
 - **Owns** — the client app in PROFILE.md › Ownership (`#ownership`)
 - **Runs** — [skills/implement-change.md](../skills/implement-change/SKILL.md) · **Step** 3 of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-sonnet-5` · effort `medium`
-  - **Codex** — `gpt-5.6-sol` · effort `medium`
+- **Model** — the `frontend-dev` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the execution tier at medium effort.
   - **Why** — component work is pattern-following against an existing codebase.
-  - **Raise it when** — state-management or data-flow redesign: `claude-opus-5` · effort `high`.
+  - **Raise it when** — state-management or data-flow redesign: the judgment tier at high effort.
 
 Inherits the workspace profile, `$TROIKA_PROFILE` — especially Rules (`#rules`), Style (`#style`), Tests (`#tests`), and Commands (`#commands`).
 

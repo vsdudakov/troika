@@ -174,7 +174,10 @@ def check_duplicated_enumerations():
 # --- 4. file shapes declared in the two READMEs -----------------------------
 
 AGENT_SECTIONS = ["Scope", "Inputs", "Rules", "Gates", "Output"]
-MODEL_SUBS = ["Claude", "Codex", "Why"]
+# A role declares what its row *needs* and why; the model ids and efforts themselves are the
+# workspace's, in PROFILE.md › Models and effort (`#models`). A sub-bullet naming a host —
+# `Claude`, `Codex` — is the hardcoded shape coming back, so it fails as an undeclared one.
+MODEL_SUBS = ["Needs", "Why"]
 MODEL_SUBS_OPTIONAL = ["Raise it when", "Drop it when", "Also"]
 
 
@@ -193,10 +196,11 @@ def check_agent_shape():
         # would fail the build with the wrong reason.
         block = re.search(r"^- \*\*Model\*\*.*?(?=^\S|\Z)", text, re.M | re.S)
         sub = re.findall(r"^  - \*\*([A-Za-z ]+)\*\*", block.group(0) if block else "", re.M)
-        if sub[:3] != MODEL_SUBS:
-            fail(f, f"Model sub-bullets start {sub[:3]} != {MODEL_SUBS}")
+        n = len(MODEL_SUBS)
+        if sub[:n] != MODEL_SUBS:
+            fail(f, f"Model sub-bullets start {sub[:n]} != {MODEL_SUBS}")
         # An undeclared sub-bullet is drift the README does not describe.
-        for extra in [s for s in sub[3:] if s not in MODEL_SUBS_OPTIONAL]:
+        for extra in [s for s in sub[n:] if s not in MODEL_SUBS_OPTIONAL]:
             fail(f, f"Model sub-bullet '{extra}' is not one of {MODEL_SUBS_OPTIONAL}")
 
 
@@ -336,7 +340,7 @@ def check_resolver():
                 found = resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE")
                 fail("plugin/resolve.py", f"resolved {found!r} with no settings.json anywhere above it")
             except SystemExit as e:
-                if "troika:setup" not in str(e):
+                if "tr:setup" not in str(e):
                     fail("plugin/resolve.py", f"the no-workspace error does not point at setup: {e}")
 
 

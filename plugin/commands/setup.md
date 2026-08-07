@@ -24,4 +24,4 @@ and ask** what to do: leave it, update it against what the repos now say, or rew
 profile from the template. Default to leaving it, and never overwrite what a human wrote
 without being asked to in words.
 
-Every other `/troika:*` command resolves that workspace instead of creating one.
+Every other `/tr:*` command resolves that workspace instead of creating one.

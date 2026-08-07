@@ -9,11 +9,10 @@ Runs change tests once, in parallel lanes; routes failures.
 
 - **Owns** — the local unit-test run · the selection of what runs · the test report
 - **Runs** — [skills/run-unit-tests.md](../skills/run-unit-tests/SKILL.md) · **Step** 5 of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-sonnet-5` · effort `medium`
-  - **Codex** — `gpt-5.6-sol` · effort `medium`
+- **Model** — the `tester` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the execution tier at medium effort.
   - **Why** — procedural selection and result validation.
-  - **Raise it when** — a failure's cause is not obvious from its output and the routing decision (test wrong vs code wrong) is genuinely unclear: effort `high`.
+  - **Raise it when** — a failure's cause is not obvious from its output and the routing decision (test wrong vs code wrong) is genuinely unclear: one effort step above the profile's row.
 
 Inherits the workspace profile, `$TROIKA_PROFILE` — especially Tests (`#tests`), Commands (`#commands`), and Gotchas (`#gotchas`).
 

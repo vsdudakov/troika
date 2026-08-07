@@ -32,7 +32,7 @@ eval "$(python3 troika/plugin/resolve.py --ensure)"
 ```
 
 `--init` writes `.troika/settings.json`, its `.gitignore` and the state directories. The
-profile is the part that needs reading and asking, so either run `/troika:setup` in a host that
+profile is the part that needs reading and asking, so either run `/tr:setup` in a host that
 has commands, or copy `troika/PROFILE.template.md` to `<workspace>/.troika/PROFILE.md` and fill
 every anchor by hand.
 

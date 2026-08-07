@@ -1,6 +1,6 @@
 ---
 title: Set up a workspace
-description: A workspace is the folder holding your repos. One command creates it — what /troika:setup writes into .troika/, what it asks you, and how to do it by hand.
+description: A workspace is the folder holding your repos. One command creates it — what /tr:setup writes into .troika/, what it asks you, and how to do it by hand.
 ---
 
 # Set up a workspace
@@ -9,7 +9,7 @@ A **workspace** is the folder that holds your repos. Everything Troika needs liv
 directory inside it, and one command creates that directory:
 
 ```
-/troika:setup
+/tr:setup
 ```
 
 Run it in the folder that holds your repos — not inside a repo. It reads them, drafts the
@@ -48,6 +48,8 @@ What no repo records, it asks:
 | voice | how outward-facing text should sound, with one do and one don't |
 | gotchas | destructive commands, production-access rules, the traps a newcomer hits |
 | stack limits | what a green local run does **not** prove |
+| autonomy | who the reporter is and how a `--ask` run reaches them, how long it waits, and what may never be automatic on an unattended run |
+| models | which models and efforts the roles run on, and the second tool that reviews independently — the defaults are shown, you correct what your accounts cannot run |
 
 You confirm the whole draft once, not section by section. Then it writes `.troika/PROFILE.md`.
 
@@ -111,7 +113,7 @@ env | grep TROIKA_
 ```
 
 If the resolver exits non-zero, no ancestor of the current directory holds
-`.troika/settings.json` — that is a stop, not a default, and the fix is `/troika:setup`.
+`.troika/settings.json` — that is a stop, not a default, and the fix is `/tr:setup`.
 [Paths and the resolver](../concepts/paths.md) explains what it looks for.
 
 ## Next

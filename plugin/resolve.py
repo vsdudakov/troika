@@ -14,7 +14,7 @@ say — `${CLAUDE_PLUGIN_ROOT}` — and is deliberately not among them.
 
 The workspace is the nearest ancestor holding `.troika/settings.json`. That file is the
 only marker, and it is not optional: a folder with no `.troika/` is one nobody has run
-`/troika:setup` in yet, and guessing paths for it scatters handoff files through whatever
+`/tr:setup` in yet, and guessing paths for it scatters handoff files through whatever
 directory the caller happened to be standing in.
 """
 
@@ -64,7 +64,7 @@ def find_workspace(start):
             return d
     raise SystemExit(
         f"no workspace above {start}: expected a {CONFIG} in it or in an ancestor. "
-        f"Run /troika:setup in the folder that holds your repos."
+        f"Run /tr:setup in the folder that holds your repos."
     )
 
 

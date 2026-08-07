@@ -9,12 +9,11 @@ Reviews plan, local diff, open PR. Findings only.
 
 - **Owns** — plan review · internal review · PR review
 - **Runs** — [skills/plan-review.md](../skills/plan-review/SKILL.md) · [skills/internal-review.md](../skills/internal-review/SKILL.md) · [skills/pr-review.md](../skills/pr-review/SKILL.md) · **Step** 2, 4, and post-PR of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-fable-5`, fallback `claude-opus-5` · effort `high`
-  - **Codex** — `gpt-5.6-sol` · effort `high`
+- **Model** — the `reviewer` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the judgment tier at high effort.
   - **Why** — review needs adversarial depth.
-  - **Raise it when** — the diff touches auth, money, or migrations: effort `xhigh`.
-  - **Also** — prefer a different model family from the author; running the pass under Codex is the cheapest way ([plan-review › in Codex](../skills/plan-review/SKILL.md#runner) · [internal-review › in Codex](../skills/internal-review/SKILL.md#runner)).
+  - **Raise it when** — the diff touches auth, money, or migrations: one effort step above the profile's row.
+  - **Also** — prefer a different model family from the author; the workspace names the tool and the exact command in PROFILE.md › Review runner (`#review-runner`) ([plan-review › runner](../skills/plan-review/SKILL.md#runner) · [internal-review › runner](../skills/internal-review/SKILL.md#runner)).
 
 Inherits the workspace profile, `$TROIKA_PROFILE`.
 

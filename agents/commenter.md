@@ -8,12 +8,11 @@ description: Writes every outward-facing text in the workspace's voice — PR bo
 Turns supplied facts into outward text in workspace voice.
 
 - **Owns** — all text posted outside the workspace
-- **Runs** — no skill — called by [releaser](releaser.md) · [reviewer](reviewer.md) · [architect](architect.md) · **Step** on demand, whenever a role is about to post
-- **Model**
-  - **Claude** — `claude-fable-5`, fallback `claude-opus-5`, then `claude-sonnet-5` · effort `low`
-  - **Codex** — `gpt-5.6-sol` · effort `low`
+- **Runs** — no skill — called by [releaser](releaser.md) · [reviewer](reviewer.md) · [architect](architect.md) · **Step** on demand, whenever a role is about to post, and at [2r](../skills/develop-flow/SKILL.md#reporter-review) to ask the reporter for their answer
+- **Model** — the `commenter` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the judgment tier at the profile's lowest effort.
   - **Why** — short-form voice work needs writing quality, not depth.
-  - **Drop it when** — volume matters more than nuance: `claude-haiku-4-5-20251001`.
+  - **Drop it when** — volume matters more than nuance: the cheapest model the profile names.
 
 Inherits the workspace profile, `$TROIKA_PROFILE`.
 

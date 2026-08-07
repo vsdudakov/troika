@@ -9,11 +9,10 @@ Implements approved backend work and its unit tests. Runs the profile's verifica
 
 - **Owns** — the backend repos in PROFILE.md › Ownership (`#ownership`)
 - **Runs** — [skills/implement-change.md](../skills/implement-change/SKILL.md) · **Step** 3 of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-fable-5`, fallback `claude-opus-5` · effort `high`
-  - **Codex** — `gpt-5.6-sol` · effort `high`
+- **Model** — the `backend-dev` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the judgment tier, at its high effort.
   - **Why** — layering, migrations, and a strict coverage gate punish shallow reasoning.
-  - **Drop it when** — the change is mechanical (rename, config, a single obvious fix): `claude-sonnet-5` · effort `medium`.
+  - **Drop it when** — the change is mechanical (rename, config, a single obvious fix): the execution tier at medium effort.
 
 Inherits the workspace profile, `$TROIKA_PROFILE` — especially Rules (`#rules`), Style (`#style`), Tests (`#tests`), and Commands (`#commands`).
 

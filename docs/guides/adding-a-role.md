@@ -20,9 +20,8 @@ description: <one line — the host shows this when picking a subagent>
 
 - **Owns** — …
 - **Runs** — [skill](../skills/<name>/SKILL.md) · **Step** … of develop-flow
-- **Model**
-  - **Claude** — `claude-sonnet-5`
-  - **Codex** — `gpt-5.6-sol`, medium effort
+- **Model** — the `<slug>` row of PROFILE.md › Models and effort (`#models`)
+  - **Needs** — <judgment tier | execution tier> · <effort>
   - **Why** — …
   - **Raise it when** — …        (optional)
   - **Drop it when** — …         (optional)
@@ -37,6 +36,11 @@ description: <one line — the host shows this when picking a subagent>
 Those five sections, in that order, and the three header bullets, are enforced by
 `tests/check.py`. The list markers matter: three bare lines collapse into one paragraph in
 every markdown renderer.
+
+**No model id belongs in the file.** A role says what its row needs — the judgment tier or the
+execution tier, and an effort — and the workspace says which model that is, in the `#models`
+anchor of its profile. A new role also means a new row there, so add it to the template's
+default table in the same change; `check.py` rejects a `Claude` or `Codex` sub-bullet.
 
 !!! danger "Only roles go in `agents/`"
     Hosts load **every** file in that directory as a subagent. A README, a note, or a draft in

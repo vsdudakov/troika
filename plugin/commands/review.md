@@ -20,7 +20,7 @@ With no argument, ask for one and stop — do not guess.
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika/settings.json`
    where the workspace declares them, and creating the three it writes into. It exits
    non-zero when no ancestor of the current directory holds that file — **stop there and
-   say so**, and point at `/troika:setup`; a guessed path writes handoff files nobody reads.
+   say so**, and point at `/tr:setup`; a guessed path writes handoff files nobody reads.
 
 2. Read the procedure: `${CLAUDE_PLUGIN_ROOT}/skills/pr-review/SKILL.md`.
 3. Read `$TROIKA_PROFILE` — the workspace profile. Every repo, command, branch, base ref,

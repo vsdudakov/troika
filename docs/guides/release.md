@@ -8,7 +8,7 @@ description: What the releaser does after QA passes — the gates it checks firs
 `release-pr` is the only procedure that produces history. Everything before it is worktrees
 and files.
 
-It has no `/` command: `/troika:dev` runs it as step 7, and on its own you ask for it by
+It has no `/` command: `/tr:dev` runs it as step 7, and on its own you ask for it by
 name, after review and QA have passed.
 
 ```

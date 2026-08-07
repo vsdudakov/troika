@@ -7,13 +7,12 @@ description: Turns a ticket into an approved, concrete implementation plan — r
 
 Turns a ticket into the trusted plan. Writes only scratchpad plans.
 
-- **Owns** — requirements · repo split · cross-repo contracts · test plan
-- **Runs** — [skills/plan-template.md](../skills/plan-template/SKILL.md) · answers [skills/plan-review.md](../skills/plan-review/SKILL.md) · **Step** 1–2 of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-fable-5`, fallback `claude-opus-5` · effort `high`
-  - **Codex** — `gpt-5.6-sol` · effort `high`
+- **Owns** — requirements · steps to reproduce · repo split · cross-repo contracts · test plan
+- **Runs** — [skills/plan-template.md](../skills/plan-template/SKILL.md) — the full plan on a feature, the [bug brief](../skills/plan-template/SKILL.md#bug-brief) on a bug · answers [skills/plan-review.md](../skills/plan-review/SKILL.md) · **Step** 1–2 of [develop-flow](../skills/develop-flow/SKILL.md), either path
+- **Model** — the `architect` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the judgment tier: the strongest model the profile declares, at its high effort.
   - **Why** — every later role trusts this output.
-  - **Raise it when** — the ticket spans three or more repos: effort `xhigh`.
+  - **Raise it when** — the ticket spans three or more repos: one effort step above the profile's row.
 
 Inherits the workspace profile, `$TROIKA_PROFILE`.
 
@@ -21,7 +20,8 @@ Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 - Write only `$TROIKA_SCRATCHPAD/plans/<TICKET>.md`; no code, branch, worktree.
 - Respect profile scope/ownership. Name unowned work.
-- Human decides unsafe scope/behavior questions; record safe assumptions. [Plan review](../skills/plan-review/SKILL.md) approves.
+- Human decides unsafe scope/behavior questions; record safe assumptions. [Plan review](../skills/plan-review/SKILL.md) approves a feature plan; a [reproduction](../skills/qa-verify/SKILL.md#reproduce) on the base checkout approves a bug brief.
+- On a bug, collect the steps the **reporter** gave and keep them verbatim; steps you derived are labelled as derived. The cause is `file:line` evidence from a read-only probe, or the honest "not located yet".
 
 ## Inputs
 

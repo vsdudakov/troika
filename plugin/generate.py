@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 # References and templates are read *by* a procedure, never run on their own, so only
-# procedures become commands. A `/troika:pr-template` that fills nothing in would be a
+# procedures become commands. A `/tr:pr-template` that fills nothing in would be a
 # command that cannot be finished.
 KIND = "procedure"
 
@@ -41,7 +41,7 @@ KIND = "procedure"
 # command at all.
 #
 # The **hint** is what the `/` menu shows next to it, and it is spelled out per command
-# rather than defaulted: a hint inherited from a default is how `/troika:review` came to
+# rather than defaulted: a hint inherited from a default is how `/tr:review` came to
 # advertise `<TICKET>` for a procedure that reads a PR. One upper-case word, naming the
 # thing the procedure's first step resolves — the accepted forms of that thing belong in
 # the procedure, not in a menu line. `<>` is required, `[]` optional.
@@ -97,7 +97,7 @@ BODY = """Run Troika's **{name}** procedure.
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika/settings.json`
    where the workspace declares them, and creating the three it writes into. It exits
    non-zero when no ancestor of the current directory holds that file — **stop there and
-   say so**, and point at `/troika:setup`; a guessed path writes handoff files nobody reads.
+   say so**, and point at `/tr:setup`; a guessed path writes handoff files nobody reads.
 
 2. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`.
 3. Read `$TROIKA_PROFILE` — the workspace profile. Every repo, command, branch, base ref,
@@ -133,7 +133,7 @@ and ask** what to do: leave it, update it against what the repos now say, or rew
 profile from the template. Default to leaving it, and never overwrite what a human wrote
 without being asked to in words.
 
-Every other `/troika:*` command resolves that workspace instead of creating one.
+Every other `/tr:*` command resolves that workspace instead of creating one.
 """
 
 # What to do with no argument. Optional for exactly one command, so the two lines are not

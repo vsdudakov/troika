@@ -7,13 +7,12 @@ description: Verifies a change end to end on the real local stack and captures p
 
 Verifies on the local stack; captures proofs; reports defects.
 
-- **Owns** — local full stack · manual and integration verification · proofs
-- **Runs** — [skills/qa-verify.md](../skills/qa-verify/SKILL.md) · **Step** 6 of [develop-flow](../skills/develop-flow/SKILL.md) (stack pre-warm starts at step 3)
-- **Model**
-  - **Claude** — `claude-sonnet-5` · effort `medium`
-  - **Codex** — `gpt-5.6-sol` · effort `medium`
+- **Owns** — local full stack · bug reproduction · manual and integration verification · proofs
+- **Runs** — [skills/qa-verify.md](../skills/qa-verify/SKILL.md) · **Step** 6 of [develop-flow](../skills/develop-flow/SKILL.md), and step 2b on a bug ticket — the [reproduction pass](../skills/qa-verify/SKILL.md#reproduce) on the base checkout (stack pre-warm starts at step 3, or step 1b on the bug path)
+- **Model** — the `qa` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the execution tier at medium effort.
   - **Why** — long execution/observation session.
-  - **Raise it when** — a hard "why is this flaky" investigation: `claude-opus-5` · effort `high`.
+  - **Raise it when** — a hard "why is this flaky" investigation: the judgment tier at high effort.
 
 Inherits the workspace profile, `$TROIKA_PROFILE`.
 
@@ -25,14 +24,16 @@ Inherits the workspace profile, `$TROIKA_PROFILE`.
 
 ## Inputs
 
-- `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements and the test plan (click path or API call per requirement).
-- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — each dev role's worktree path and changed screens/routes, which become the stack's path overrides.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` — the requirements and the test plan (click path or API call per requirement), or on a bug ticket the [bug brief](../skills/plan-template/SKILL.md#bug-brief): environment, steps, observed, expected.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-<role>.md` — each dev role's worktree path and changed screens/routes, which become the stack's path overrides. The reproduction pass has none of these: it runs before any fix exists, on the base ref.
+- `$TROIKA_SCRATCHPAD/plans/<TICKET>-repro-<n>.md`, on the later cycles of a bug ticket — what was seen on the base checkout, and the proof files that are already the **before** side.
 
 ## Rules
 
 - Verify plan requirements on the running stack, not from diff. Record start command/cwd.
 - Check adjacent flows. Never fabricate proof; list stack limits and unverified work.
 - Report defects; never fix.
+- **Reproducing a bug is verification too**: run the reporter's steps unchanged on the base ref, capture the failure as that requirement's before proof, and report `Not reproduced` honestly rather than adjusting the steps until something breaks.
 
 ## Gates
 

@@ -2,7 +2,7 @@
 
 <img src="docs/assets/troika.jpg" alt="A troika — three horses harnessed abreast, pulling one sleigh" width="100%">
 
-<sub>Nikolai Sverchkov (1817–1898), *A Troika Ride Through The Snow*. Public domain, via
+<sub>Nikolai Sverchkov (1817–1898), _A Troika Ride Through The Snow_. Public domain, via
 [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Nikolai_Sverchkov_-_A_Troika_Ride_Through_The_Snow.jpg).</sub>
 
 **Troika turns a tracker ticket into a reviewed, QA-verified pull request.** An AI
@@ -36,7 +36,7 @@ hosts that ship a plugin system.
 One command runs the whole pipeline:
 
 ```
-/troika:dev SCRUM-123
+/tr:dev SCRUM-123
 ```
 
 Behind it: the architect plans, a **different model family** reviews the plan and loops it
@@ -48,7 +48,7 @@ inherits an earlier role's assumptions.
 
 **Nothing in this repository names your organisation.** No repo, command, branch, tracker,
 URL, or person. Every such fact comes from one directory in your workspace — `.troika/`,
-written by `/troika:setup` — holding the profile and the paths. Run setup in another folder of
+written by `/tr:setup` — holding the profile and the paths. Run setup in another folder of
 repos and the same pipeline runs there unchanged.
 
 ---
@@ -61,12 +61,12 @@ repos and the same pipeline runs there unchanged.
 - 🧑‍🤝‍🧑 **Eight roles, eight contexts.** architect · backend-dev · frontend-dev · reviewer ·
   tester · qa · releaser · commenter — each with its own scope, model, effort, and hard
   refusals. Dev roles write tests but never run them; the reviewer never runs anything.
-- 🔌 **One tree, three hosts.** The same skills are `/troika:*` commands in Claude Code and
+- 🔌 **One tree, three hosts.** The same skills are `/tr:*` commands in Claude Code and
   Cursor, and model-invoked skills in Codex. Or skip the plugin and point any agent at the
   files by path.
 - 🏢 **Organisation-neutral by construction.** Org facts live in your `.troika/PROFILE.md` and
   are cited **by anchor**; a procedure that hardcodes one is a bug, and CI fails it.
-- 🧭 **Setup reads before it asks.** `/troika:setup` investigates your repos — manifests, CI,
+- 🧭 **Setup reads before it asks.** `/tr:setup` investigates your repos — manifests, CI,
   linters, remotes — drafts every profile section it can prove, and only then asks about the
   handful no file records.
 - 📂 **Per-workspace paths.** `.troika/settings.json` says where plans, worktrees and memory
@@ -82,14 +82,14 @@ repos and the same pipeline runs there unchanged.
 
 ```bash
 claude plugin marketplace add vsdudakov/troika
-claude plugin install troika@troika          # add --scope project to pin it to one workspace
+claude plugin install tr@troika          # add --scope project to pin it to one workspace
 ```
 
 **Codex**
 
 ```bash
 codex plugin marketplace add vsdudakov/troika
-codex plugin add troika@troika
+codex plugin add tr@troika
 ```
 
 **Cursor**
@@ -101,12 +101,12 @@ cursor-agent plugin marketplace add https://github.com/vsdudakov/troika
 Restart the host, then set up the folder that holds your repos — once per workspace:
 
 ```
-/troika:setup
+/tr:setup
 ```
 
 ## Set up a workspace
 
-A *workspace* is the folder holding your repos, and `/troika:setup` is what makes it one. It
+A _workspace_ is the folder holding your repos, and `/tr:setup` is what makes it one. It
 reads your repos, drafts the profile from what they prove, asks about what they cannot, and
 writes:
 
@@ -124,7 +124,7 @@ writes:
 ```
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[folder of repos] --> B{already set up?}
   B -- yes --> Z([ask: leave · update · rewrite])
   B -- no --> C[--init: settings.json,<br/>.gitignore, state dirs]
@@ -139,7 +139,8 @@ Most of the profile is already in your repos — manifests, `Makefile`s, CI work
 configs, git remotes, PR templates — so setup drafts the stack, the verification commands, the
 test framework, the base branch, the deploy triggers and the release scheme, and shows them for
 confirmation. It asks you only about what no file records: the tracker and **which writes a
-role may make**, ownership, voice, gotchas, and what a green local run does not prove.
+role may make**, ownership, voice, gotchas, what a green local run does not prove, and which
+models and efforts the roles run on — including the second tool that reviews independently.
 
 Run it again and it changes nothing without asking — leave it as it is, update it against what
 the repos now say, or rewrite the profile from the template.
@@ -147,7 +148,7 @@ the repos now say, or rewrite the profile from the template.
 The profile's **anchors are a contract**. Roles cite them by id — `` `#commands` ``,
 `` `#branches` ``, `` `#tracker` `` — and a missing one is a role reading a reference that
 answers nothing. `python3 tests/check.py` verifies every anchor the tree cites exists in
-[`PROFILE.template.md`](PROFILE.template.md). Where the profile declares a *limit* — no ticket
+[`PROFILE.template.md`](PROFILE.template.md). Where the profile declares a _limit_ — no ticket
 transitions, one repo and one PR, no build step, a base branch that is not `origin/main` — the
 roles follow the profile, not the generic wording.
 
@@ -177,61 +178,143 @@ marker and nothing falls back: no workspace above you is a stop, not a default. 
 
 ## The pipeline
 
-[`develop-flow`](skills/develop-flow/SKILL.md) is the whole thing. Nine steps, each a gate —
-and every failed gate goes back to the dev lanes rather than forward:
+[`develop-flow`](skills/develop-flow/SKILL.md) is the whole thing: nine steps, each one a gate.
+
+**How a ticket opens depends on what it is**; from step 3 the two paths are one flow:
+
+- **bug** — collect the steps to reproduce → **local QA reproduces it on the base checkout** → fix in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
+- **feature** — collect requirements → plan → **plan review loop** (a different model family, max 3) → implement in parallel lanes → internal review loop (max 3) → unit tests → **local QA before/after** → PR with the proofs → CI + post-PR actions
+
+The reporter review is the only step that waits for a person, and a plain run does not run it —
+`/tr:dev SCRUM-123` goes from ticket to PR unattended. `--ask` puts the gate in.
 
 ```mermaid
 flowchart TD
-  T[ticket] --> P[1 · plan<br/>architect]
-  P --> PR{2 · plan review<br/>reviewer, other model family}
-  PR -- request changes --> P
-  PR -- approved --> D[3 · dev lanes, one per repo<br/>backend-dev · frontend-dev]
-  D --> IR{4 · internal review<br/>lint only, never runs tests}
-  IR -- blocker/major --> D
-  IR -- pass --> U{5 · unit tests<br/>tester, parallel lanes}
-  U -- fail --> D
-  U -- green --> Q{6 · QA on the local stack}
-  Q -- fail --> D
-  Q -- pass --> R[7 · release<br/>commit · PR · proofs · ticket]
-  R --> C{8 · CI + review watch}
-  C -- red --> D
-  C -- quiet --> M([merge-ready PR])
+  A[ticket] --> B{bug or feature?}
+  B -- bug --> C[1b · collect steps to reproduce]
+  C --> D{2b · local QA reproduces it<br/>on the base checkout}
+  D -- not reproduced --> E([stop · ask the reporter])
+  D -- reproduced · approved<br/>human approves in ask mode --> H
+  B -- feature --> F[1f · collect requirements and plan]
+  F --> G{2f · plan review loop<br/>other model family, max 3}
+  G -- request changes --> F
+  G -- approved<br/>human approves in ask mode --> H[3 · implement · one lane per repo]
+  H --> I[lane A · backend-dev<br/>code and tests written, not run]
+  H --> J[lane B · frontend-dev<br/>code and tests written, not run]
+  I --> K
+  J --> K{4 · internal review loop<br/>lint only, max 3}
+  K -- blocker or major --> H
+  K -- approved --> L{5 · unit tests<br/>only the changed tests}
+  L -- fail --> H
+  L -- green --> M{6 · local QA before and after<br/>one proof per requirement, max 3}
+  M -- fail --> H
+  M -- approved --> N[7 · create the PR<br/>template · QA proofs · ticket link]
+  N --> O{8 · wait for CI and review waves}
+  O -- red --> H
+  O -- green and quiet --> P[post-PR actions<br/>tracker writes · worktree cleanup]
+  P --> Q([merge-ready PR])
 ```
 
-| Step | What happens | Who |
-| --- | --- | --- |
-| 0 | Fan out — refresh the code index, read the ticket, read memory | orchestrator |
-| 1 | Collect requirements, write the plan | [architect](agents/architect.md) |
-| 2 | **Plan review loop** — a different model family approves or sends it back (cap 3 rounds) | [reviewer](agents/reviewer.md) |
-| 3 | Development — one lane per repo, own worktree, tests written but not run | [backend-dev](agents/backend-dev.md) · [frontend-dev](agents/frontend-dev.md) |
-| 4 | **Internal review loop** — nine checks on the local diff, lint only, nothing posted | [reviewer](agents/reviewer.md) |
-| 5 | Unit tests — the change's own tests only, parallel lanes, failures routed back | [tester](agents/tester.md) |
-| 6 | **QA on the real local stack** — browser E2E with before/after GIFs, API + datastore checks | [qa](agents/qa.md) |
-| 7 | Release — commit, push, PR from your template with proofs, ticket updated | [releaser](agents/releaser.md) |
-| 8 | CI + review-bot watch loop — the PR is not done until it is quiet | [releaser](agents/releaser.md) |
+`2r` is the only step that waits for a person: a plain run passes straight through it, and
+`--ask` is what makes it stop for the reporter's answer ([Run it unattended](#run-it-unattended)).
+
+| Step | What happens                                                                                                                                                                                                                             | Who                                                                           |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| 0    | Fan out — refresh the code index, read the ticket, read memory, **classify it bug or feature**                                                                                                                                           | orchestrator                                                                  |
+| 1b   | _Bug_ — collect the reporter's steps to reproduce, probe for the cause, pre-warm the stack                                                                                                                                               | [architect](agents/architect.md)                                              |
+| 2b   | _Bug_ — **reproduce it on the base checkout**, before any fix. Not reproduced → stop and ask                                                                                                                                             | [qa](agents/qa.md)                                                            |
+| 1f   | _Feature_ — collect requirements, write the plan                                                                                                                                                                                         | [architect](agents/architect.md)                                              |
+| 2f   | _Feature_ — **plan review loop**, a different model family approves or sends it back (cap 3 rounds)                                                                                                                                      | [reviewer](agents/reviewer.md)                                                |
+| 2r   | **Reporter review** — the person who filed it reads what will be built, or what was reproduced, and answers _go ahead_ / _change this_ / _not this at all_. The only gate that waits for a person, and it runs **only** on a `--ask` run | [commenter](agents/commenter.md) asks, the reporter answers                   |
+| 3    | Development — one lane per repo, own worktree, tests written but not run                                                                                                                                                                 | [backend-dev](agents/backend-dev.md) · [frontend-dev](agents/frontend-dev.md) |
+| 4    | **Internal review loop** — nine checks on the local diff, lint only, nothing posted                                                                                                                                                      | [reviewer](agents/reviewer.md)                                                |
+| 5    | Unit tests — the change's own tests only, parallel lanes, failures routed back                                                                                                                                                           | [tester](agents/tester.md)                                                    |
+| 6    | **QA on the real local stack** — before/after per requirement: GIFs for UI, API + datastore for backend                                                                                                                                  | [qa](agents/qa.md)                                                            |
+| 7    | Release — commit, push, PR from your template with proofs, ticket updated                                                                                                                                                                | [releaser](agents/releaser.md)                                                |
+| 8    | CI watch, review-bot waves, then the post-PR actions — tracker writes, worktree cleanup                                                                                                                                                  | [releaser](agents/releaser.md)                                                |
+
+A bug fix carries the regression test that encodes the reproduction — internal review reads
+the test against `-repro-1.md`, and one that would pass on the base ref is a Blocker. The
+failing capture from step 2b is reused as the `before` proof at step 6, so the pair the PR
+carries costs one stack boot, not two.
+
+### Run it unattended
+
+**Exactly one gate waits for a person** — 2r — and a plain run does not run it. There is one
+flag, and it adds the gate rather than removing it:
+
+```
+/tr:dev SCRUM-123            # unattended, ticket to PR
+/tr:dev SCRUM-123 --ask      # stop once, at 2r, for the reporter's answer
+```
+
+Your profile's `#autonomy` anchor says who that reporter is, where `--ask` reaches them, how
+long it waits, and what happens when the wait runs out. Every run states which way it ran.
+
+Running unattended removes an **approval**, not a **judgment**. It never silences a stop
+condition — a hit cap, an unowned repo, a bug that will not reproduce — and never overrides what
+your profile marks never-automatic: scope changes, irreversible migrations, public contract
+changes, production deploys. An open question with no safe assumption stops the run instead of
+guessing. Everything it did assume is written into the plan and repeated in the PR body.
 
 Every outward-facing sentence on the way — PR body, ticket comment, review reply — is written
 by the [commenter](agents/commenter.md) in your workspace's voice.
 
-Or start somewhere else:
+## Using it on a real team
+
+Who types what, in the order a week actually happens.
+
+**A developer with an assigned ticket** — one command, whole pipeline. `/tr:dev` classifies the
+ticket itself: a bug gets reproduced before it is fixed, a feature gets planned and reviewed.
 
 ```
-/troika:spike SCRUM-123              # investigate and plan it, build nothing
-/troika:review 412                   # review an open PR
-/troika:fix 412                      # work through that review's comments
-/troika:fix 412 stream the export instead of buffering it
-/troika:qa https://github.com/<org>/<repo>/pull/412
-/troika:triage <stack trace>
-/troika:release 2026.8.0             /troika:demo
+/tr:dev SCRUM-123                # ticket to merge-ready PR
+/tr:spike SCRUM-123              # or plan it first and build nothing — sizing, shaping, a design call
 ```
+
+**After the PR is open** — fix it in place, on the same branch. Nothing here opens a second PR.
+
+```
+/tr:fix https://github.com/<org>/<repo>/pull/41
+/tr:fix https://github.com/<org>/<repo>/pull/41 stream the export instead of buffering it
+```
+
+With no words after the URL it works through every unresolved review comment; with words, it
+does what you said and re-runs the same gates either way.
+
+**Developers reviewing each other's PRs** — the review is read-only, the QA run is not a review.
+
+```
+/tr:review https://github.com/<org>/<repo>/pull/41    # nine checks, one posted comment
+/tr:qa     https://github.com/<org>/<repo>/pull/41    # boot the stack, before/after proofs, Pass or Fail
+```
+
+**A production incident, or just a stack trace someone pasted** — read-only, changes nothing.
+
+```
+/tr:triage <stack trace>
+```
+
+**The release manager** — the two scheduled jobs, both stopping before anything a human owns.
+
+```
+/tr:demo    release/X.Y.Z        # build the demo integration branch, deploy it, draft the notification
+/tr:release release/X.Y.Z        # promote the previous cut, branch, notes, QA plan, pre-production deploy
+```
+
+`/tr:demo` takes the demo label your profile declares (`#demo`); `/tr:release` takes the
+version or release branch in your own scheme (`#release`). Both stop at the announcement and
+wait for a human to send it.
+
+Everything above needs `/tr:setup` to have been run once in the folder that holds your repos.
 
 <details open>
 <summary><b>What each of the other commands does, drawn</b></summary>
 
-**`/troika:spike`** — plan it, build nothing.
+**`/tr:spike`** — plan it, build nothing.
 
 ```mermaid
-flowchart LR
+flowchart TD
   T[ticket] --> F[fan out:<br/>index · ticket · memory]
   F --> I[read-only probe per repo]
   I --> P[plan + cost + alternatives]
@@ -240,10 +323,10 @@ flowchart LR
   R -- approved --> O([plan file — no branch, no code])
 ```
 
-**`/troika:review`** — read-only PR review, one comment posted.
+**`/tr:review`** — read-only PR review, one comment posted.
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[PR] --> B[requirements:<br/>plan file, else the PR body]
   B --> C[isolated worktree<br/>on the head branch]
   C --> D[nine checks · lint only<br/>never runs tests, never edits]
@@ -251,7 +334,7 @@ flowchart LR
   E --> F([worktree removed])
 ```
 
-**`/troika:fix`** — fix an open PR in place; never a second PR.
+**`/tr:fix`** — fix an open PR in place; never a second PR.
 
 ```mermaid
 flowchart TD
@@ -272,7 +355,7 @@ flowchart TD
   K -- green --> L([the same PR, updated])
 ```
 
-**`/troika:qa`** — verify on the real local stack.
+**`/tr:qa`** — verify on the real local stack.
 
 ```mermaid
 flowchart TD
@@ -287,10 +370,10 @@ flowchart TD
   H --> I([proofs per requirement · Pass/Fail])
 ```
 
-**`/troika:triage`** — production symptom to cause, changing nothing.
+**`/tr:triage`** — production symptom to cause, changing nothing.
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[symptom] --> B[pin the question]
   B --> C[aggregate to the hot service]
   C --> D[read raw events]
@@ -299,10 +382,10 @@ flowchart LR
   F --> G([cause with evidence])
 ```
 
-**`/troika:release`** — cut a periodic release.
+**`/tr:release`** — cut a periodic release.
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[version] --> B[promote the previous pre-release]
   B --> C[cut the branch<br/>+ pre-release]
   C --> D[notes from the diff]
@@ -311,10 +394,10 @@ flowchart LR
   F --> G([announcement prepared, not posted])
 ```
 
-**`/troika:demo`** — build the demo integration branch.
+**`/tr:demo`** — build the demo integration branch.
 
 ```mermaid
-flowchart LR
+flowchart TD
   A[label] --> B[collect the labelled PRs]
   B --> C[reset the integration branch<br/>from the default branch]
   C --> D[merge in conflict-minimising order]
@@ -333,13 +416,13 @@ discover, invocable by name when you want just that step. Each command's flow, d
 
 ## What is in the box
 
-| | |
-| --- | --- |
-| [`agents/`](ROLES.md) | the eight roles — scope, inputs, rules, gates, output, and the model and effort each runs on |
-| [`skills/`](skills/README.md) | 16 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside |
-| [`plugin/`](plugin/README.md) | the three host manifests, the generated commands, and [`resolve.py`](plugin/resolve.py) |
-| [`tests/`](tests/README.md) | the two gates on this tree |
-| [`PROFILE.template.md`](PROFILE.template.md) | the profile setup fills in, and the anchor contract |
+|                                              |                                                                                                                                             |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`agents/`](ROLES.md)                        | the eight roles — scope, inputs, rules, gates, output, and the model tier and effort each one needs (the ids themselves are your profile's) |
+| [`skills/`](skills/README.md)                | 16 procedures, 5 references, 2 templates — one directory per skill, `SKILL.md` inside                                                       |
+| [`plugin/`](plugin/README.md)                | the three host manifests, the generated commands, and [`resolve.py`](plugin/resolve.py)                                                     |
+| [`tests/`](tests/README.md)                  | the two gates on this tree                                                                                                                  |
+| [`PROFILE.template.md`](PROFILE.template.md) | the profile setup fills in, and the anchor contract                                                                                         |
 
 Procedures: `develop-flow` · `spike` · `plan-review` · `implement-change` ·
 `internal-review` · `run-unit-tests` · `qa-verify` · `release-pr` · `pr-review` · `fix-pr` ·
@@ -350,12 +433,12 @@ Procedures: `develop-flow` · `spike` · `plan-review` · `implement-change` ·
 
 Plans, proofs, worktrees and memory are **not in this repository at all** — they are
 per-workspace, live under your `.troika/`, and are created wherever `settings.json` puts them.
-Because they are *ignored* rather than absent, `git clean -xfd` in a workspace deletes all
+Because they are _ignored_ rather than absent, `git clean -xfd` in a workspace deletes all
 three, in-flight branches included. Clean with explicit paths or not at all.
 
 ## How it stays honest
 
-You cannot unit-test a prompt. You *can* test a gate — and both gates run on this repo in CI.
+You cannot unit-test a prompt. You _can_ test a gate — and both gates run on this repo in CI.
 
 ```bash
 python3 tests/check.py          # structural: seconds, every commit
@@ -437,7 +520,7 @@ python3 plugin/generate.py          # regenerate the / commands after editing a 
 ```
 
 Editing a procedure? Its frontmatter drives the command that runs it, so regenerate and let
-`check.py` confirm nothing drifted. Adding a role? It goes in `agents/` — and *only* roles go
+`check.py` confirm nothing drifted. Adding a role? It goes in `agents/` — and _only_ roles go
 there, because hosts load every file in that directory as a subagent, which is why the roles
 index lives at [`ROLES.md`](ROLES.md).
 

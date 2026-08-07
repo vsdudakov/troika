@@ -5,7 +5,7 @@ description: The per-workspace path file — every key, how relative and absolut
 
 # `.troika/settings.json`
 
-One file per folder-of-repos, written by [`/troika:setup`](commands.md). It is the only place
+One file per folder-of-repos, written by [`/tr:setup`](commands.md). It is the only place
 a path is declared, and the only thing that marks a directory as a workspace.
 
 ```json
@@ -80,7 +80,7 @@ setup in, and the resolver exits non-zero saying exactly that:
 
 ```
 no workspace above /Users/me/acme/backend/src: expected a .troika/settings.json in it or in
-an ancestor. Run /troika:setup in the folder that holds your repos.
+an ancestor. Run /tr:setup in the folder that holds your repos.
 ```
 
 That is a stop, not a default. The alternative — walking up to the first `AGENTS.md` — resolves

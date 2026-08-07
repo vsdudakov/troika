@@ -9,7 +9,7 @@ A ticket link in, an approved plan out. Nothing is implemented, branched, or com
 
 **Kind** procedure · **Used by** [architect](../../agents/architect.md) · **When** a ticket needs sizing, shaping or a design decision before anyone commits to building it · **Ends with** an approved plan at `$TROIKA_SCRATCHPAD/plans/<TICKET>.md` and a summary, with no worktree and no code
 
-This is [develop-flow](../develop-flow/SKILL.md) steps 0 – 2 and nothing after them. Run it when the answer wanted is *what would this take* rather than *ship it*; when the plan is approved and the work is wanted, [develop-flow](../develop-flow/SKILL.md) picks up the same plan file at its step 3.
+This is [develop-flow](../develop-flow/SKILL.md) steps 0, 1f and 2f — its **feature** path's planning half — and nothing after them. A spike plans even where the ticket is a bug: the answer wanted is a shape and a cost, and reproducing it belongs to the flow that will fix it ([Kind](../develop-flow/SKILL.md#kind)). Run it when the answer wanted is *what would this take* rather than *ship it*; when the plan is approved and the work is wanted, [develop-flow](../develop-flow/SKILL.md) picks up the same plan file at its step 3.
 
 Read-only over every repo. Set `TROIKA_WORKSPACE` first (workspace paths (`#workspace-paths`)).
 
@@ -57,6 +57,8 @@ Run [plan-review.md](../plan-review/SKILL.md) with [reviewer](../../agents/revie
 Each pass writes `$TROIKA_SCRATCHPAD/plans/<TICKET>-plan-review-<n>.md`.
 
 Ask the human only for scope or behavior with no safe assumption, unowned scope, undefined completion, or a hit cap ([human](../plan-review/SKILL.md#human)).
+
+**No separate reporter review here.** A spike's whole output is a plan handed to the person who asked for it, so [develop-flow's 2r gate](../develop-flow/SKILL.md#reporter-review) would be the same conversation twice. When that plan is later built, develop-flow runs 2r on it only if that run carries `--ask` ([Autonomy](../develop-flow/SKILL.md#autonomy)); a plan a reporter already answered on carries that answer in its file and 2r reads it rather than asking again.
 
 <a id="no-transition"></a>
 **Make no tracker write here** — no comment, and in particular **no in-progress transition**, even where the profile declares one. plan-review runs that transition on `Approve` because in develop-flow the code starts immediately; here nothing starts, and a ticket parked in progress with no branch behind it is a lie the board acts on. Where the plan should reach the tracker, say so in the summary and let the human ask for it.

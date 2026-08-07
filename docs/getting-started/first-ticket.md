@@ -8,7 +8,7 @@ description: Run the whole pipeline on one ticket, see what each gate produces, 
 With a profile written and paths resolved, one command runs everything:
 
 ```
-/troika:dev SCRUM-123
+/tr:dev SCRUM-123
 ```
 
 Start with a **small, well-specified ticket** in a repo whose profile section you trust. The
@@ -17,10 +17,16 @@ the profile as of the change.
 
 ## What you will see
 
+The first thing it decides is the ticket's **kind**, and that picks the next two steps: a bug
+is reproduced on the base checkout before anyone fixes it, a feature is planned and the plan
+is reviewed. Everything from development on is the same either way.
+
 | Stage | What lands on disk |
 | --- | --- |
-| Plan | `$TROIKA_SCRATCHPAD/plans/SCRUM-123.md` |
-| Plan review | `…/SCRUM-123-plan-review-1.md` — `Approve`, or findings and a rewrite |
+| Plan, or bug brief | `$TROIKA_SCRATCHPAD/plans/SCRUM-123.md` |
+| Plan review *(feature)* | `…/SCRUM-123-plan-review-1.md` — `Approve`, or findings and a rewrite |
+| Reproduction *(bug)* | `…/SCRUM-123-repro-1.md` — `Reproduced`, plus the failing capture, which is reused as the `before` proof |
+| Reporter review | nothing on disk — one message to the reporter, and their answer recorded in the plan file. Only on a `--ask` run |
 | Development | a worktree per repo at `$TROIKA_WORKTREES/<repo>-SCRUM-123`, plus `…/SCRUM-123-backend-dev.md` |
 | Internal review | `…/SCRUM-123-review-1.md` — severity-tagged findings |
 | Tests | `…/SCRUM-123-tests-1.md`, plus a raw `.log` per lane |
@@ -37,25 +43,45 @@ It is supposed to stop. A gate that fails is the product working:
 
 - **Plan review sends it back** — the plan was ambiguous or missed a requirement. It rewrites
   and re-reviews, up to three rounds, then asks you.
+- **The reporter says "change this"** — what you asked for was not what the plan or the
+  reproduction describes. It goes back to the plan or the brief, twice at most, then hands back
+  to you. This is the only gate that waits for a person, and it exists only on a `--ask` run —
+  a plain `/tr:dev SCRUM-123` never stops for an approval.
+- **The bug does not reproduce** — the reporter's steps produced the expected behaviour on the
+  base checkout. It stops rather than fixing blind, and says what it ran and what it needs from
+  the reporter: an environment, a data shape, a user role.
 - **The reviewer files a Blocker** — the fix goes back to the dev role, and the re-review is a
   new numbered file. No diff advances unreviewed.
 - **QA fails** — a proof could not be captured, or behaviour did not match the requirement.
   Fix, re-verify.
 - **The resolver exits non-zero** — nothing ran. You are standing outside any workspace, or
-  `.troika/settings.json` is missing — run `/troika:setup`; see [Paths](../concepts/paths.md).
+  `.troika/settings.json` is missing — run `/tr:setup`; see [Paths](../concepts/paths.md).
 
 ## Start somewhere else instead
 
-Nothing requires the full pipeline. The other seven commands each start a session of their own:
+Nothing requires the full pipeline. The other seven commands each start a session of their
+own — this is roughly how a team splits them up:
 
 ```
-/troika:spike   SCRUM-123     # investigate and plan it, and stop — nothing gets built
-/troika:review  412           # review an open PR
-/troika:fix     412           # fix that review's comments — or say what to fix instead
-/troika:qa      412           # verify an open PR on your local stack, with proofs
-/troika:triage  <paste a stack trace or an issue link>
-/troika:release 2026.8.0
-/troika:demo
+# a developer, on an assigned ticket
+/tr:dev     SCRUM-123     # the whole pipeline
+/tr:dev     SCRUM-123 --ask    # ... stopping once for the reporter's approval
+/tr:spike   SCRUM-123     # investigate and plan it, and stop — nothing gets built
+
+# the same developer, once the PR is open — always the same branch, never a second PR
+/tr:fix     https://github.com/<org>/<repo>/pull/41
+/tr:fix     https://github.com/<org>/<repo>/pull/41 stream the export instead of buffering it
+
+# developers, on each other's PRs
+/tr:review  https://github.com/<org>/<repo>/pull/41   # nine checks, one posted comment
+/tr:qa      https://github.com/<org>/<repo>/pull/41   # local stack, before/after proofs, Pass or Fail
+
+# anyone, on a production symptom
+/tr:triage  <paste a stack trace or an issue link>
+
+# the release manager
+/tr:demo    release/X.Y.Z # build and deploy the demo integration branch
+/tr:release release/X.Y.Z # promote, branch, notes, QA plan, pre-production deploy
 ```
 
 The steps in between — `plan-review`, `implement-change`, `internal-review`,

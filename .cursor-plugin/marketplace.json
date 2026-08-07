@@ -4,11 +4,11 @@
     "name": "vsdudakov"
   },
   "metadata": {
-    "description": "Troika: a tool-neutral agent pipeline — roles, procedures, and the gates between them."
+    "description": "Troika: a tool-neutral agent pipeline \u2014 roles, procedures, and the gates between them."
   },
   "plugins": [
     {
-      "name": "troika",
+      "name": "tr",
       "source": ".",
       "description": "Tool-neutral agent pipeline: the roles, the procedures, and the gates between them"
     }

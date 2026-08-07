@@ -44,7 +44,7 @@ If no marker is found, the resolver exits non-zero with the fix:
 
 ```
 no workspace above /Users/me/acme/backend/src: expected a .troika/settings.json in it or in
-an ancestor. Run /troika:setup in the folder that holds your repos.
+an ancestor. Run /tr:setup in the folder that holds your repos.
 ```
 
 **That is a stop, not a default.** A guessed path writes proofs nobody reads.
@@ -65,7 +65,7 @@ $TROIKA_WORKTREES, $TROIKA_MEMORY, or $TROIKA_PROFILE
 
 Because resolution happens at run time, one installed plugin serves every folder-of-repos on
 the machine — a client, an employer, a side project — each with its own profile and its own
-paths. There is nothing per-workspace in the install; `/troika:setup` is what makes a folder
+paths. There is nothing per-workspace in the install; `/tr:setup` is what makes a folder
 one.
 
 [settings.json reference :material-arrow-right:](../reference/settings-json.md){ .md-button }

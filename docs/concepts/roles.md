@@ -11,12 +11,12 @@ the structural gate enforces that shape.
 
 | Role | Owns | Never |
 | --- | --- | --- |
-| **architect** | requirements, the plan, repo split, pinned contracts | writes no product code |
+| **architect** | requirements, the plan or the bug brief with the reporter's steps to reproduce, repo split, pinned contracts | writes no product code |
 | **backend-dev** | server-side repos and their unit tests | never *runs* a test |
 | **frontend-dev** | the client apps the profile assigns it, and their unit tests | never runs a test |
 | **reviewer** | plan review, internal review, PR review | never runs anything, never edits code |
 | **tester** | the local unit-test run, narrowed to the change, in parallel lanes | writes nothing |
-| **qa** | the local stack, integration verification, proofs | never edits product code |
+| **qa** | the local stack, bug reproduction on the base checkout, integration verification, proofs | never edits product code |
 | **releaser** | commits, push, PR, proofs, tracker writes | never greens a check by weakening it |
 | **commenter** | every outward-facing sentence, in the workspace's voice | never invents a fact |
 
@@ -51,7 +51,7 @@ file makes "one role writes a worktree at a time" enforceable rather than aspira
 ## Where a role's behaviour comes from
 
 ```mermaid
-flowchart LR
+flowchart TD
     P[PROFILE.md<br/>your facts] --> R[role file<br/>craft, gates, refusals]
     S[skill<br/>ordered steps] --> R
     R --> O[handoff file]

@@ -54,7 +54,7 @@ sources: those are development inputs.
       "source": { "source": "github", "repo": "vsdudakov/troika", "ref": "v0.2.0" }
     }
   },
-  "enabledPlugins": { "troika@troika": true }
+  "enabledPlugins": { "tr@troika": true }
 }
 ```
 
@@ -65,7 +65,7 @@ one-line diff and a reviewable one.
 
 ```bash
 codex plugin marketplace add vsdudakov/troika@v0.2.0
-codex plugin add troika@troika
+codex plugin add tr@troika
 ```
 
 **Or install from the release archive** — no git required at the destination:
@@ -81,7 +81,7 @@ mkdir -p ~/.troika
 curl -fsSL https://github.com/vsdudakov/troika/releases/download/v0.2.0/troika-0.2.0.tar.gz \
   | tar xz -C ~/.troika
 claude plugin marketplace add ~/.troika/troika-0.2.0
-claude plugin install troika@troika
+claude plugin install tr@troika
 ```
 
 Verify the download against the published checksum first if you are pinning for a team:
@@ -101,20 +101,20 @@ version you already have.
 
     ```bash
     claude plugin marketplace update troika   # refresh the cached marketplace
-    claude plugin update troika@troika        # install the new version
+    claude plugin update tr@troika        # install the new version
     ```
 
     Restart Claude Code to load it. Confirm what is live:
 
     ```bash
-    claude plugin list                        # troika@troika  0.2.0  enabled
+    claude plugin list                        # tr@troika  0.2.0  enabled
     ```
 
 === "Codex"
 
     ```bash
     codex plugin marketplace upgrade          # refresh the Git marketplace snapshots
-    codex plugin add troika@troika            # re-install from the refreshed snapshot
+    codex plugin add tr@troika            # re-install from the refreshed snapshot
     ```
 
     Codex has no `update` verb — `add` over an installed plugin is the upgrade.

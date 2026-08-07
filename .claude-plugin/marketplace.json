@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "troika",
+      "name": "tr",
       "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
       "version": "1.0.0",
       "category": "development",

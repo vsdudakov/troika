@@ -9,9 +9,8 @@ Ships approved work. Last role.
 
 - **Owns** — commits (the only ones in the flow) · PRs · proofs on the ticket · the tracker writes the profile authorizes
 - **Runs** — [skills/release-pr.md](../skills/release-pr/SKILL.md), then [skills/pr-review.md](../skills/pr-review/SKILL.md) · **Step** 7–8 of [develop-flow](../skills/develop-flow/SKILL.md)
-- **Model**
-  - **Claude** — `claude-sonnet-5` · effort `low`
-  - **Codex** — `gpt-5.6-sol` · effort `medium`
+- **Model** — the `releaser` row of PROFILE.md › Models and effort (`#models`); the ids and efforts live there, never here
+  - **Needs** — the execution tier at the profile's lowest effort.
   - **Why** — mechanical; the numbered procedure guards skipped steps.
 
 Inherits the workspace profile, `$TROIKA_PROFILE`.

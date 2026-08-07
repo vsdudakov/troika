@@ -35,6 +35,27 @@ Say in the report which of these you used. Requirements taken from a PR body are
 
 Multi-repo change: one PR link per repo, and the stack is pointed at every one of those worktrees before step 2. Verifying one repo's PR against the primary clone of the others tests a combination nobody is shipping.
 
+<a id="reproduce"></a>
+## 0b. Reproduction pass — a bug, on the base checkout, before any fix exists
+
+Runs at [develop-flow step 2b](../develop-flow/SKILL.md#kind), on a bug ticket, and it is the only pass that verifies **the absence of a change**. Everything below about pointing the stack at a worktree is inverted here: the stack runs the **base ref** (`#branches`), unmodified.
+
+1. Read the [bug brief](../plan-template/SKILL.md#bug-brief) — environment, steps, observed, expected.
+2. Bring the stack up on the base checkout (steps 2 below) and seed exactly the data the brief names. Data the brief does not name is a variable you introduced; record every row you added.
+3. Walk the steps **in the order the reporter gave them**, changing nothing. A repro that only fails after you improved the steps is a different bug, and the report says which steps you actually ran.
+4. Capture the failure with the proof kind the change deserves ([split](#3-split-the-change)) — GIF for a user-visible bug, request plus datastore transcript for a backend one — and name it as the **before** side of its requirement (`req-1-<slug>-before.gif`). Step 6 of the flow reuses this file; it is not re-recorded on a stack restart.
+5. Watch the console, the network log and the service logs. The stack trace behind the symptom is worth more to the dev role than the symptom.
+
+| Verdict | Means | Next |
+| --- | --- | --- |
+| **Reproduced** | the observed behaviour matched the brief | the fix is authorized |
+| **Reproduced differently** | it failed, but not the way the brief says | correct the brief's observed line; that becomes the requirement |
+| **Not reproduced** | the steps produced the expected behaviour | **stop.** Report the ref, the data, the environment, the exact steps run, and what the reporter must supply |
+
+Two attempts, then stop: a third rewrite of the steps is a question for the reporter. Never fix, and never edit product code to make a bug appear.
+
+Write `$TROIKA_SCRATCHPAD/plans/<TICKET>-repro-<n>.md`: the ref and commit under test, the seeded data, the steps as run, observed versus expected, the proof filenames, the log excerpt, and the verdict.
+
 <a id="prewarm"></a>
 ## 0. Pre-warm — start this the moment the first dev lane reports done
 
@@ -74,7 +95,7 @@ A change that touches frontend code but no user-visible behaviour is verified as
 
 Drive the running app along the plan's click path with a browser automation tool that records GIFs (Claude in Chrome, or equivalent); fall back to before/after screenshots only if none exists. Per requirement:
 
-- **before** — the same path on the base checkout, showing the old behaviour. Net-new screens have none: write `n/a — new` rather than faking one.
+- **before** — the same path on the base checkout, showing the old behaviour. Net-new screens have none: write `n/a — new` rather than faking one. On a bug ticket this side already exists — the [reproduction pass](#reproduce) captured it — so reuse that file instead of restarting the stack on the base ref.
 - **after** — the same path on the branch worktree, showing the requirement met.
 
 Capture a few frames around each action so playback reads, and end on the state that proves the requirement, not the click. **Watch the browser console and network log** — an error there is a defect even when the screen looks right. Batch all before captures, restart once, then all after.
@@ -83,7 +104,7 @@ Capture a few frames around each action so playback reads, and end on the state 
 
 Per requirement, capture:
 
-1. **Datastore before** — the query and the rows the change should affect.
+1. **Datastore before** — the query and the rows the change should affect. On a bug ticket, the [reproduction pass](#reproduce) already recorded this side against the base ref; carry that transcript forward rather than repeating it.
 2. **The call** — `curl` with the documented auth, showing status, headers that matter, and body. Real requests only; never a client library wrapper hiding the wire.
 3. **Datastore after** — the same query, showing the state effect.
 4. **Error cases** — bad auth, missing field, not-found — status and body shape checked against the pinned contract.

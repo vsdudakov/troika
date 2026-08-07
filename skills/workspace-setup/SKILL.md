@@ -5,7 +5,7 @@ description: Creates a workspace — the .troika directory, its settings, and th
 
 # Workspace setup (create `.troika/`, write the profile)
 
-A folder of repos in, a working workspace out: `.troika/settings.json`, the state directories, and a filled-in `.troika/SETUP.md`. Every other Troika procedure stops immediately without this, so it is the first thing run in a new workspace and the only procedure that may run outside one.
+A folder of repos in, a working workspace out: `.troika/settings.json`, the state directories, and a filled-in `.troika/PROFILE.md`. Every other Troika procedure stops immediately without this, so it is the first thing run in a new workspace and the only procedure that may run outside one.
 
 **Kind** procedure · **Used by** [architect](../../agents/architect.md) · **When** Troika has just been installed, a new folder of repos is being adopted, or the profile has drifted from how the repos actually work · **Ends with** `.troika/settings.json`, the three state directories, and `$TROIKA_PROFILE` written with every anchor answered
 
@@ -75,6 +75,9 @@ Always ask, because no repo records them:
 - **`#gotchas`** — destructive commands, production-access rules, the traps a newcomer hits. Ask for them by that name; people list them readily and no file contains them.
 - **`#stack-limits`** — what a green local run does not prove. Ask what QA has to check by hand today.
 - **`#rules`** — anything binding beyond Troika's own defaults: signing, ask-before-committing, branch policy.
+- **`#autonomy`** — does a run stop after the plan is approved and wait for the reporter, or proceed on its own? Ask for the default, who the reporter is, where they are asked, how long a run waits, and what happens when the wait runs out. Ask separately for what may **never** be automatic — offer the template's floor and let them add to it; silence here is what turns an unattended run into an unreviewed one.
+- **`#models`** — which hosts this workspace actually runs roles on, and whether the template's default model ids are available on those accounts. Show the default table and ask for corrections rather than for eight rows: an id that does not exist fails at spawn, and every role reads its model from here.
+- **`#review-runner`** — which second tool runs the reviewer's plan and diff passes, so the reviewer is not the family that wrote the work, with the exact command. "We only have one family" is a valid answer; write it as such, with the fresh-session fallback named.
 
 Ask only when the evidence was silent or ambiguous: `#demo`, `#announcements`, `#release` (the steps only a human does), `#deploy` (who may dispatch one), `#layering`, `#code-search`.
 
@@ -84,9 +87,9 @@ Where an answer does not come, write the anchor with an honest one-line "not app
 
 ## 5. Draft, confirm, write
 
-1. Read the template — `${CLAUDE_PLUGIN_ROOT}/SETUP.template.md`. It carries both the anchor contract and the skeleton.
+1. Read the template — `${CLAUDE_PLUGIN_ROOT}/PROFILE.template.md`. It carries both the anchor contract and the skeleton.
 2. Fill every anchor from steps 3 and 4. Commands are copy-pasteable with the environment variables they need. Keep the anchor ids exactly as the template spells them; the headings above them may be reworded.
-3. **Show the caller the draft before writing it** — one gate, whole file. Not anchor by anchor: the point of reading first was to spend one confirmation, not twenty-five.
+3. **Show the caller the draft before writing it** — one gate, whole file. Not anchor by anchor: the point of reading first was to spend one confirmation, not twenty-nine.
 4. Write it to `$TROIKA_PROFILE`.
 
 Then verify, and report the result:
@@ -133,7 +136,7 @@ nothing is indistinguishable from a fresh install that worked.
 - Drafted from evidence: <anchor · … — count>
 - Answered by you: <anchor · … — count>
 - Unresolved: <anchor — why, and what to do about it — or none>
-- Next: `/troika:dev <TICKET>` for a full pipeline, or `/troika:spike <TICKET>` to plan one first
+- Next: `/tr:dev <TICKET>` for a full pipeline, or `/tr:spike <TICKET>` to plan one first
 ```
 
 ## Stop conditions

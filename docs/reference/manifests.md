@@ -45,7 +45,7 @@ no `agents` key at all, and `agents/` contains nothing but roles. The roles inde
 Verify what actually registered:
 
 ```bash
-claude plugin details troika
+claude plugin details tr
 #   Skills (20)  …
 #   Agents (8)   …
 ```
