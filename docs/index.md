@@ -72,7 +72,7 @@ reproduced, before any code is written. `/tr:dev SCRUM-123` runs the whole pipel
   memory live — one file per folder-of-repos, so a single installed plugin serves every
   client and org you work in. [Paths :material-arrow-right:](concepts/paths.md)
 - :test_tube: **It is tested on itself.** A structural gate checks every link, anchor and
-  file shape; a behavioural gate plants seventeen known defects and asserts the role that
+  file shape; a behavioural gate plants twenty-one known defects and asserts the role that
   claims to catch each one does. [Testing :material-arrow-right:](testing.md)
 
 ## How a ticket moves

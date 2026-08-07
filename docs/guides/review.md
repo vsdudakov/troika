@@ -1,6 +1,6 @@
 ---
 title: The nine review checks
-description: What the reviewer checks on every diff, which severities are pinned, and why two of the seventeen test cases are controls rather than defects.
+description: What the reviewer checks on every diff, which severities are pinned, and why two of the twenty-one test cases are controls rather than defects.
 ---
 
 # The nine review checks
@@ -42,7 +42,7 @@ file states it. **To make a rule carry a severity, state it in the role file.**
 
 `Approve with nits` is a pass. A reviewer that blocks the flow on style the profile calls a
 nit is failing at its job just as surely as one that waves a Blocker through — which is why
-one of the seventeen behavioural cases is a diff whose only problems are nits, and it *fails*
+one of the twenty-one behavioural cases is a diff whose only problems are nits, and it *fails*
 if the reviewer gates on them.
 
 ## The reviewer never runs anything

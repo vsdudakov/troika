@@ -1,0 +1,13 @@
+# reviewer › Rules check 6: real behaviour, only external services mocked.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: [Blocker, Major]
+  file: tests/service/test_allocation.py
+  keywords_any: [mock, patch, assert_called, real behaviour, real behavior]
+profile_requires: [nothing may be mocked, assert real behaviour]
+why: >
+  The first test patches the repository the service exists to call and then asserts the
+  mock was used, so requirement 2 passes without the maths ever running. The toy repo has
+  no external service, and the profile says nothing may be mocked.

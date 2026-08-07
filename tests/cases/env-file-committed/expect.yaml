@@ -1,0 +1,12 @@
+# reviewer › Rules check 9: no `.env` in the diff.
+role: reviewer
+skill: internal-review
+verdict: [Request changes]
+expect_finding:
+  severity: [Blocker, Major]
+  file: .env
+  keywords_any: [.env, environment file, credentials, secret]
+profile_requires: ["no `.env`"]
+why: >
+  A `.env` added alongside the change. It carries a connection string and would be
+  committed by release, so hygiene has to stop it before the push.

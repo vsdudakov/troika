@@ -1,0 +1,13 @@
+# reviewer › Rules check 2: a comment restating the code is a nit, every time.
+role: reviewer
+skill: internal-review
+verdict: [Approve with nits, Request changes]
+expect_finding:
+  severity: [Nit, Major]
+  file: app/service/allocation.py
+  keywords_any: [comment, restate, restates, obvious, why]
+profile_requires: [comment restating the code is a nit]
+why: >
+  Four comments that say what the next line says. The profile allows a comment only for a
+  non-obvious why, and rates this a nit — so the gate is that it is raised at all, not that
+  it blocks the flow.

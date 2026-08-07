@@ -217,6 +217,83 @@ def check_skill_shape():
                 fail(f, f"header line missing **{field}**")
 
 
+def check_stop_conditions():
+    """A procedure that cannot say when to stop will improvise past a failed gate. Every
+    one declares them; references and templates are read *by* a procedure and have none."""
+    for f in skill_files():
+        kind = re.search(r"\*\*Kind\*\* (\w+)", text_of(f))
+        has = re.search(r"^## Stop conditions", text_of(f), re.M)
+        if kind and kind.group(1) == "procedure" and not has:
+            fail(f, "a procedure with no '## Stop conditions' section")
+        if kind and kind.group(1) != "procedure" and has:
+            fail(f, f"a {kind.group(1)} declares stop conditions; only a procedure runs and can stop")
+
+
+def check_template_anchor_table():
+    """The template is two lists of the same anchors — the contract table at the top and the
+    skeleton below it — and they drift silently. An anchor in the skeleton but not the table
+    is one no role is told exists; one in the table but not the skeleton is a heading a fresh
+    workspace never gets, so every citation of it reads a section that was never written."""
+    if not os.path.exists(TEMPLATE):
+        return
+    text = text_of(TEMPLATE)
+    table = set(re.findall(r"^\| `#([a-z][a-z0-9-]*)`", text, re.M))
+    skeleton = set(re.findall(r'<a id="([a-z][a-z0-9-]*)"></a>', text))
+    for missing in sorted(skeleton - table):
+        fail(TEMPLATE, f"#{missing} is in the skeleton but not in the anchor table")
+    for missing in sorted(table - skeleton):
+        fail(TEMPLATE, f"#{missing} is in the anchor table but not in the skeleton")
+
+
+def check_fixture_profile():
+    """The behavioural fixtures answer to the same contract as a real workspace. An anchor
+    the template declares but the fixture lacks makes every case run against a profile that
+    is thinner than the one the roles were written for."""
+    fixture = "tests/fixtures/PROFILE.md"
+    if not (os.path.exists(TEMPLATE) and os.path.exists(fixture)):
+        return
+    declared = set(re.findall(r'<a id="([a-z][a-z0-9-]*)"></a>', text_of(TEMPLATE)))
+    present = set(re.findall(r'<a id="([a-z][a-z0-9-]*)"></a>', text_of(fixture)))
+    for missing in sorted(declared - present):
+        fail(fixture, f"lacks #{missing}, which {TEMPLATE} declares — cases run on a thinner profile")
+
+
+def check_cases():
+    """Each behavioural case is a directory with an expect.yaml naming a role and a skill
+    that exist. A case pointing at a renamed skill fails at run time, an hour and a model
+    call later; here it costs nothing."""
+    for spec in sorted(glob.glob("tests/cases/*/expect.yaml")):
+        text = text_of(spec)
+        role = re.search(r"^role: (\S+)", text, re.M)
+        skill = re.search(r"^skill: (\S+)", text, re.M)
+        if not role or not skill:
+            fail(spec, "must declare both role: and skill:")
+            continue
+        if not os.path.exists(f"agents/{role.group(1)}.md"):
+            fail(spec, f"role '{role.group(1)}' has no file in agents/")
+        if not os.path.exists(f"skills/{skill.group(1)}/SKILL.md"):
+            fail(spec, f"skill '{skill.group(1)}' has no SKILL.md")
+        if "why:" not in text:
+            fail(spec, "no why: — a case nobody can read is a case nobody can fix")
+    for case in sorted(glob.glob("tests/cases/*")):
+        if os.path.basename(case) == "_base" or not os.path.isdir(case):
+            continue
+        if not os.path.exists(f"{case}/expect.yaml"):
+            fail(case, "case directory with no expect.yaml")
+
+
+def check_command_flags():
+    """generate.py's FLAGS map documents a procedure's flags in the `/` menu. A key that is
+    not a commanded skill documents a flag on a command that does not exist."""
+    module = load_module("plugin/generate.py", "generate_flags")
+    if module is None:
+        return
+    commanded = set(module.COMMANDS)
+    for name in getattr(module, "FLAGS", {}):
+        if name not in commanded:
+            fail("plugin/generate.py", f"FLAGS names '{name}', which has no command")
+
+
 def check_frontmatter():
     for f in body_files():
         m = re.match(r"---\nname: (\S+)\ndescription: (.+)\n", text_of(f))
@@ -417,6 +494,11 @@ def main():
     check_duplicated_enumerations()
     check_agent_shape()
     check_skill_shape()
+    check_stop_conditions()
+    check_template_anchor_table()
+    check_fixture_profile()
+    check_cases()
+    check_command_flags()
     check_frontmatter()
     check_plugin_wrappers()
     check_manifests()

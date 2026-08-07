@@ -29,6 +29,12 @@ money and they are stochastic.
 - every profile anchor a role cites exists in `PROFILE.template.md`, so a *fresh* workspace does
   not inherit a dead link
 - role and skill file shapes match what `ROLES.md` and `skills/README.md` declare
+- every procedure declares its stop conditions, and nothing that is not a procedure does
+- the profile template's anchor table and its skeleton list the same anchors — drift between
+  them is either an anchor no role is told about, or a heading a fresh workspace never gets
+- the behavioural fixtures' own profile answers every anchor the template declares, so a case
+  never runs against a thinner profile than the roles were written for
+- every behavioural case names a role and a skill that exist, and says why it exists
 - the reviewer's nine checks match the copies of that list in the review skills, **in order**
 - the generated commands and the manifest's command list are current
 - no file hardcodes a path the workspace is allowed to move
@@ -49,15 +55,16 @@ plant the defect, run the role, assert the finding.
 **correctly** — and every case is that base plus exactly **one** planted defect, so a miss is
 the gate failing rather than the diff being ambiguous.
 
-Seventeen cases cover all nine checks: a deferred import, a skipped layer, an N+1, a missing
-mirror test, tests that assert only `is not None`, a hand-edited migration, a contract
-mismatch, a secret, a debug print, a truncated file, a work log that overstates its collected
-count, and more.
+Twenty-one cases cover all nine checks: a deferred import, a skipped layer, an N+1, a missing
+mirror test, tests that assert only `is not None`, a test that patches the repository it
+exists to exercise, a hand-edited migration, a contract mismatch, a secret, a committed
+`.env`, a debug print, commented-out code, a comment that restates the line under it, a
+truncated file, a work log that overstates its collected count, and more.
 
 ### The two controls matter as much as the defects
 
 A gate that flags everything passes every injection test and is worthless. So two of the
-seventeen cases have **no defect**:
+twenty-one cases have **no defect**:
 
 - `clean` — a correct diff must come back `Approve`.
 - `nits-only` — a diff whose only problems are nits must **not** be blocked.
@@ -101,5 +108,5 @@ make test AGENT='codex exec -m gpt-5.6-sol -'
 - Every case exercises the **reviewer**. Gates owned by tester, QA and releaser have no
   coverage yet.
 - Nothing tests the orchestrator: lane assignment, parallelism and the caps are unmeasured.
-- A passing suite means these seventeen defects are caught. It does not mean the pipeline is
+- A passing suite means these twenty-one defects are caught. It does not mean the pipeline is
   good.

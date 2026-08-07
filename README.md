@@ -73,7 +73,7 @@ repos and the same pipeline runs there unchanged.
   live — one per folder-of-repos, so a single installed plugin serves every client and org you
   work in.
 - 🧪 **It is tested on itself.** A structural gate checks every link, anchor, and file shape;
-  a behavioural gate plants seventeen known defects in a toy repo and asserts the role that
+  a behavioural gate plants twenty-one known defects in a toy repo and asserts the role that
   claims to catch each one does.
 
 ## Install
@@ -451,10 +451,10 @@ list matches its copies, the `/` commands are current, and that no file hardcode
 workspace is allowed to move.
 
 [`run.py`](tests/run.py) is the interesting one: `fixtures/repo` is a tiny layered app,
-`cases/_base` implements its plan **correctly**, and each of seventeen cases is that base
+`cases/_base` implements its plan **correctly**, and each of twenty-one cases is that base
 plus exactly one planted defect — a deferred import, a skipped layer, an N+1, a test that
 asserts nothing, a secret, a work log that overstates its test count. The gate that claims to
-catch each one has to catch it. Two of the seventeen are controls: a clean diff must come
+catch each one has to catch it. Two of the twenty-one are controls: a clean diff must come
 back approved, and a diff whose only problems are nits must not be blocked. A gate that flags
 everything is worthless, and the controls are what prove it isn't.
 

@@ -1,0 +1,12 @@
+# reviewer › Rules check 9: no commented-out code.
+role: reviewer
+skill: internal-review
+verdict: [Request changes, Approve with nits]
+expect_finding:
+  severity: [Blocker, Major, Nit]
+  file: app/service/allocation.py
+  keywords_any: [commented-out, commented out, dead code, leftover]
+profile_requires: [no commented-out code]
+why: >
+  An earlier attempt left in place as commented-out lines. The profile forbids it
+  outright, so the reviewer must name it rather than read past it.
