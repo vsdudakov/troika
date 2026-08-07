@@ -62,9 +62,9 @@ reproduced, before any code is written. `/tr:dev SCRUM-123` runs the whole pipel
 - :busts_in_silhouette: **Eight roles, eight contexts.** Each has its own scope, model,
   effort and hard refusals. Dev roles write tests but never run them; the reviewer never runs
   anything. [Roles :material-arrow-right:](concepts/roles.md)
-- :electric_plug: **One tree, three hosts.** The same skills are `/tr:*` commands in
-  Claude Code and Cursor, and model-invoked skills in Codex — or no plugin at all, just files
-  read by path. [Running without a plugin :material-arrow-right:](guides/no-plugin.md)
+- :electric_plug: **One tree, three hosts.** The same commands are `/tr:dev` in Claude
+  Code, `/tr-dev` in Cursor, and `$tr-dev` skill mentions in Codex — or no plugin at all,
+  just files read by path. [Running without a plugin :material-arrow-right:](guides/no-plugin.md)
 - :office: **Organisation-neutral by construction.** Nothing in the repository names a repo,
   command, branch, tracker, URL or person. Those live in your `.troika/PROFILE.md` and are
   linked **by anchor**. [Writing the profile :material-arrow-right:](guides/profile.md)

@@ -8,6 +8,17 @@ description: Install Troika as a plugin in Claude Code, Codex or Cursor, pin it 
 Install it as a plugin — for `/tr:*` commands, subagents, and model-invoked skills — then
 run `/tr:setup` once in the folder that holds your repos. That is the whole install.
 
+Every command exists in all three hosts; only the spelling differs, because each host has
+its own command surface:
+
+| Host | Spelling | Example |
+|------|----------|---------|
+| Claude Code | `/tr:<command>` | `/tr:dev SCRUM-123` |
+| Cursor | `/tr-<command>` | `/tr-dev SCRUM-123` |
+| Codex | `$tr-<command>` (a skill mention — type `$`) | `$tr-dev SCRUM-123` |
+
+These docs write the Claude Code spelling everywhere; substitute your host's.
+
 There is nothing to compile. The only executable surface is two Python scripts on the standard
 library, so any Python 3.9+ works and no virtualenv is needed.
 

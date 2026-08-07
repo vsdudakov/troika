@@ -105,10 +105,21 @@ That gives `/tr-dev`, `/tr-review`, … — Cursor command names cannot contain 
 export works for Codex (`python3 troika/plugin/export.py codex`), where the commands land
 as skills — Codex has no custom slash commands — and are invoked as `$tr-dev`, `$tr-review`, ….
 
+**One command, three spellings.** Every command exists in all three hosts; only the
+invocation differs, because each host has its own command surface:
+
+| Host | Spelling | Example |
+|------|----------|---------|
+| Claude Code | `/tr:<command>` | `/tr:dev SCRUM-123` |
+| Cursor | `/tr-<command>` | `/tr-dev SCRUM-123` |
+| Codex | `$tr-<command>` (a skill mention — type `$`) | `$tr-dev SCRUM-123` |
+
+This README writes the Claude Code spelling everywhere; substitute your host's.
+
 Restart the host, then set up the folder that holds your repos — once per workspace:
 
 ```
-/tr:setup
+/tr:setup        # Cursor: /tr-setup · Codex: $tr-setup
 ```
 
 ## Set up a workspace

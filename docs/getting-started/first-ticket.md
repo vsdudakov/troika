@@ -11,6 +11,10 @@ With a profile written and paths resolved, one command runs everything:
 /tr:dev SCRUM-123
 ```
 
+That is the Claude Code spelling, used throughout these docs; in Cursor the same command
+is `/tr-dev SCRUM-123`, and in Codex it is the skill mention `$tr-dev SCRUM-123` — see
+[Installation](installation.md).
+
 Start with a **small, well-specified ticket** in a repo whose profile section you trust. The
 pipeline is only as sharp as the facts you gave it, and the first run is as much a test of
 the profile as of the change.
