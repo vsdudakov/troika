@@ -408,17 +408,33 @@ def check_resolver():
         if out.get("TROIKA_PROFILE") != str(root / ".troika" / "PROFILE.md"):
             fail("plugin/resolve.py", "the profile did not resolve to .troika/PROFILE.md")
         # settings.json is the only marker. A repo's own AGENTS.md must not be taken for a
-        # workspace: stopping there would scatter handoff files through a worktree.
-        with tempfile.TemporaryDirectory() as other:
-            stray = Path(other).resolve()
-            (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
-            (stray / "repo").mkdir()
-            try:
-                found = resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE")
-                fail("plugin/resolve.py", f"resolved {found!r} with no settings.json anywhere above it")
-            except SystemExit as e:
-                if "tr:setup" not in str(e):
-                    fail("plugin/resolve.py", f"the no-workspace error does not point at setup: {e}")
+        # workspace: stopping there would scatter handoff files through a worktree. The env
+        # fallback below is real behaviour, so the negative test runs with it cleared.
+        saved = os.environ.pop("TROIKA_WORKSPACE", None)
+        try:
+            with tempfile.TemporaryDirectory() as other:
+                stray = Path(other).resolve()
+                (stray / "AGENTS.md").write_text("not a workspace", encoding="utf-8")
+                (stray / "repo").mkdir()
+                try:
+                    found = resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE")
+                    fail("plugin/resolve.py", f"resolved {found!r} with no settings.json anywhere above it")
+                except SystemExit as e:
+                    if "tr:setup" not in str(e):
+                        fail("plugin/resolve.py", f"the no-workspace error does not point at setup: {e}")
+                # An absolute `worktrees` override puts a role's cwd outside the workspace;
+                # the exported TROIKA_WORKSPACE is the way back to it.
+                os.environ["TROIKA_WORKSPACE"] = str(root)
+                try:
+                    if resolve.resolve(str(stray / "repo")).get("TROIKA_WORKSPACE") != str(root):
+                        fail("plugin/resolve.py", "the TROIKA_WORKSPACE fallback did not resolve the exported workspace")
+                except SystemExit as e:
+                    fail("plugin/resolve.py", f"failed from an external worktree despite TROIKA_WORKSPACE being set: {e}")
+        finally:
+            if saved is None:
+                os.environ.pop("TROIKA_WORKSPACE", None)
+            else:
+                os.environ["TROIKA_WORKSPACE"] = saved
 
 
 def check_plugin_wrappers():
@@ -427,7 +443,14 @@ def check_plugin_wrappers():
     module = load_module("plugin/generate.py", "generate")
     if module is None:
         return
-    for problem in module.drift():
+    # drift() reads every SKILL.md and manifest; one malformed file must land in FAIL with
+    # the rest of the report, not abort the run before the checks below it.
+    try:
+        problems = module.drift()
+    except (Exception, SystemExit) as e:
+        fail("plugin/", f"generate.py drift() failed: {e}")
+        return
+    for problem in problems:
         fail("plugin/", problem)
 
 
@@ -438,7 +461,12 @@ def check_versions():
     module = load_module("plugin/version.py", "version")
     if module is None:
         return
-    for problem in module.drift():
+    try:
+        problems = module.drift()
+    except (Exception, SystemExit) as e:
+        fail("VERSION", f"version.py drift() failed: {e}")
+        return
+    for problem in problems:
         fail("VERSION", problem)
 
 
@@ -472,10 +500,10 @@ def check_manifests():
     # `commands` takes command *files*; a directory there is read as a skill directory, which
     # silently registers every procedure a second time.
     for path in claude.get("commands", []):
-        if os.path.isdir(path.lstrip("./")):
+        if os.path.isdir(path.removeprefix("./")):
             fail(CLAUDE_MANIFEST, f"commands lists the directory {path}; list the files in it")
     skills = codex.get("skills") if codex else None
-    if skills and not os.path.isdir(skills.lstrip("./")):
+    if skills and not os.path.isdir(skills.removeprefix("./")):
         fail(CODEX_MANIFEST, f"skills points at {skills}, which is not a directory")
 
 

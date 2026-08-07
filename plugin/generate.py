@@ -93,6 +93,10 @@ BODY = """Run Troika's **{name}** procedure.
    eval "$(python3 "${{CLAUDE_PLUGIN_ROOT}}/plugin/resolve.py" --ensure)"
    ```
 
+   `${{CLAUDE_PLUGIN_ROOT}}` is Claude Code's name for the plugin's install directory. On a
+   host that does not export it, substitute that directory — the one holding this plugin's
+   `plugin/` and `skills/` trees — everywhere the variable appears below.
+
    That exports `TROIKA_WORKSPACE`, `TROIKA_PROFILE`, `TROIKA_SCRATCHPAD`,
    `TROIKA_WORKTREES`, and `TROIKA_MEMORY`, reading `<workspace>/.troika/settings.json`
    where the workspace declares them, and creating the three it writes into. It exits
@@ -122,7 +126,9 @@ With no argument, use the current directory, and confirm it with the caller befo
 This is the one command that runs before a workspace exists, so it does **not** resolve one
 first. It creates it.
 
-1. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`.
+1. Read the procedure: `${{CLAUDE_PLUGIN_ROOT}}/skills/{name}/SKILL.md`. `${{CLAUDE_PLUGIN_ROOT}}`
+   is Claude Code's name for the plugin's install directory; on a host that does not export
+   it, substitute that directory — the one holding this plugin's `plugin/` and `skills/` trees.
 2. Follow it in order. It fixes the workspace root, scaffolds `.troika/`, investigates the
    repos, asks only what they cannot answer, and writes the profile.
 3. Every step is a gate: never advance past a failed one, and stop on any of its stop
@@ -225,11 +231,18 @@ def main():
         for p in problems:
             print(f"  {p}")
         return 1 if problems else 0
-    for path, content in wanted().items():
+    files = wanted()
+    for path, content in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
+    # Drift's fix for an orphan is re-running this script, so this script must be the one
+    # that removes it — a stale file left behind fails the gate with no way to clear it.
+    removed = [f for f in glob.glob(str(ROOT / "plugin" / "commands" / "*.md")) if Path(f) not in files]
+    for f in removed:
+        Path(f).unlink()
     synced = " and the manifest" if sync_manifest() else ""
-    print(f"wrote {len(wanted())} command(s){synced} for {len(skills())} procedure(s)")
+    gone = f", removed {len(removed)} orphan(s)" if removed else ""
+    print(f"wrote {len(files)} command(s){synced} for {len(skills())} procedure(s){gone}")
     return 0
 
 

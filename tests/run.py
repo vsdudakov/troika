@@ -116,7 +116,13 @@ def load_expect(case: Path) -> dict:
             node[key] = {}
             stack.append((indent, node[key]))
         elif value.startswith("["):
-            node[key] = split_items(value[1:-1])
+            # Slice to the closing bracket, not to the last character: a trailing comment
+            # after `]` would otherwise corrupt the final item into a keyword that can
+            # never match, and the case would fail forever at model cost.
+            end = value.rfind("]")
+            if end == -1:
+                raise ValueError(f"unterminated inline list: {raw.strip()}")
+            node[key] = split_items(value[1:end])
         elif value == "null":
             node[key] = None
         else:
@@ -335,10 +341,26 @@ def env_timeout() -> int:
     return DEFAULT_TIMEOUT
 
 
+# Every key a case may carry. A misspelled `expect_findings:` is not an error to the
+# parser — it silently degrades an injection case to a verdict-only check that both
+# no-spend gates pass — so unknown keys are rejected and expect_finding must be present,
+# spelled `expect_finding: null` in a control case.
+SPEC_KEYS = {"role", "skill", "why", "verdict", "expect_finding", "forbid_severity",
+             "remove", "profile_requires", "plan_requires"}
+FINDING_KEYS = {"file", "severity", "keywords_any"}
+
+
 def check_spec(spec: dict) -> list:
     """A typo in a severity or verdict label makes a case unpassable, and only shows up
     after a paid run — so catch it here instead."""
     problems = []
+    for key in sorted(set(spec) - SPEC_KEYS):
+        problems.append(f"unknown key '{key}' — one of {sorted(SPEC_KEYS)}")
+    if "expect_finding" not in spec:
+        problems.append("no expect_finding — a control case spells it `expect_finding: null`")
+    if isinstance(spec.get("expect_finding"), dict):
+        for key in sorted(set(spec["expect_finding"]) - FINDING_KEYS):
+            problems.append(f"expect_finding: unknown key '{key}' — one of {sorted(FINDING_KEYS)}")
     for v in as_list(spec.get("verdict")):
         if v not in VERDICTS:
             problems.append(f"verdict '{v}' is not one of {list(VERDICTS)}")

@@ -26,6 +26,13 @@ MANIFESTS = (
     ".cursor-plugin/plugin.json",
 )
 MARKETPLACE = ".claude-plugin/marketplace.json"
+# Marketplace files apply() does not write. Their entries carry no version today; one
+# gaining a version key would rot silently outside the gate, so drift() rejects it until
+# the key is either removed or brought under apply().
+UNMANAGED = (
+    ".cursor-plugin/marketplace.json",
+    ".agents/plugins/marketplace.json",
+)
 
 
 def current():
@@ -56,6 +63,13 @@ def drift():
     for where, got in declared().items():
         if got != want:
             problems.append(f"{where}: version {got!r} != {want!r} in VERSION")
+    for rel in UNMANAGED:
+        if not (ROOT / rel).is_file():
+            continue
+        for entry in load(rel).get("plugins", []):
+            if "version" in entry:
+                problems.append(f"{rel}#{entry.get('name')}: has a version key this script "
+                                "does not write — remove it or add the file to apply()")
     return problems
 
 

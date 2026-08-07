@@ -62,6 +62,14 @@ def find_workspace(start):
     for d in [start, *start.parents]:
         if (d / CONFIG).is_file():
             return d
+    # An absolute `worktrees` override puts a role's cwd outside the workspace, where no
+    # ancestor carries the marker. The command's step 1 already exported TROIKA_WORKSPACE
+    # while standing inside it, so a re-resolve from the worktree falls back to that.
+    env = os.environ.get("TROIKA_WORKSPACE", "")
+    if env:
+        d = Path(env).expanduser().resolve()
+        if (d / CONFIG).is_file():
+            return d
     raise SystemExit(
         f"no workspace above {start}: expected a {CONFIG} in it or in an ancestor. "
         f"Run /tr:setup in the folder that holds your repos."
@@ -136,7 +144,10 @@ def main():
         return 0
     start = None
     if "--from" in args:
-        start = args[args.index("--from") + 1]
+        i = args.index("--from")
+        if i + 1 >= len(args):
+            raise SystemExit("--from needs a directory argument")
+        start = args[i + 1]
     out = resolve(start)
     if "--ensure" in args:
         for key in STATE:

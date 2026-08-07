@@ -99,7 +99,7 @@ dist: check ## Build the release archive locally, exactly as CI does
 # builds the archive and publishes the GitHub Release.
 release: check test-check ## Tag the current VERSION and push it (triggers the release workflow)
 	@v=$$(cat VERSION); \
-	git diff --quiet || { echo "working tree is dirty — commit first"; exit 1; }; \
+	[ -z "$$(git status --porcelain)" ] || { echo "working tree is dirty — commit first"; exit 1; }; \
 	git tag -a "v$$v" -m "troika v$$v"; \
 	git push origin "v$$v"; \
 	echo "pushed v$$v — watch: gh run watch"
