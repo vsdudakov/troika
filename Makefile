@@ -37,6 +37,11 @@ cov: check test-check ## Both no-spend gates, as CI runs them
 commands: ## Regenerate the / commands and the manifest list from skills/
 	python3 plugin/generate.py
 
+# Codex plugins have no command concept and Cursor does not surface plugin commands, so
+# both hosts get the commands as native slash-command files instead: /tr-dev and friends.
+export-commands: commands ## Write the /tr-* commands into ~/.codex/prompts and ~/.cursor/commands
+	python3 plugin/export.py codex cursor
+
 install: commands check ## Install into Claude Code (project scope) and Codex
 	claude plugin marketplace add $(PWD) || claude plugin marketplace update troika
 	claude plugin install tr@troika --scope project
@@ -47,12 +52,12 @@ install: commands check ## Install into Claude Code (project scope) and Codex
 # and updating the plugin are two steps everywhere. Only the first one sees a new
 # release; skipping it re-installs the version already on disk. A pinned ref still
 # resolves to that ref — bump the pin first (docs/reference/releases.md).
-upgrade: ## Refresh the marketplace and update the plugin in Claude Code, Codex and Cursor
+upgrade: ## Refresh the marketplace, update the plugins, re-export the Codex/Cursor commands
 	-claude plugin marketplace update troika
 	-claude plugin update tr@troika
 	-codex plugin marketplace upgrade
 	-codex plugin add tr@troika
-	-cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
+	$(MAKE) --no-print-directory export-commands
 	@echo "restart the host to load the new version"
 
 uninstall: ## Remove the plugin from both hosts

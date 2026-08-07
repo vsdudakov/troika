@@ -44,17 +44,30 @@ codex plugin marketplace add vsdudakov/troika        # or a local path, or owner
 codex plugin add tr@troika
 ```
 
-Codex has no `commands` concept, so its surface is the skills — the model invokes them by
-description rather than you typing a `/` command. Installs are global; there is no
+Codex has no `commands` concept, so the plugin's surface is the skills — the model invokes
+them by description rather than you typing a `/` command. Installs are global; there is no
 per-project enable.
+
+For typed commands, export them into Codex's own slash-command directory from a clone:
+
+```bash
+python3 plugin/export.py codex        # writes /tr-dev, /tr-review, … into ~/.codex/prompts
+```
 
 ## Cursor
 
+Cursor does not surface plugin commands, and its slash menu already lists every registered
+skill — so the plugin registers none, and the commands are exported into Cursor's own
+slash-command directory from a clone instead:
+
 ```bash
-cursor-agent plugin marketplace add https://github.com/vsdudakov/troika
+python3 plugin/export.py cursor       # writes /tr-dev, /tr-review, … into ~/.cursor/commands
 ```
 
-Cursor requires a **git URL** — a local path is not accepted.
+`make export-commands` regenerates and exports for both hosts at once. The exported files
+pin the clone's path where Claude Code would use `${CLAUDE_PLUGIN_ROOT}`, so re-run the
+export after moving the clone; installing from a marketplace snapshot instead takes
+`--root <snapshot-path>`.
 
 ## Upgrading
 
@@ -64,8 +77,10 @@ the marketplace, then update the plugin*:
 ```bash
 claude plugin marketplace update troika && claude plugin update tr@troika
 codex plugin marketplace upgrade && codex plugin add tr@troika
-cursor-agent plugin marketplace update https://github.com/vsdudakov/troika
 ```
+
+Exported commands come from a clone, not a snapshot, so their upgrade is `git pull` in the
+clone followed by `python3 plugin/export.py codex cursor` (or `make export-commands`).
 
 Restart the host afterwards. A pinned version does not move until you bump the pin — see
 [Upgrading an installed plugin](../reference/releases.md#upgrading-an-installed-plugin).

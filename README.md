@@ -94,9 +94,15 @@ codex plugin add tr@troika
 
 **Cursor**
 
+Cursor does not surface plugin commands, so export them into its slash-command
+directory from a clone:
+
 ```bash
-cursor-agent plugin marketplace add https://github.com/vsdudakov/troika
+git clone https://github.com/vsdudakov/troika && python3 troika/plugin/export.py cursor
 ```
+
+The same export works for Codex (`python3 troika/plugin/export.py codex`) when you want
+typed `/tr-*` commands there on top of the plugin's skills.
 
 Restart the host, then set up the folder that holds your repos — once per workspace:
 
