@@ -28,7 +28,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from generate import command_text, skills
+from generate import commands
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -45,8 +45,7 @@ EXPLAINERS = (
 )
 
 
-def export_text(name, alias, hint, desc, root, spelling):
-    text = command_text(name, alias, hint, desc)
+def export_text(alias, text, root, spelling):
     for pattern in EXPLAINERS:
         text = re.sub(pattern, "", text, flags=re.S)
     text = text.replace("${CLAUDE_PLUGIN_ROOT}", str(root))
@@ -58,13 +57,14 @@ def export_text(name, alias, hint, desc, root, spelling):
 def export(host, root):
     dest, spelling = HOSTS[host]
     dest.mkdir(parents=True, exist_ok=True)
-    current = {f"tr-{alias}" for _, alias, _, _ in skills()}
+    rows = commands()
+    current = {f"tr-{alias}" for alias, _ in rows}
     for stale in dest.glob("tr-*"):
         if stale.stem not in current:
             shutil.rmtree(stale) if stale.is_dir() else stale.unlink()
             print(f"removed stale {stale}")
-    for name, alias, hint, desc in skills():
-        text = export_text(name, alias, hint, desc, root, spelling)
+    for alias, text in rows:
+        text = export_text(alias, text, root, spelling)
         if host == "codex":
             (dest / f"tr-{alias}").mkdir(exist_ok=True)
             (dest / f"tr-{alias}" / "SKILL.md").write_text(text, encoding="utf-8")

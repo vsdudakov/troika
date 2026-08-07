@@ -162,6 +162,29 @@ FLAGS = {
 # Procedures that must not open by resolving a workspace, keyed by skill.
 BODIES = {"workspace-setup": SETUP_BODY}
 
+# The one command with no procedure behind it: it answers "what commands are there?" from
+# the COMMANDS map itself, so it is generated from the same rows as the files it lists and
+# can never disagree with them. It resolves nothing and runs nothing.
+HELP_DESC = "List every Troika command — the argument each takes and what it does."
+HELP_BODY = """Show the caller Troika's command surface. Print the list below as it stands —
+run nothing, resolve nothing, and add no commands that are not on it.
+
+{rows}
+
+Every command except `/tr:setup` starts by resolving the workspace `/tr:setup` created, and
+stops — pointing at `/tr:setup` — when there is none. The steps the flow runs for you
+(plan-review, implement-change, internal-review, run-unit-tests and the rest) have no
+command on purpose: they are skills, invocable by name, wrong to start on their own.
+"""
+
+
+def help_text():
+    rows = "\n".join(f"- `/tr:{alias} {hint}` — {desc}" for _, alias, hint, desc in skills())
+    return (
+        f"---\nname: help\ndescription: {HELP_DESC}\n---\n\n"
+        + HELP_BODY.format(rows=rows)
+    )
+
 
 def command_text(name, alias, hint, desc):
     body = BODIES.get(name, BODY)
@@ -183,7 +206,7 @@ def manifest_commands():
     """Claude Code's `commands` key takes command *files*. Pointed at a directory it reads
     that directory as a skill directory instead, which registers every procedure a second
     time — phantom skills, no commands. So the list is spelled out, and generated."""
-    return [f"./plugin/commands/{alias}.md" for _, alias, _, _ in skills()]
+    return [f"./plugin/commands/{alias}.md" for alias, _ in commands()]
 
 
 def sync_manifest():
@@ -195,12 +218,16 @@ def sync_manifest():
     return True
 
 
+def commands():
+    """(alias, text) per generated command file, `help` included, in alias order."""
+    rows = [(alias, command_text(name, alias, hint, desc)) for name, alias, hint, desc in skills()]
+    rows.append(("help", help_text()))
+    return sorted(rows)
+
+
 def wanted():
     """path -> content, for every file this script owns."""
-    out = {}
-    for name, alias, hint, desc in skills():
-        out[ROOT / "plugin" / "commands" / f"{alias}.md"] = command_text(name, alias, hint, desc)
-    return out
+    return {ROOT / "plugin" / "commands" / f"{alias}.md": text for alias, text in commands()}
 
 
 def drift():

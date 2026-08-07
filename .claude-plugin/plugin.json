@@ -1,6 +1,6 @@
 {
   "name": "tr",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "description": "Turns a tracker ticket into a reviewed, QA-verified pull request: an agent pipeline of eight roles with a gate at every step",
   "author": {
     "name": "vsdudakov",
@@ -20,6 +20,7 @@
     "./plugin/commands/demo.md",
     "./plugin/commands/dev.md",
     "./plugin/commands/fix.md",
+    "./plugin/commands/help.md",
     "./plugin/commands/qa.md",
     "./plugin/commands/release.md",
     "./plugin/commands/review.md",

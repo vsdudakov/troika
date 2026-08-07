@@ -29,6 +29,7 @@ until it has been run once.
 | `/tr:triage` | `incident-triage` | `<ISSUE>` | investigates a production symptom read-only, lands on a cause with evidence |
 | `/tr:release` | `release-cut` | `<VERSION>` | cuts a periodic release end to end |
 | `/tr:demo` | `demo-prep` | `[LABEL]` | builds the demo integration branch, deploys, prepares the notification |
+| `/tr:help` | — | | prints this command list in the session — generated from the same map as the commands, so it cannot drift |
 
 ## Who runs which
 

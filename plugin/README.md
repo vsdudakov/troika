@@ -12,7 +12,8 @@ generated command per entry-point procedure, and the resolver every role runs fi
 - [`../.cursor-plugin/plugin.json`](../.cursor-plugin/plugin.json) — Cursor: commands as a
   glob, plus the same skills.
 - `commands/<alias>.md` — **generated** by [`generate.py`](generate.py) from its `COMMANDS`
-  map: `setup`, `dev`, `spike`, `fix`, `review`, `qa`, `triage`, `release`, `demo`.
+  map: `setup`, `dev`, `spike`, `fix`, `review`, `qa`, `triage`, `release`, `demo` — plus
+  `help`, generated from the same map, which lists them all in the session.
   `/tr:<alias>` in Claude Code and Cursor. A procedure absent from that map has no command
   and stays a skill — the steps the flow runs for you are wrong to start on their own.
 - [`resolve.py`](resolve.py) — where this workspace keeps its files. Every command runs it
