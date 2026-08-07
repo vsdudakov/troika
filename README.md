@@ -101,8 +101,9 @@ directory from a clone:
 git clone https://github.com/vsdudakov/troika && python3 troika/plugin/export.py cursor
 ```
 
-The same export works for Codex (`python3 troika/plugin/export.py codex`) when you want
-typed `/tr-*` commands there on top of the plugin's skills.
+That gives `/tr-dev`, `/tr-review`, … — Cursor command names cannot contain `:`. The same
+export works for Codex (`python3 troika/plugin/export.py codex`), where the commands land
+as skills — Codex has no custom slash commands — and are invoked as `$tr-dev`, `$tr-review`, ….
 
 Restart the host, then set up the folder that holds your repos — once per workspace:
 

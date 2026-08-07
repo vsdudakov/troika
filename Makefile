@@ -37,9 +37,9 @@ cov: check test-check ## Both no-spend gates, as CI runs them
 commands: ## Regenerate the / commands and the manifest list from skills/
 	python3 plugin/generate.py
 
-# Codex plugins have no command concept and Cursor does not surface plugin commands, so
-# both hosts get the commands as native slash-command files instead: /tr-dev and friends.
-export-commands: commands ## Write the /tr-* commands into ~/.codex/prompts and ~/.cursor/commands
+# Neither host can show /tr:dev: Cursor reads flat slash-command files (/tr-dev) and
+# Codex has no custom slash commands at all, so it gets command-shaped skills ($tr-dev).
+export-commands: commands ## Write the commands as ~/.cursor/commands/tr-*.md and ~/.codex/skills/tr-*/
 	python3 plugin/export.py codex cursor
 
 install: commands check ## Install into Claude Code (project scope) and Codex

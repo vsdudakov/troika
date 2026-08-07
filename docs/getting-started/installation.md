@@ -44,15 +44,17 @@ codex plugin marketplace add vsdudakov/troika        # or a local path, or owner
 codex plugin add tr@troika
 ```
 
-Codex has no `commands` concept, so the plugin's surface is the skills — the model invokes
-them by description rather than you typing a `/` command. Installs are global; there is no
-per-project enable.
-
-For typed commands, export them into Codex's own slash-command directory from a clone:
+Codex has no `commands` concept — no plugin commands, and no custom slash commands either
+(the old `~/.codex/prompts` directory is no longer read). Its explicit surface is skills,
+mentioned with a `$` prefix. So the plugin's 23 skills install as usual, and the nine
+commands are exported as command-shaped skills from a clone:
 
 ```bash
-python3 plugin/export.py codex        # writes /tr-dev, /tr-review, … into ~/.codex/prompts
+python3 plugin/export.py codex        # writes tr-dev, tr-review, … into ~/.codex/skills
 ```
+
+Then type `$tr-dev TICKET-123` in the composer — `$` opens the skill picker the way `/`
+opens the command menu elsewhere. Installs are global; there is no per-project enable.
 
 ## Cursor
 
@@ -63,6 +65,10 @@ slash-command directory from a clone instead:
 ```bash
 python3 plugin/export.py cursor       # writes /tr-dev, /tr-review, … into ~/.cursor/commands
 ```
+
+Cursor command names allow only lowercase letters, digits and hyphens, so the spelling is
+`/tr-dev` — the `/tr:dev` form exists only in Claude Code, whose plugin system owns the
+`:` namespace.
 
 `make export-commands` regenerates and exports for both hosts at once. The exported files
 pin the clone's path where Claude Code would use `${CLAUDE_PLUGIN_ROOT}`, so re-run the
